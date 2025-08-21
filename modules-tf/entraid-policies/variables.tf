@@ -28,15 +28,15 @@ variable "conditional_access_policy_definitions" {
     state        = string
     # conditionalAccessSessionControls
     sessionControls = optional(object({
-      disableResilienceDefaults       = optional()
-      applicationEnforcedRestrictions = optional()
-      cloudAppSecurity                = optional()
-      secureSignInSession             = optional()
+      disableResilienceDefaults       = optional(any)
+      applicationEnforcedRestrictions = optional(any)
+      cloudAppSecurity                = optional(any)
+      secureSignInSession             = optional(any)
       signInFrequency = optional(object({
         value               = optional(number)
         type                = optional(string)
         authenticationTypes = optional(list(string))
-        frequencyInterval   = optional()
+        frequencyInterval   = optional(any)
         isEnabled           = bool
       }))
       persistentBrowser = optional(object({
@@ -46,20 +46,20 @@ variable "conditional_access_policy_definitions" {
     }))
     # conditionalAccessConditionSet
     conditions = object({
-      applications               = optional()
-      authenticationFlows        = optional()
-      clientApplications         = optional()
-      clientAppTypes             = optional()
-      devices                    = optional()
-      deviceStates               = optional()
-      locations                  = optional()
-      platforms                  = optional()
-      servicePrincipalRiskLevels = optional()
-      signInRiskLevels           = optional()
-      userRiskLevels             = optional()
-      users                      = optional()
-      insiderRiskLevels          = optional()
-      times                      = optional()
+      applications               = optional(any)
+      authenticationFlows        = optional(any)
+      clientApplications         = optional(any)
+      clientAppTypes             = optional(any)
+      devices                    = optional(any)
+      deviceStates               = optional(any)
+      locations                  = optional(any)
+      platforms                  = optional(any)
+      servicePrincipalRiskLevels = optional(any)
+      signInRiskLevels           = optional(any)
+      userRiskLevels             = optional(any)
+      users                      = optional(any)
+      insiderRiskLevels          = optional(any)
+      times                      = optional(any)
     })
     # conditionalAccessGrantControls
     grantControls = optional(object({
@@ -70,7 +70,7 @@ variable "conditional_access_policy_definitions" {
       authenticationStrengths     = optional(string)
     }))
     templateId                = optional(string)
-    partialEnablementStrategy = optional()
+    partialEnablementStrategy = optional(any)
     # MS-graph specific properties which are not used in the module but allow them for compatibility
     #     "@odata.type" must not be included!
     id               = optional(string)
