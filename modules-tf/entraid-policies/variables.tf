@@ -11,7 +11,7 @@ variable "named_location_definitions" {
       cidrAddress = string
     })))
     # MS-graph specific properties which are not used in the module but allow them for compatibility
-    "@odata.type"    = optional(string)
+    #     "@odata.type" must not be included!
     id               = optional(string)
     createdDateTime  = optional(string)
     modifiedDateTime = optional(string)
