@@ -23,6 +23,7 @@ resource "terraform_data" "policy_identity_security_defaults_enforcement_update"
     interpreter = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-command"]
     command     = <<-SCRIPT
       az rest --method patch --url 'https://graph.microsoft.com/v1.0/policies/identitySecurityDefaultsEnforcementPolicy' --body '${local.policy_identitySecurityDefaultsEnforcement_body_create}' --headers 'Content-Type=application/json'
+      start-sleep -Seconds 30
     SCRIPT
   }
 
