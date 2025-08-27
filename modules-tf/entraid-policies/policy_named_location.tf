@@ -35,6 +35,15 @@ resource "azuread_named_location" "ip_ranges" {
     create = "10m"
     delete = "10m"
   }
+
+  depends_on = [terraform_data.policy_identity_security_defaults_enforcement_update]
+
+  lifecycle {
+    precondition {
+      condition     = local.reference_directory_license_level != "AAD_FREE"
+      error_message = "Conditional Access requires Entra ID Premium P1 or P2 license. However, the tenant is currently at license level: ${local.reference_directory_license_level}."
+    }
+  }
 }
 
 resource "azuread_named_location" "countries_and_regions" {
@@ -50,6 +59,15 @@ resource "azuread_named_location" "countries_and_regions" {
   timeouts {
     create = "10m"
     delete = "10m"
+  }
+
+  depends_on = [terraform_data.policy_identity_security_defaults_enforcement_update]
+
+  lifecycle {
+    precondition {
+      condition     = local.reference_directory_license_level != "AAD_FREE"
+      error_message = "Conditional Access requires Entra ID Premium P1 or P2 license. However, the tenant is currently at license level: ${local.reference_directory_license_level}."
+    }
   }
 }
 
@@ -71,31 +89,13 @@ locals {
   )
 }
 
-# query for all namedLocation (to use them as reference in CA policies via display name or id)
-data "msgraph_resource" "azuread_named_location" {
-  url         = "identity/conditionalAccess/namedLocations"
-  api_version = "v1.0"
-  response_export_values = {
-    # JMSPath query to extract id and displayName
-    namedLocations = "value[].{id:id, displayName:displayName}"
-  }
-
-  depends_on = [
+output "conditional_access_named_location" {
+  value = { for key, val in merge(
     azuread_named_location.ip_ranges,
     azuread_named_location.countries_and_regions
-  ]
+    ) : key => {
+    display_name = val.display_name
+    id           = split("/", val.id)[length(split("/", val.id)) - 1]
+    }
+  }
 }
-
-# ####################################################
-# # Conditional Access Exclusion Group
-# #
-# #     Notes: use as a TEMPORARY workaround to exclude a group from all policies
-# #
-# ####################################################
-
-
-
-
-# output "azuread_named_location" {
-#   value = azuread_named_location.region_critical_high_risk
-# }
