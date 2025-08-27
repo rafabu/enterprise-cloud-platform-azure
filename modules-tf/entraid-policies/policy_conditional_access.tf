@@ -497,12 +497,24 @@ resource "azuread_conditional_access_policy" "this" {
     }
   }
 
+  provisioner "local-exec" {
+    # delay operations randomly between 5 and 30 seconds to avoid "simultaneous" creation which the API dislikes
+    when        = create
+    interpreter = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-command"]
+    command     = <<-SCRIPT
+      start-sleep -Seconds (Get-Random -Minimum 5 -Maximum 30)
+    SCRIPT
+  }
+
   timeouts {
     create = "10m"
     delete = "10m"
   }
 
-  depends_on = [terraform_data.policy_identity_security_defaults_enforcement_update]
+  depends_on = [
+    azuread_named_location.ip_ranges,
+    azuread_named_location.countries_and_regions
+  ]
 
   lifecycle {
     precondition {
