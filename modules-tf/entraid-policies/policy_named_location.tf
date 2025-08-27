@@ -38,6 +38,7 @@ resource "azuread_named_location" "ip_ranges" {
     command     = <<-SCRIPT
       start-sleep -Seconds (Get-Random -Minimum 5 -Maximum 30)
     SCRIPT
+    quiet       = true
   }
 
   timeouts {
@@ -74,6 +75,7 @@ resource "azuread_named_location" "countries_and_regions" {
     command     = <<-SCRIPT
       start-sleep -Seconds (Get-Random -Minimum 5 -Maximum 30)
     SCRIPT
+    quiet       = true
   }
 
   timeouts {
