@@ -17,7 +17,7 @@ resource "azurerm_virtual_network" "lp" {
     var.virtual_network_address_space
   ]
   encryption {
-    enforcement = AllowUnencrypted
+    enforcement = "AllowUnencrypted"
   }
   private_endpoint_vnet_policies = "Disabled"
 
