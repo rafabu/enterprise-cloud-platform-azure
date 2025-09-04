@@ -1,9 +1,9 @@
 data "azurecaf_name" "rg" {
-  name          = "lp"
+  name          = null
   resource_type = "azurerm_resource_group"
   prefixes      = ["rabu", "d7"]
-  suffixes      = ["y", "z"]
-  random_length = 5
+  suffixes      = ["ecpa", "lp"]
+  random_length = 0
   clean_input   = true
   use_slug      = true
 }
