@@ -1,9 +1,6 @@
-data "azurecaf_name" "lp" {
+data "azurecaf_name" "rg" {
   name = "lp"
-  resource_types = toset([
-    "azurerm_resource_group",
-    "azurerm_virtual_network"
-  ])
+  resource_type = "azurerm_resource_group"
   prefixes      = ["rabu", "d7"]
   suffixes      = ["y", "z"]
   random_length = 5
@@ -12,7 +9,7 @@ data "azurecaf_name" "lp" {
 }
 
 resource "azurerm_resource_group" "lp-p" {
-  name     = data.azurecaf_name.lp.results[0]
+  name     = data.azurecaf_name.rg.result
   location = var.azure_location
   
   tags     = var.azure_tags
