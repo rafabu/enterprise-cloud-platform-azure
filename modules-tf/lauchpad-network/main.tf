@@ -8,7 +8,7 @@ data "azurecaf_name" "rg" {
   use_slug      = true
 }
 
-resource "azurerm_resource_group" "lp-p" {
+resource "azurerm_resource_group" "lp" {
   name     = data.azurecaf_name.rg.result
   location = var.azure_location
   
