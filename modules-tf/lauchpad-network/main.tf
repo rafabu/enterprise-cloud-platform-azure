@@ -1,5 +1,5 @@
 data "azurecaf_name" "rg" {
-  name = "lp"
+  name          = "lp"
   resource_type = "azurerm_resource_group"
   prefixes      = ["rabu", "d7"]
   suffixes      = ["y", "z"]
@@ -9,8 +9,10 @@ data "azurecaf_name" "rg" {
 }
 
 resource "azurerm_resource_group" "lp" {
+  provider = azurerm.lauchpad
+
   name     = data.azurecaf_name.rg.result
   location = var.azure_location
-  
-  tags     = var.azure_tags
+
+  tags = var.azure_tags
 }
