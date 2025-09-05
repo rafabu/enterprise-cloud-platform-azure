@@ -9,7 +9,7 @@ data "azurecaf_name" "rg" {
 }
 
 data "azurecaf_name" "vnet" {
-  for_each = var.virtual_network_artefact_names
+  for_each = toset(var.virtual_network_artefact_names)
 
   name          = try(var.virtual_network_definitions[each.key].nameElement, null)
   resource_type = "azurerm_virtual_network"
