@@ -15,3 +15,16 @@ output "virtual_networks" {
     }
   }
 }
+
+output "virtual_network_subnets" {
+  description = "core properties of virtual networks subnets"
+  value = {
+    for key, val in azurerm_subnet.lp : key => val #{
+    #   id                  = val.id,
+    #   name                = val.name,
+    #   location            = val.location
+    #   resource_group_name = val.resource_group_name
+    #   address_space       = val.address_space
+    # }
+  }
+}

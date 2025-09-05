@@ -67,19 +67,3 @@ resource "azurerm_subnet" "lp" {
   #   }
   # }
 }
-
-# pull data back for output (which includes subnets that have been created)
-data "azurerm_virtual_network" "lp" {
-  provider = azurerm.lauchpad
-
-  for_each = toset(var.virtual_network_artefact_names)
-
-  name                = azurerm_virtual_network.lp[each.key].name
-  resource_group_name = azurerm_virtual_network.lp[each.key].resource_group_name
-
-  depends_on = [azurerm_subnet.lp]
-}
-
-output "data" {
-  value = data.azurerm_virtual_network.lp
-}
