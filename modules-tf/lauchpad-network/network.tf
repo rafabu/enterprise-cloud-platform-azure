@@ -8,7 +8,7 @@ resource "azurerm_virtual_network" "lp" {
   resource_group_name = azurerm_resource_group.lp.name
 
   address_space = [
-    var.virtual_network_definitions[each.key].addressSpace.addressPrefixes
+    var.virtual_network_definitions[each.key].addressSpace.addressPrefixes[0]
   ]
   encryption {
     enforcement = "AllowUnencrypted"
