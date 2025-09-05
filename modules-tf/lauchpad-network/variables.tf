@@ -30,8 +30,8 @@ variable "virtual_network_definitions" {
     addressSpace = object({
       addressPrefixes = optional(list(string))
       baseAddressOffsets = optional(list(object({
-        netnum = number
-        newbits   = number
+        netnum  = number
+        newbits = number
       })))
     })
     dhcpOptions = optional(object({
@@ -47,8 +47,14 @@ variable "virtual_network_definitions" {
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
 }
 
-variable "virtual_network_address_space" {
-  type        = string
-  description = "The address space for the virtual network"
-  default     = "10.0.0.0/24"
+variable "virtual_network_artefact_names" {
+  type        = list(string)
+  default     = []
+  description = "List of virtualNetwork artefacts that are created"
+}
+
+variable "subnet_artefact_names" {
+  type        = list(string)
+  default     = []
+  description = "List of virtualNetwork/subnet artefacts that are created"
 }
