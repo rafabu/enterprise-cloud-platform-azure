@@ -11,7 +11,7 @@ locals {
     }
   }
 
-subnet_address_prefixes = {
+  subnet_address_prefixes = {
     for af in toset(var.subnet_artefact_names) : af => {
       addressPrefixes = distinct(concat(
         var.virtual_network_subnet_definitions[af].addressPrefixes != null ? var.virtual_network_subnet_definitions[af].addressPrefixes : [],
@@ -44,4 +44,24 @@ resource "azurerm_virtual_network" "lp" {
   private_endpoint_vnet_policies = "Disabled"
 
   tags = var.azure_tags
+}
+
+resource "azurerm_subnet" "lp" {
+  provider = azurerm.lauchpad
+
+  for_each = toset(var.subnet_artefact_names)
+
+  name                 = var.virtual_network_subnet_definitions[each.key].name
+  resource_group_name  = azurerm_virtual_network.lp[var.virtual_network_subnet_definitions[each.key].virtualNetwork.artefactName].resource_group_name
+  virtual_network_name = azurerm_virtual_network.lp[var.virtual_network_subnet_definitions[each.key].virtualNetwork.artefactName].name
+  address_prefixes     = local.subnet_address_prefixes[each.key].addressPrefixes
+
+  # delegation {
+  #   name = "delegation"
+
+  #   service_delegation {
+  #     name    = "Microsoft.ContainerInstance/containerGroups"
+  #     actions = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"]
+  #   }
+  # }
 }
