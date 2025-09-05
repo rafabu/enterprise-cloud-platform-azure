@@ -53,7 +53,7 @@ variable "virtual_network_subnet_definitions" {
     name                  = optional(string)
     addressPrefixes       = optional(list(string))
     defaultOutboundAccess = optional(bool)
-    delegations : optional(array)
+    delegations : optional(list)
     virtualNetwork : object({
       artefactName = string
     })
