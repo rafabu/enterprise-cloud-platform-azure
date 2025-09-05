@@ -2,12 +2,12 @@ locals {
   # calculate cidrsubnets on artefacts if required
   virtual_network_address_prefixes = {
     for af in toset(var.virtual_network_artefact_names) : af => {
-      addressPrefixes = concat(
-        try(var.virtual_network_definitions[af].addressSpace.addressPrefixes, []),
-        [
+      addressPrefixes = distinct(concat(
+        var.virtual_network_definitions[af].addressSpace.addressPrefixes != null ? var.virtual_network_definitions[af].addressSpace.addressPrefixes : [],
+        var.virtual_network_definitions[af].addressSpace.baseAddressOffsets != null ? [
           for bao in var.virtual_network_definitions[af].addressSpace.baseAddressOffsets : cidrsubnet(var.ecp_network_main_ipv4_address_space, bao.newbits, bao.netnum)
-        ]
-      )
+        ] : []
+      ))
     }
   }
 }
@@ -30,6 +30,3 @@ resource "azurerm_virtual_network" "lp" {
 
   tags = var.azure_tags
 }
-
-
-
