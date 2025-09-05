@@ -56,8 +56,8 @@ resource "azurerm_subnet" "lp" {
   virtual_network_name = azurerm_virtual_network.lp[var.virtual_network_subnet_definitions[each.key].virtualNetwork.artefactName].name
   address_prefixes     = local.subnet_address_prefixes[each.key].addressPrefixes
 
-  default_outbound_access_enabled               = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)
-  private_endpoint_network_policies             = try(var.virtual_network_subnet_definitions[each.key].privateEndpointNetworkPolicies, null)
+  default_outbound_access_enabled   = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)
+  private_endpoint_network_policies = try(var.virtual_network_subnet_definitions[each.key].privateEndpointNetworkPolicies, null)
   # defaults to true
   private_link_service_network_policies_enabled = try(var.virtual_network_subnet_definitions[each.key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
   # delegation {
@@ -68,4 +68,20 @@ resource "azurerm_subnet" "lp" {
   #     actions = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"]
   #   }
   # }
+}
+
+# pull data back for output (which includes subnets that have been created)
+data "azurerm_virtual_network" "lp" {
+  provider = azurerm.lauchpad
+
+  for_each = toset(var.virtual_network_artefact_names)
+
+  name                = azurerm_virtual_network.lp[each.key].name
+  resource_group_name = azurerm_virtual_network.lp[each.key].resource_group_name
+
+  depends_on = [azurerm_subnet.lp]
+}
+
+output "data" {
+  value = data.azurerm_virtual_network.lp
 }
