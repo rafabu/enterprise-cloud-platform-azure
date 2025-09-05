@@ -23,6 +23,10 @@ subnet_address_prefixes = {
   }
 }
 
+output "subnet_address_prefixes" {
+  value = local.subnet_address_prefixes
+}
+
 resource "azurerm_virtual_network" "lp" {
   provider = azurerm.lauchpad
 
