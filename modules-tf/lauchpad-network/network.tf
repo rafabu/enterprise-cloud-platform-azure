@@ -34,9 +34,9 @@ resource "azurerm_virtual_network" "lp" {
 
   address_space = local.virtual_network_address_prefixes[each.key].addressPrefixes
   dynamic "encryption" {
-    for_each = try(var.virtual_network_definitions[each.key].encryption.enabled, false) == true ? var.virtual_network_definitions[each.key].encryption : {}
+    for_each = try(var.virtual_network_definitions[each.key].encryption.enabled, false) == true ? ["encrypt"] : []
     content {
-      enforcement = encryption.value.enforcement
+      enforcement = try(var.virtual_network_definitions[each.key].encryption.enforcement, "AllowUnencrypted")
     }
   }
   private_endpoint_vnet_policies = try(var.virtual_network_definitions[each.key].privateEndpointVNetPolicies, null) == "Basic" ? "Basic" : null
