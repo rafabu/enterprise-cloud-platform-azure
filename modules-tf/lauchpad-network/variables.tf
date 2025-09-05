@@ -47,6 +47,24 @@ variable "virtual_network_definitions" {
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
 }
 
+variable "virtual_network_subnet_definitions" {
+  type = map(object({
+    artefactName          = string
+    name                  = optional(string)
+    addressPrefixes       = optional(list(string))
+    defaultOutboundAccess = optional(bool)
+    delegations : optional(array)
+    virtualNetwork : object({
+      artefactName = string
+    })
+    baseAddressOffsets = optional(list(object({
+      netnum  = number
+      newbits = number
+    })))
+  }))
+  description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
+}
+
 variable "virtual_network_artefact_names" {
   type        = list(string)
   default     = []
