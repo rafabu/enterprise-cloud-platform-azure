@@ -41,8 +41,7 @@ variable "virtual_network_definitions" {
       enabled     = bool
       enforcement = string
     }))
-    privateEndpointNetworkPolicies    = optional(string)
-    privateLinkServiceNetworkPolicies = optional(string)
+    privateEndpointVNetPolicies    = optional(string)
   }))
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
 }

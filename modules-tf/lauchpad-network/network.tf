@@ -23,10 +23,6 @@ locals {
   }
 }
 
-output "subnet_address_prefixes" {
-  value = local.subnet_address_prefixes
-}
-
 resource "azurerm_virtual_network" "lp" {
   provider = azurerm.lauchpad
 
@@ -37,11 +33,13 @@ resource "azurerm_virtual_network" "lp" {
   resource_group_name = azurerm_resource_group.lp.name
 
   address_space = local.virtual_network_address_prefixes[each.key].addressPrefixes
-
-  encryption {
-    enforcement = "AllowUnencrypted"
+  dynamic "encryption" {
+    for_each = try(var.virtual_network_definitions[each.key].encryption.enabled, false) == true ? var.virtual_network_definitions[each.key].encryption : {}
+    content {
+      enforcement = encryption.value.enforcement
+    }
   }
-  private_endpoint_vnet_policies = "Disabled"
+  private_endpoint_vnet_policies = try(var.virtual_network_definitions[each.key].privateEndpointVNetPolicies, null) == "Basic" ? "Basic" : null
 
   tags = var.azure_tags
 }
