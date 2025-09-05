@@ -58,7 +58,8 @@ resource "azurerm_subnet" "lp" {
 
   default_outbound_access_enabled               = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)
   private_endpoint_network_policies             = try(var.virtual_network_subnet_definitions[each.key].privateEndpointNetworkPolicies, null)
-  private_link_service_network_policies_enabled = try(var.virtual_network_subnet_definitions[each.key].privateLinkServiceNetworkPolicies, null)
+  # defaults to true
+  private_link_service_network_policies_enabled = try(var.virtual_network_subnet_definitions[each.key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
   # delegation {
   #   name = "delegation"
 
