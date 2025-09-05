@@ -56,6 +56,9 @@ resource "azurerm_subnet" "lp" {
   virtual_network_name = azurerm_virtual_network.lp[var.virtual_network_subnet_definitions[each.key].virtualNetwork.artefactName].name
   address_prefixes     = local.subnet_address_prefixes[each.key].addressPrefixes
 
+  default_outbound_access_enabled               = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)
+  private_endpoint_network_policies             = try(var.virtual_network_subnet_definitions[each.key].privateEndpointNetworkPolicies, null)
+  private_link_service_network_policies_enabled = try(var.virtual_network_subnet_definitions[each.key].privateLinkServiceNetworkPolicies, null)
   # delegation {
   #   name = "delegation"
 
