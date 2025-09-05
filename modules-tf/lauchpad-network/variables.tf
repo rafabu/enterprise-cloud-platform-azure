@@ -30,7 +30,7 @@ variable "virtual_network_definitions" {
     addressSpace = object({
       addressPrefixes = optional(list(string))
       baseAddressOffsets = optional(list(object({
-        netnumber = number
+        netnum = number
         newbits   = number
       })))
     })
