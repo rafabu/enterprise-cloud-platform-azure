@@ -3,6 +3,17 @@ variable "ecp_network_main_ipv4_address_space" {
   description = "The main IPv4 address space for the ECP network"
 }
 
+
+variable "ecp_azure_devops_organization_name" {
+  type        = string
+  description = "name of Azure DevOps organization"
+}
+
+variable "ecp_azure_root_parent_management_group_id" {
+  type        = string
+  description = "ID of parent management group under which the ECP hierarchy for the environment will be created. Recommended: One level below Azure's Root Management Group."
+}
+
 variable "azure_location" {
   type = string
 }
@@ -24,7 +35,7 @@ variable "azure_tags" {
 
 variable "virtual_network_id" {
   # e.g. output of launchpad-network module
-  type = string
+  type        = string
   description = "Id of virtualNetwork"
 }
 
@@ -55,3 +66,4 @@ variable "subnet_artefact_names" {
   default     = []
   description = "List of virtualNetwork/subnet artefacts that are created"
 }
+
