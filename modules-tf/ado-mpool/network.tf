@@ -1,16 +1,5 @@
 locals {
   # calculate cidrsubnets on artefacts if required
-  # virtual_network_address_prefixes = {
-  #   for af in toset(var.virtual_network_artefact_names) : af => {
-  #     addressPrefixes = distinct(concat(
-  #       var.virtual_network_definitions[af].addressSpace.addressPrefixes != null ? var.virtual_network_definitions[af].addressSpace.addressPrefixes : [],
-  #       var.virtual_network_definitions[af].addressSpace.baseAddressOffsets != null ? [
-  #         for bao in var.virtual_network_definitions[af].addressSpace.baseAddressOffsets : cidrsubnet(var.ecp_network_main_ipv4_address_space, bao.newbits, bao.netnum)
-  #       ] : []
-  #     ))
-  #   }
-  # }
-
   subnet_address_prefixes = {
     for af in toset(var.subnet_artefact_names) : af => {
       addressPrefixes = distinct(concat(
@@ -26,8 +15,8 @@ locals {
 data "azurerm_virtual_network" "mpool" {
   provider = azurerm.lauchpad
 
-  name                = provider::azurerm::parse_resource_id(var.virtual_network_id).parsed_id["resource_name"]
-  resource_group_name = provider::azurerm::parse_resource_id(var.virtual_network_id).parsed_id["resource_group_name"]
+  name                = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_name
+  resource_group_name = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_group_name
 }
 
 resource "azurerm_subnet" "mpool" {
