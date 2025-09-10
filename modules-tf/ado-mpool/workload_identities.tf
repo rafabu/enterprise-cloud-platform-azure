@@ -117,8 +117,9 @@ locals {
     }
     l1-read       = {}
     l1-contribute = {}
-    l2-read       = {}
-    l2-contribute = {}
+    # need to enable licenses to have more than 4 (5)
+    # l2-read       = {}
+    # l2-contribute = {}
   }
   ado_wid_azure_roleassigment_list = [
     for key, val in local.ado_wid_permission_objects : {
@@ -184,6 +185,19 @@ resource "azurerm_user_assigned_identity" "mpool" {
   resource_group_name = azurerm_resource_group.mpool.name
 }
 
+# service principals require a while to replicate properly
+resource "time_sleep" "wait_after_user_assigned_identity" {
+  for_each = {
+    for key, val in local.ado_wid_permission_objects : key => val
+    if var.workload_identity_type == "userAssignedIdentity"
+  }
+
+  create_duration = "5m"
+
+  triggers = {
+    client_id = azurerm_user_assigned_identity.mpool[each.key].client_id
+  }
+}
 data "azuread_service_principal" "mpool" {
   for_each = {
     for key, val in local.ado_wid_permission_objects : key => val
@@ -191,6 +205,10 @@ data "azuread_service_principal" "mpool" {
   }
 
   client_id = azurerm_user_assigned_identity.mpool[each.key].client_id
+
+  depends_on = [
+    time_sleep.wait_after_user_assigned_identity
+  ]
 }
 
 ####################### Entra Service Principal #######################
@@ -200,7 +218,8 @@ resource "azuread_application" "mpool" {
     if var.workload_identity_type == "serviceprincipal"
   }
 
-  display_name = format("%s-%s", local.service_principal_name, each.key)
+  display_name            = format("%s-%s", local.service_principal_name, each.key)
+  prevent_duplicate_names = true
 
   dynamic "required_resource_access" {
     for_each = try(each.value["entra-application-requiredResourceAccess"], {})
@@ -217,7 +236,7 @@ resource "azuread_application" "mpool" {
   }
 
   owners = [
-    data.azurerm_client_config.this.object_id
+    # data.azurerm_client_config.this.object_id
   ]
 }
 
@@ -231,7 +250,7 @@ resource "azuread_service_principal" "mpool" {
   client_id                    = azuread_application.mpool[each.key].client_id
   app_role_assignment_required = false
   owners = [
-    data.azurerm_client_config.this.object_id
+    # data.azurerm_client_config.this.object_id
   ]
 
   feature_tags {
