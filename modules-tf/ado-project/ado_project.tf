@@ -1,9 +1,10 @@
-# if project already exists; import it!!!
-
 # import {
-#   to = "azuredevops_project.this"
-#   id = "my_resource_id"
+#   to = azuredevops_project.this
+#   id = "<<<project_id>>>"
 # }
+data "azuredevops_projects" "all" {
+}
+
 
 resource "azuredevops_project" "this" {
   name               = var.ecp_azure_devops_project_name
@@ -11,6 +12,10 @@ resource "azuredevops_project" "this" {
   description        = "Enterprise Cloud Platform (ECP) Automation Repository"
   version_control    = "Git"
   work_item_template = "Agile"
+
+  lifecycle {
+    ignore_changes = ["features"]
+  }
 }
 
 resource "azuredevops_project_features" "this" {
