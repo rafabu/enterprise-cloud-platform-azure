@@ -9,6 +9,11 @@ variable "ecp_azure_devops_organization_name" {
   description = "name of Azure DevOps organization"
 }
 
+variable "ecp_azure_devops_project_name" {
+  type        = string
+  description = "name of Azure DevOps project for ECP"
+}
+
 variable "ecp_azure_root_parent_management_group_id" {
   type        = string
   description = "ID of parent management group under which the ECP hierarchy for the environment will be created. Recommended: One level below Azure's Root Management Group."
