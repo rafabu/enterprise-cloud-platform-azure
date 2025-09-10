@@ -46,10 +46,10 @@ resource "time_sleep" "wait_after_provider_register" {
   for_each = toset(local.ado_pool_resource_providers)
 
   # 2 mins sleep timer to allow PaloAltoNetworks.Cloudngfw provider registration to finish
-  create_duration = data.azapi_resource.provider_registration[each.key].output.registrationState == "Registering" ? "2m" : "1ms"
+  create_duration = data.azapi_resource.provider_registration[each.key].output.registrationState == "Registering" ? "5m" : "1ms"
 
   triggers = {
-    create_duration = data.azapi_resource.provider_registration[each.key].output.registrationState == "Registering" ? "2m" : "1ms"
+    create_duration = data.azapi_resource.provider_registration[each.key].output.registrationState == "Registering" ? "5m" : "1ms"
   }
 }
 
