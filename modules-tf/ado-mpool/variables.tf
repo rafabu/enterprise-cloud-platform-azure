@@ -67,3 +67,12 @@ variable "subnet_artefact_names" {
   description = "List of virtualNetwork/subnet artefacts that are created"
 }
 
+variable "workload_identity_type" {
+  type        = string
+  default     = "userAssignedIdentity"
+  description = "ADO pool identity type: userAssignedIdentity or serviceprincipal. Defaults to userAssignedIdentity."
+  validation {
+    condition     = contains(["serviceprincipal", "userAssignedIdentity"], var.workload_identity_type)
+    error_message = "variable workload_identity_type must be either 'serviceprincipal' or 'userAssignedIdentity'."
+  }
+}

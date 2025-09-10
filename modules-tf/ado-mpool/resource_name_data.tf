@@ -8,3 +8,11 @@ data "azurecaf_name" "rg" {
   use_slug      = true
 }
 
+locals {
+  service_principal_name = format(
+    "ar-%s-%s-%s",
+    join("-", try(var.azure_resource_name_elements.prefixes, [])),
+    try(var.azure_resource_name_elements.name, null),
+    join("-", try(var.azure_resource_name_elements.suffixes, []))
+  )
+}

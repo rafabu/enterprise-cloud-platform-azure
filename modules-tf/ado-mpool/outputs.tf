@@ -15,3 +15,19 @@ output "virtual_network_subnets" {
     }
   }
 }
+
+output "workload_identities" {
+  description = "core properties of managed identities / service principals"
+  value = { for key, val in merge(
+    data.azuread_service_principal.mpool,
+    azuread_service_principal.mpool
+    ) : key => {
+    id                     = val["id"]
+    client_id              = val["client_id"]
+    display_name           = val["display_name"]
+    object_id              = val["object_id"]
+    workload_identity_type = val.workload_identity_type
+    }
+  }
+}
+

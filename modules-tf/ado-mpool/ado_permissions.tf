@@ -1,42 +1,30 @@
 # NOTE: If running via Service Principal, that identity needs to be a member of 'Enterprise Service Accounts'
 #     built in DevOps organizational level group
 #     otherwise the adding of Entra ID based groups and accounts might fail
-data "azuredevops_group" "enterprise_service_accounts" {
+data "azuredevops_group" "reference" {
 
-  project_id = null #  If project_id is not specified the project collection groups will be searched.
-  name       = "Enterprise Service Accounts"
+  for_each = local.ado_wid_group_membership_objects
+
+  project_id = each.value["projectId"] #  If project_id is not specified the project collection groups will be searched.
+  name       = each.value["displayName"]
 }
 
-data "azuredevops_group_membership" "enterprise_service_accounts" {
+resource "azuredevops_service_principal_entitlement" "mpool" {
+  for_each = local.ado_wid_permission_objects
 
-  group_descriptor = data.azuredevops_group.enterprise_service_accounts.descriptor
+  origin_id = var.workload_identity_type == "userAssignedIdentity" ? data.azuread_service_principal.mpool[each.key].object_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.key].object_id : "error"
+  origin    = "aad"
+  # ensure that the service principal has at least a Basic ('express') license. Stakeholder licenses don't provide repository access.
+  account_license_type = "express" # "stakeholder"
+  licensing_source     = "account"
 }
 
-data "azuread_service_principal" "master_spi" {
-  client_id = data.azurerm_client_config.this.client_id
-}
+resource "azuredevops_group_membership" "mpool" {
+  for_each = local.ado_wid_group_membership_objects
 
-data "azuredevops_service_principal" "master_spi" {
-  
-  display_name = data.azuread_service_principal.master_spi.display_name
-}
-
-resource "azuredevops_group_membership" "enterprise_service_accounts_l0_spi" {
-  group = data.azuredevops_group.enterprise_service_accounts.descriptor
+  group = data.azuredevops_group.reference[each.key].descriptor
   members = [
-    data.azuredevops_service_principal.master_spi.descriptor
+    azuredevops_service_principal_entitlement.mpool[each.value["wid_key"]].descriptor
   ]
   mode = "add"
-}
-
-output "azuredevops_group_membership" {
-    value = data.azuredevops_group_membership.enterprise_service_accounts
-}
-
-output "azuredevops_service_principal" {
-    value = data.azuredevops_service_principal.master_spi
-}
-
-output "azuredevops_client_config" {
-  value = data.azuredevops_client_config.this
 }
