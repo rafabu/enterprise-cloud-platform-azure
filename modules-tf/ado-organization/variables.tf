@@ -4,7 +4,7 @@ variable "ecp_azure_devops_organization_name" {
 }
 
 variable "ecp_azure_devops_billing_subscription_id" {
-  type        = optional(string)
+  type        = string
   default     = null
   nullable    = true
   description = "Id of Azure subscription to link ADO Organization to for billing purposes."
