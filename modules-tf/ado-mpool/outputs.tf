@@ -26,7 +26,7 @@ output "workload_identities" {
     client_id              = val["client_id"]
     display_name           = val["display_name"]
     object_id              = val["object_id"]
-    workload_identity_type = val.workload_identity_type
+    workload_identity_type = var.workload_identity_type
     }
   }
 }
