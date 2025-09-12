@@ -1,17 +1,17 @@
-# output "azuredevops_project" {
-#   value = {
-#     id          = azuredevops_project.this.id
-#     name        = azuredevops_project.this.name
-#     description = azuredevops_project.this.description
-#   }
-# }
+output "resource_group" {
+  description = "The ID of the resource group"
+  value = {
+    id       = azurerm_resource_group.mpool.id
+    name     = azurerm_resource_group.mpool.name
+    location = azurerm_resource_group.mpool.location
+  }
+}
 
-# output "all_azuredevops_projects" {
-#   value = {
-#     for p in try(data.azuredevops_projects.all.projects, []) : p["project_id"] => {
-#       id    = p["project_id"]
-#       name  = p["name"]
-#       state = p["state"]
-#     }
-#   }
-# }
+output "managed_devops_pool" {
+  value = {
+    id                  = module.managed_devops_pool.resource_id
+    name                = module.managed_devops_pool.name
+    resource_group_name = azurerm_resource_group.mpool.name
+    location            = azurerm_resource_group.mpool.location
+  }
+}
