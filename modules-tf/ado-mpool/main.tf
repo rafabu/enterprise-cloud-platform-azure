@@ -1,20 +1,14 @@
-data "azuredevops_client_config" "this" {}
-
-data "azurerm_client_config" "this" {
-  provider = azurerm.lauchpad
+data "azapi_client_config" "this" {
 }
 
-data "azurerm_management_group" "ecp_root_parent" {
-  provider = azurerm.lauchpad
+# data "azapi_resource_id" "resource_group" {
+#   type      = "Microsoft.Resources/resourceGroups@2021-04-01"
+#   parent_id = data.azapi_client_config.this.subscription_resource_id
+#   name      = var.resource_group_id
+# }
+data "azapi_resource" "resource_group" {
+  type        = "Microsoft.Resources/resourceGroups@2021-04-01"
+  resource_id = var.resource_group_id
 
-  name = var.ecp_azure_root_parent_management_group_id
-}
-
-resource "azurerm_resource_group" "mpool" {
-  provider = azurerm.lauchpad
-
-  name     = data.azurecaf_name.rg.result
-  location = var.azure_location
-
-  tags = var.azure_tags
+  response_export_values = ["*"]
 }

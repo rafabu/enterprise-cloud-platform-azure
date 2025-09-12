@@ -12,7 +12,3 @@ data "azapi_resource" "resource_group" {
 
   response_export_values = ["*"]
 }
-
-output "rg" {
-  value = data.azapi_resource.resource_group
-}
