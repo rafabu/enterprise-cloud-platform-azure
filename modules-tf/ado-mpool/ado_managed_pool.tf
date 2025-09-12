@@ -1,5 +1,5 @@
 # module "managed_devops_pool" {
-#   source = "Azure/avm-res-devopsinfrastructure-pool/azurerm"
+#   source = "Azure/avm-res-devopsinfrastructure-pool/azurerm" # 0.3.1
 
 #   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
 #   name                = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")

@@ -12,19 +12,19 @@ locals {
   }
 }
 
-data "azapi_resource" "virtual_network" {
-  type        = "Microsoft.Network/virtualNetworks@2025-01-01"
-  resource_id = var.virtual_network_id
+data "azurerm_virtual_network" "mpool" {
+  provider = azurerm.lauchpad
 
-  response_export_values = ["*"]
+  name                = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_name
+  resource_group_name = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_group_name
 }
 
 
 output "subnet_address_prefixes" {
   value = local.subnet_address_prefixes
 }
-output "virtual_network" {
-  value = data.azapi_resource.virtual_network
+output "azurerm_virtual_network" {
+  value = data.azurerm_virtual_network.mpool
 }
 
 # resource "azurerm_subnet" "mpool" {
