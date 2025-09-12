@@ -24,7 +24,7 @@ locals {
 }
 
 resource "azurerm_virtual_network" "lp" {
-  provider = azurerm.lauchpad
+  provider = azurerm.launchpad
 
   for_each = toset(var.virtual_network_artefact_names)
 
@@ -45,7 +45,7 @@ resource "azurerm_virtual_network" "lp" {
 }
 
 resource "azurerm_subnet" "lp" {
-  provider = azurerm.lauchpad
+  provider = azurerm.launchpad
 
   for_each = toset(var.subnet_artefact_names)
 

@@ -2,7 +2,7 @@ locals {
   # non-standard subscription providers that need to be registered
   #     use azapi to allow opportunistic registration
   ado_pool_resource_providers = [
-    "Microsoft.DevOpsInfrastructure"
+    "Microsoft.DevCenter"
   ]
 }
 

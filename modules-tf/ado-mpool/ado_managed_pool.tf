@@ -1,16 +1,65 @@
-# module "managed_devops_pool" {
-#   source = "Azure/avm-res-devopsinfrastructure-pool/azurerm" # 0.3.1
+# DevOpsInfrastructure service principal needs "Reader" and "Network Contributor"
+data "azuread_service_principal" "devops_infrastructure" {
+  # DevOpsInfrastructure
+  client_id = "31687f79-5e43-4c1e-8c63-d9f4bff5cf8b"
 
-#   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
-#   name                = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
-#   resource_group_name = data.azapi_resource.resource_group.name
-#   location            = data.azapi_resource.resource_group.location
+  depends_on = [
+    data.azapi_resource.provider_registration_recheck
+  ]
+}
 
-#   dev_center_project_resource_id           = var.dev_center_project_resource_id
-#   version_control_system_organization_name = var.ecp_azure_devops_organization_name
-#   version_control_system_project_names = [
-#     var.ecp_azure_devops_project_name
-#   ]
-#   version_control_system_type = "azuredevops"
-#   # subnet_id                   = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/my-subnet"
-# }
+resource "azurerm_role_assignment" "devops_infrastructure_vnet" {
+  provider = azurerm.launchpad
+
+  for_each = toset([
+    "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+    "4d97b98b-1d4f-4787-a291-c67834d212e7"
+  ])
+
+  scope              = data.azurerm_virtual_network.mpool.id
+  role_definition_id = "/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
+  principal_id       = data.azuread_service_principal.devops_infrastructure.object_id
+}
+
+module "managed_devops_pool" {
+  providers = {
+    azurerm = azurerm.launchpad
+    azapi   = azapi
+  }
+
+  source  = "Azure/avm-res-devopsinfrastructure-pool/azurerm"
+  version = "0.3.1"
+
+  # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
+  name                = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
+  resource_group_name = azurerm_resource_group.mpool.name
+  location            = azurerm_resource_group.mpool.location
+
+  dev_center_project_resource_id           = var.dev_center_project_resource_id
+  version_control_system_organization_name = var.ecp_azure_devops_organization_name
+  version_control_system_project_names = [
+    var.ecp_azure_devops_project_name
+  ]
+  version_control_system_type = "azuredevops"
+  subnet_id                   = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
+
+  fabric_profile_data_disks = []
+  fabric_profile_images = [
+    {
+      "aliases" : [
+        "ubuntu-24.04/latest"
+      ],
+      "well_known_image_name" : "ubuntu-24.04/latest"
+    }
+  ]
+  fabric_profile_os_disk_storage_account_type = "StandardSSD"
+  fabric_profile_os_profile_logon_type        = "Service"
+  fabric_profile_sku_name                     = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
+
+  tags = var.azure_tags
+
+  depends_on = [
+    azuredevops_group_membership.mpool,
+    azurerm_role_assignment.devops_infrastructure_vnet
+  ]
+}

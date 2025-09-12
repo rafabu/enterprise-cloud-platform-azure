@@ -1,3 +1,8 @@
+variable "ecp_network_main_ipv4_address_space" {
+  type        = string
+  description = "The main IPv4 address space for the ECP network"
+}
+
 variable "ecp_azure_devops_organization_name" {
   type        = string
   description = "name of Azure DevOps organization"
@@ -6,6 +11,11 @@ variable "ecp_azure_devops_organization_name" {
 variable "ecp_azure_devops_project_name" {
   type        = string
   description = "name of Azure DevOps project for ECP"
+}
+
+variable "ecp_azure_root_parent_management_group_id" {
+  type        = string
+  description = "ID of parent management group under which the ECP hierarchy for the environment will be created. Recommended: One level below Azure's Root Management Group."
 }
 
 variable "azure_location" {
@@ -27,14 +37,10 @@ variable "azure_tags" {
   default = {}
 }
 
-variable "resource_group_id" {
-  type        = string
-  description = "The resource group where the resources will be deployed."
-}
-
 variable "virtual_network_id" {
+  # e.g. output of launchpad-network module
   type        = string
-  description = "Virtual network resource Id"
+  description = "Id of virtualNetwork"
 }
 
 variable "virtual_network_subnet_definitions" {
@@ -65,6 +71,15 @@ variable "subnet_artefact_names" {
   description = "List of virtualNetwork/subnet artefacts that are created"
 }
 
+variable "workload_identity_type" {
+  type        = string
+  default     = "userAssignedIdentity"
+  description = "ADO pool identity type: userAssignedIdentity or serviceprincipal. Defaults to userAssignedIdentity."
+  validation {
+    condition     = contains(["serviceprincipal", "userAssignedIdentity"], var.workload_identity_type)
+    error_message = "variable workload_identity_type must be either 'serviceprincipal' or 'userAssignedIdentity'."
+  }
+}
 
 variable "dev_center_project_resource_id" {
   type        = string

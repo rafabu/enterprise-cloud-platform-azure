@@ -172,7 +172,7 @@ locals {
 
 ####################### Azure User Assigned Managed Identity #######################
 resource "azurerm_user_assigned_identity" "mpool" {
-  provider = azurerm.lauchpad
+  provider = azurerm.launchpad
 
   for_each = {
     for key, val in local.ado_wid_permission_objects : key => val
@@ -262,7 +262,7 @@ resource "azuread_service_principal" "mpool" {
 
 ####################### Azure RBAC #######################
 resource "azurerm_role_assignment" "mpool" {
-  provider = azurerm.lauchpad
+  provider = azurerm.launchpad
 
   for_each = local.ado_wid_azure_roleassigment_objects
 
