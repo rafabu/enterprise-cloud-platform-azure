@@ -192,7 +192,7 @@ resource "time_sleep" "wait_after_user_assigned_identity" {
     if var.workload_identity_type == "userAssignedIdentity"
   }
 
-  create_duration = "5m"
+  create_duration = "2m"
 
   triggers = {
     client_id = azurerm_user_assigned_identity.mpool[each.key].client_id
