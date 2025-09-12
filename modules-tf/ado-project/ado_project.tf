@@ -14,7 +14,9 @@ resource "azuredevops_project" "this" {
   work_item_template = "Agile"
 
   lifecycle {
-    ignore_changes = ["features"]
+    ignore_changes = [
+      features
+    ]
   }
 }
 
