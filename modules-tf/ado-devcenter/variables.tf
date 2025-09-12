@@ -17,8 +17,7 @@ variable "azure_tags" {
   default = {}
 }
 
-
-variable "resource_group_name" {
+variable "resource_group_id" {
   type        = string
   description = "The resource group where the resources will be deployed."
 }
