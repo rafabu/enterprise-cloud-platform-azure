@@ -12,33 +12,41 @@ locals {
   }
 }
 
-data "azurerm_virtual_network" "mpool" {
-  provider = azurerm.lauchpad
+data "azapi_resource" "virtual_network" {
+  type        = "Microsoft.Network/virtualNetworks@2025-01-01"
+  resource_id = var.virtual_network_id
 
-  name                = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_name
-  resource_group_name = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_group_name
+  response_export_values = ["*"]
 }
 
-resource "azurerm_subnet" "mpool" {
-  provider = azurerm.lauchpad
 
-  for_each = toset(var.subnet_artefact_names)
-
-  name                 = var.virtual_network_subnet_definitions[each.key].name
-  resource_group_name  = data.azurerm_virtual_network.mpool.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.mpool.name
-  address_prefixes     = local.subnet_address_prefixes[each.key].addressPrefixes
-
-  default_outbound_access_enabled   = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)
-  private_endpoint_network_policies = try(var.virtual_network_subnet_definitions[each.key].privateEndpointNetworkPolicies, null)
-  # defaults to true
-  private_link_service_network_policies_enabled = try(var.virtual_network_subnet_definitions[each.key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
-  # delegation {
-  #   name = "delegation"
-
-  #   service_delegation {
-  #     name    = "Microsoft.ContainerInstance/containerGroups"
-  #     actions = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"]
-  #   }
-  # }
+output "subnet_address_prefixes" {
+  value = local.subnet_address_prefixes
 }
+output "virtual_network" {
+  value = data.azapi_resource.virtual_network
+}
+
+# resource "azurerm_subnet" "mpool" {
+#   provider = azurerm.lauchpad
+
+#   for_each = toset(var.subnet_artefact_names)
+
+#   name                 = var.virtual_network_subnet_definitions[each.key].name
+#   resource_group_name  = data.azurerm_virtual_network.mpool.resource_group_name
+#   virtual_network_name = data.azurerm_virtual_network.mpool.name
+#   address_prefixes     = local.subnet_address_prefixes[each.key].addressPrefixes
+
+#   default_outbound_access_enabled   = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)
+#   private_endpoint_network_policies = try(var.virtual_network_subnet_definitions[each.key].privateEndpointNetworkPolicies, null)
+#   # defaults to true
+#   private_link_service_network_policies_enabled = try(var.virtual_network_subnet_definitions[each.key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
+#   # delegation {
+#   #   name = "delegation"
+
+#   #   service_delegation {
+#   #     name    = "Microsoft.ContainerInstance/containerGroups"
+#   #     actions = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"]
+#   #   }
+#   # }
+# }

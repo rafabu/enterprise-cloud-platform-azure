@@ -1,3 +1,13 @@
+variable "ecp_azure_devops_organization_name" {
+  type        = string
+  description = "name of Azure DevOps organization"
+}
+
+variable "ecp_azure_devops_project_name" {
+  type        = string
+  description = "name of Azure DevOps project for ECP"
+}
+
 variable "azure_location" {
   type = string
 }
@@ -20,4 +30,44 @@ variable "azure_tags" {
 variable "resource_group_id" {
   type        = string
   description = "The resource group where the resources will be deployed."
+}
+
+variable "virtual_network_id" {
+  type        = string
+  description = "Virtual network resource Id"
+}
+
+variable "virtual_network_subnet_definitions" {
+  type = map(object({
+    artefactName          = string
+    name                  = optional(string)
+    addressPrefixes       = optional(list(string))
+    defaultOutboundAccess = optional(bool)
+    # delegations : optional(list(object({
+
+    # })))
+    virtualNetwork : object({
+      artefactName = string
+    })
+    baseAddressOffsets = optional(list(object({
+      netnum  = number
+      newbits = number
+    })))
+    privateEndpointNetworkPolicies    = optional(string)
+    privateLinkServiceNetworkPolicies = optional(string)
+  }))
+  description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
+}
+
+variable "subnet_artefact_names" {
+  type        = list(string)
+  default     = []
+  description = "List of virtualNetwork/subnet artefacts that are created"
+}
+
+
+variable "dev_center_project_resource_id" {
+  type        = string
+  description = "(Required) The resource ID of the Dev Center project."
+  nullable    = false
 }
