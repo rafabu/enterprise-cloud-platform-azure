@@ -50,18 +50,18 @@ resource "azapi_resource" "dev_center_project" {
   location = data.azapi_resource.resource_group.location
   tags     = var.azure_tags
 
-  body = {
-    properties = {
-      azureAiServicesSettings = {
-        azureAiServicesMode = "Disabled"
-      }
-      catalogSettings = {
-        catalogItemSyncTypes = [
-          "EnvironmentDefinition",
-          "ImageDefinition"
-        ]
-      }
-      customizationSettings = null
+   body = {
+     properties = {
+       azureAiServicesSettings = {
+         azureAiServicesMode = "Disabled"
+       }
+       catalogSettings = {
+         catalogItemSyncTypes = [
+           "EnvironmentDefinition",
+           "ImageDefinition"
+         ]
+       }
+       customizationSettings = null
 
       description = "ECP Launchpad Project ${join("-", var.azure_resource_name_elements.prefixes)}"
 
