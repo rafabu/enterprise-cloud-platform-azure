@@ -3,11 +3,18 @@
 locals {
   ado_wid_permission_objects = {
     l0-read = {
+      ecp_level = "l0"
       azure-roleAssignments = [
         {
           scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
           # reader
           roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7", # Reader
+          condition        = null
+        },
+        {
+          scope = var.backend_storage_accounts["l0"].id, # backend storage account
+          # security reader
+          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
           condition        = null
         }
       ],
@@ -61,11 +68,18 @@ locals {
       # ],
     }
     l0-contribute = {
+      ecp_level = "l0"
       azure-roleAssignments = [
         {
           scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
           # contributor
           roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
+          condition        = null
+        },
+        {
+          scope = var.backend_storage_accounts["l0"].id, # backend storage account
+          # security reader
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe", # Storage Blob Data Contributor
           condition        = null
         }
       ],
@@ -131,12 +145,20 @@ locals {
       #   }
       # ],
     }
-     # need to enable licenses to have more than 4 (5)
-    # l1-read       = {}
-    l1-contribute = {}
     # need to enable licenses to have more than 4 (5)
-    # l2-read       = {}
-    # l2-contribute = {}
+    # l1-read = {
+    #   ecp_level = "l1"
+    # }
+    # l1-contribute = {
+    #   ecp_level = "l1"
+    # }
+    # # need to enable licenses to have more than 4 (5)
+    # l2-read = {
+    #   ecp_level = "l2"
+    # }
+    # l2-contribute = {
+    #   ecp_level = "l2"
+    # }
   }
   ado_wid_azure_roleassigment_list = [
     for key, val in local.ado_wid_permission_objects : {
