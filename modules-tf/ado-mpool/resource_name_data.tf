@@ -15,4 +15,8 @@ locals {
     try(var.azure_resource_name_elements.name, null),
     join("-", try(var.azure_resource_name_elements.suffixes, []))
   )
+  variable_group_name = format(
+    "ecp_%s_bootstrap",
+    join("-", try(var.azure_resource_name_elements.prefixes, []))
+  )
 }

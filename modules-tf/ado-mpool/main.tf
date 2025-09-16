@@ -3,6 +3,16 @@ data "azapi_client_config" "this" {
 
 data "azuredevops_client_config" "this" {}
 
+data "azurerm_client_config" "this" {
+  provider = azurerm.launchpad
+}
+
+data "azurerm_subscription" "launchpad" {
+  provider = azurerm.launchpad
+
+  subscription_id = data.azurerm_client_config.this.subscription_id
+}
+
 data "azurerm_management_group" "ecp_root_parent" {
   provider = azurerm.launchpad
 

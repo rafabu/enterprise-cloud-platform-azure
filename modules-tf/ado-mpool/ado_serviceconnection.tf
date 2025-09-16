@@ -10,10 +10,12 @@ resource "azuredevops_serviceendpoint_azurerm" "mpool" {
   credentials {
     serviceprincipalid = local.workload_identity_service_principals[each.key].client_id
   }
-  azurerm_spn_tenantid          = data.azapi_client_config.this.tenant_id
-  azurerm_subscription_id       = null # data.azurerm_subscription.workload.subscription_id
-  azurerm_subscription_name     = null # data.azurerm_subscription.workload.display_name
-  azurerm_management_group_id   = data.azurerm_management_group.ecp_root_parent.id
+  azurerm_spn_tenantid      = data.azurerm_client_config.this.tenant_id
+  azurerm_subscription_id   = null # data.azurerm_subscription.launchpad.subscription_id
+  azurerm_subscription_name = null # data.azurerm_subscription.launchpad.display_name
+  # using management group assignment leads to failing Azure DevOps service connection "verify" results
+  #     if terraform's management_group id is used; must use name property instead
+  azurerm_management_group_id   = data.azurerm_management_group.ecp_root_parent.name
   azurerm_management_group_name = data.azurerm_management_group.ecp_root_parent.display_name
 
   lifecycle {
@@ -24,7 +26,7 @@ resource "azuredevops_serviceendpoint_azurerm" "mpool" {
 }
 
 # grant access to service endpoint for all pipelines in the project
-resource "azuredevops_pipeline_authorization" "mpool" {
+resource "azuredevops_pipeline_authorization" "mpool_serviceendpoint" {
   for_each = local.ado_wid_permission_objects
 
   project_id  = data.azuredevops_project.ecp.id

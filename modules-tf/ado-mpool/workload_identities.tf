@@ -315,7 +315,7 @@ resource "azuread_service_principal" "mpool" {
 resource "azuread_application_federated_identity_credential" "mpool" {
   for_each = {
     for key, val in local.ado_wid_permission_objects : key => val
-    if var.workload_identity_type == "servicePrincipal"
+    if var.workload_identity_type == "serviceprincipal"
   }
 
   application_id = azuread_application.mpool[each.key].id
