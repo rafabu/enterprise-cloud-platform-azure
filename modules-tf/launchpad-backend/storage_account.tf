@@ -8,6 +8,7 @@ resource "azurerm_storage_account" "backend" {
   location            = azurerm_resource_group.backend.location
 
   account_tier             = "Standard"
+  account_kind             = "StorageV2"
   account_replication_type = "LRS"
 
   allow_nested_items_to_be_public = false
@@ -15,6 +16,13 @@ resource "azurerm_storage_account" "backend" {
   local_user_enabled              = false
   public_network_access_enabled   = false
   shared_access_key_enabled       = false
+
+  is_hns_enabled           = false
+  large_file_share_enabled = false
+  nfsv3_enabled            = false
+
+  https_traffic_only_enabled = true
+  min_tls_version            = "TLS1_2"
 
   infrastructure_encryption_enabled = true
   queue_encryption_key_type         = "Account"
@@ -24,11 +32,20 @@ resource "azurerm_storage_account" "backend" {
 
   dns_endpoint_type = "Standard"
 
-  # network_rules {
-  #   default_action             = "Deny"
-  #   ip_rules                   = ["100.0.0.1"]
-  #   virtual_network_subnet_ids = [azurerm_subnet.example.id]
-  # }
+  blob_properties = {
+    versioning_enabled       = true
+    last_access_time_enabled = true
+  }
+
+  managed_identities = {
+    system_assigned = true
+  }
+
+  containers = {
+    blob_container_tfstate = {
+      name = "tfstate"
+    }
+  }
 
   tags = var.azure_tags
 }
