@@ -5,20 +5,20 @@ resource "azurerm_storage_account" "backend" {
 
   name                = format("%s-%s", data.azurecaf_name.st.result, each.key)
   resource_group_name = azurerm_resource_group.backend.name
+  location            = azurerm_resource_group.backend.location
 
-  location                 = azurerm_resource_group.backend.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
-  shared_access_key_enabled = false
-  public_network_access_enabled = false
+  allow_nested_items_to_be_public = false
   default_to_oauth_authentication = true
-  local_user_enabled = false
-  allow_blob_public_access = false
+  local_user_enabled              = false
+  public_network_access_enabled   = false
+  shared_access_key_enabled       = false
 
   infrastructure_encryption_enabled = true
-  queue_encryption_key_type = "Account"
-  table_encryption_key_type = "Account"
+  queue_encryption_key_type         = "Account"
+  table_encryption_key_type         = "Account"
 
   sftp_enabled = false
 
