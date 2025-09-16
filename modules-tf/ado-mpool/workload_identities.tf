@@ -12,9 +12,17 @@ locals {
         }
       ],
       ado-memberships = [
+        # Organization-wide permission might no longer be required once Azure DevOps Managed Pools support
+        #     project-level only permissions
         {
           displayName = "Project-Scoped Users" # "Project Collection Service Accounts"
           projectId   = null
+        }
+      ],
+      ado-project-memberships = [
+        {
+          displayName = "Readers"
+          projectId   = data.azuredevops_project.ecp.id
         }
       ],
       entra-application-requiredResourceAccess = [
@@ -62,9 +70,17 @@ locals {
         }
       ],
       ado-memberships = [
+        # Organization-wide permission might no longer be required once Azure DevOps Managed Pools support
+        #     project-level only permissions
         {
           displayName = "Enterprise Service Accounts" # "Project Collection Service Accounts"
           projectId   = null
+        }
+      ],
+      ado-project-memberships = [
+        {
+          displayName = "Project Administrators"
+          projectId   = data.azuredevops_project.ecp.id
         }
       ],
       entra-application-requiredResourceAccess = [
@@ -150,6 +166,20 @@ locals {
     flatten([for key, attr in local.ado_wid_group_membership_list : keys(attr)]),
     flatten([for key, attr in local.ado_wid_group_membership_list : values(attr)])
   )
+  ado_wid_project_group_membership_list = [
+    for key, val in local.ado_wid_permission_objects : {
+      for ra in try(val["ado-project-memberships"], []) : format("%s_%s", key, sha1(jsonencode(ra))) => merge(
+        {
+          wid_key = key
+        },
+        ra
+      )
+    }
+  ]
+  ado_wid_project_group_membership_objects = zipmap(
+    flatten([for key, attr in local.ado_wid_project_group_membership_list : keys(attr)]),
+    flatten([for key, attr in local.ado_wid_project_group_membership_list : values(attr)])
+  )
   ado_wid_entra_approle_assignment_list = distinct(flatten([
     for key, val in local.ado_wid_permission_objects : [
       for rra in try(val["entra-application-requiredResourceAccess"], []) : {
@@ -211,6 +241,28 @@ data "azuread_service_principal" "mpool" {
   ]
 }
 
+resource "azurerm_federated_identity_credential" "mpool" {
+  for_each = {
+    for key, val in local.ado_wid_permission_objects : key => val
+    if var.workload_identity_type == "userAssignedIdentity"
+  }
+
+  provider = azurerm.launchpad
+
+  parent_id           = azurerm_user_assigned_identity.mpool[each.key].id
+  name                = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
+  resource_group_name = azurerm_user_assigned_identity.mpool[each.key].resource_group_name
+
+  #   local.workload_identity_service_principals[each.key].id
+  audience = ["api://AzureADTokenExchange"]
+  issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
+  subject  = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_subject
+
+  depends_on = [
+    data.azuread_service_principal.mpool
+  ]
+}
+
 ####################### Entra Service Principal #######################
 resource "azuread_application" "mpool" {
   for_each = {
@@ -241,7 +293,6 @@ resource "azuread_application" "mpool" {
 }
 
 resource "azuread_service_principal" "mpool" {
-
   for_each = {
     for key, val in local.ado_wid_permission_objects : key => val
     if var.workload_identity_type == "serviceprincipal"
@@ -258,6 +309,31 @@ resource "azuread_service_principal" "mpool" {
     gallery    = false
     hide       = true
   }
+}
+
+resource "azuread_application_federated_identity_credential" "mpool" {
+  for_each = {
+    for key, val in local.ado_wid_permission_objects : key => val
+    if var.workload_identity_type == "servicePrincipal"
+  }
+
+  application_id = azuread_application.mpool[each.key].id
+  display_name   = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
+
+  audiences = ["api://AzureADTokenExchange"]
+  issuer    = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
+  subject   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_subject
+
+  depends_on = [
+    azuread_service_principal.mpool
+  ]
+}
+
+locals {
+  workload_identity_service_principals = merge(
+    data.azuread_service_principal.mpool,
+    azuread_service_principal.mpool,
+  )
 }
 
 ####################### Azure RBAC #######################

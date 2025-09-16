@@ -13,6 +13,14 @@ resource "azuredevops_project" "this" {
   version_control    = "Git"
   work_item_template = "Agile"
 
+   features = {
+    boards       = "disabled",
+    repositories = "disabled",
+    pipelines    = "disabled",
+    testplans    = "disabled",
+    artifacts    = "disabled"
+  }
+
   lifecycle {
     ignore_changes = [
       features

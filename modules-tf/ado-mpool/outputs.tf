@@ -15,3 +15,15 @@ output "managed_devops_pool" {
     location            = azurerm_resource_group.mpool.location
   }
 }
+
+output "service_principals" {
+  value = { for key, val in local.workload_identity_service_principals : key => {
+    id           = val.id
+    display_name = val.display_name
+    client_id    = val.client_id
+    object_id    = val.object_id
+    type         = val.type
+    }
+  }
+}
+

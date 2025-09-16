@@ -19,6 +19,8 @@ resource "azuredevops_service_principal_entitlement" "mpool" {
   licensing_source     = "account"
 }
 
+# Organization-wide permission might no longer be required once Azure DevOps Managed Pools support
+#     project-level only permissions
 resource "azuredevops_group_membership" "mpool" {
   for_each = local.ado_wid_group_membership_objects
 
@@ -28,3 +30,22 @@ resource "azuredevops_group_membership" "mpool" {
   ]
   mode = "add"
 }
+
+########################## Project Permissions ##########################
+data "azuredevops_group" "project_reference" {
+  for_each = local.ado_wid_project_group_membership_objects
+
+  project_id = each.value["projectId"] #  If project_id is not specified the project collection groups will be searched.
+  name       = each.value["displayName"]
+}
+
+resource "azuredevops_group_membership" "mpool_project" {
+  for_each = local.ado_wid_project_group_membership_objects
+
+  group = data.azuredevops_group.project_reference[each.key].descriptor
+  members = [
+    azuredevops_service_principal_entitlement.mpool[each.value["wid_key"]].descriptor
+  ]
+  mode = "add"
+}
+

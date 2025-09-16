@@ -15,3 +15,14 @@ output "all_azuredevops_projects" {
     }
   }
 }
+
+
+output "azuredevops_git_repository" {
+  value = {
+    id             = local.git_repository.id
+    name           = local.git_repository.name
+    default_branch = local.git_repository.default_branch
+    url            = local.git_repository.url
+    web_url        = local.git_repository.web_url
+  }
+}

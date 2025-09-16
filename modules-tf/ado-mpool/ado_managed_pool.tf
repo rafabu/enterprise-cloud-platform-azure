@@ -17,7 +17,7 @@ resource "azurerm_role_assignment" "devops_infrastructure_vnet" {
   ])
 
   scope              = data.azurerm_virtual_network.mpool.id
-  role_definition_id = "/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
+  role_definition_id = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
   principal_id       = data.azuread_service_principal.devops_infrastructure.object_id
 }
 
@@ -60,6 +60,24 @@ module "managed_devops_pool" {
 
   depends_on = [
     azuredevops_group_membership.mpool,
+    azuredevops_group_membership.mpool_project,
     azurerm_role_assignment.devops_infrastructure_vnet
   ]
 }
+
+# set pool permissions (authorizations on queue and all pipelines in the project (pre-authorize))
+data "azuredevops_agent_pool" "mpool" {
+  name = module.managed_devops_pool.name
+}
+
+data "azuredevops_agent_queue" "mpool" {
+  project_id = data.azuredevops_project.ecp.id
+  name       = module.managed_devops_pool.name
+}
+
+resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
+  project_id  = data.azuredevops_project.ecp.id
+  resource_id = data.azuredevops_agent_queue.mpool.id
+  type        = "queue"
+}
+
