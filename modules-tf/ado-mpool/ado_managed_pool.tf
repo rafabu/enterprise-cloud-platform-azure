@@ -68,11 +68,19 @@ module "managed_devops_pool" {
 # set pool permissions (authorizations on queue and all pipelines in the project (pre-authorize))
 data "azuredevops_agent_pool" "mpool" {
   name = module.managed_devops_pool.name
+
+  depends_on = [
+    module.managed_devops_pool
+  ]
 }
 
 data "azuredevops_agent_queue" "mpool" {
   project_id = data.azuredevops_project.ecp.id
   name       = module.managed_devops_pool.name
+
+  depends_on = [
+    module.managed_devops_pool
+  ]
 }
 
 resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
