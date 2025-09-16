@@ -366,7 +366,7 @@ resource "azurerm_role_assignment" "mpool" {
   for_each = local.ado_wid_azure_roleassigment_objects
 
   scope              = each.value["scope"]
-  role_definition_id = format("/providers/Microsoft.Authorization/roleDefinitions/%s", each.value["roleDefinitionId"])
+  role_definition_id = format("%s/providers/Microsoft.Authorization/roleDefinitions/%s", data.azapi_client_config.this.subscription_resource_id, each.value["roleDefinitionId"])
   principal_id       = var.workload_identity_type == "userAssignedIdentity" ? azurerm_user_assigned_identity.mpool[each.value["wid_key"]].principal_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.value["wid_key"]].object_id : "error"
 }
 
