@@ -131,7 +131,8 @@ locals {
       #   }
       # ],
     }
-    l1-read       = {}
+     # need to enable licenses to have more than 4 (5)
+    # l1-read       = {}
     l1-contribute = {}
     # need to enable licenses to have more than 4 (5)
     # l2-read       = {}
