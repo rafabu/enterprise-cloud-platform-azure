@@ -86,3 +86,22 @@ variable "dev_center_project_resource_id" {
   description = "(Required) The resource ID of the Dev Center project."
   nullable    = false
 }
+
+variable "backend_storage_accounts" {
+  type = map(object({
+    id       = string
+    name     = string
+    location = string
+    private_endpoint_blob = optional(object({
+      fqdn               = string
+      private_ip_address = string
+    }))
+    ecp_level = string
+  }))
+  description = "Map of storage accounts created for each ECP deployment level, with information required for private endpoint access without DNS"
+}
+  
+output "blob_storage_account_ids" {
+  description = "List of blob storage account IDs created for each ECP deployment level"
+  value       = var.backend_storage_accounts
+}
