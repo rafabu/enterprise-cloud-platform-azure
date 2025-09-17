@@ -41,10 +41,11 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
       name = "ecp_tf_backend_storage_azure_${variable.key}"
       value = jsonencode(
         {
-          name               = variable.value.name
-          fqdn               = try(variable.value.primary_blob_endpoint.fqdn, "${variable.value.name}.blob.core.windows.net")
-          private_ip_address = try(variable.value.private_endpoint_blob.private_ip_address, null)
-          ecp_level          = variable.value.ecp_level
+          name                 = variable.value.name
+          fqdn                 = try(variable.value.primary_blob_endpoint.fqdn, "${variable.value.name}.blob.core.windows.net")
+          private_ip_address   = try(variable.value.private_endpoint_blob.private_ip_address, null)
+          ecp_level            = variable.value.ecp_level
+          tf_backend_container = try(variable.value.tf_backend_container, "tfstate")
         }
       )
     }

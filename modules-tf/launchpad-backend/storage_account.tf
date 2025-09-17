@@ -76,7 +76,6 @@ resource "azurerm_private_endpoint" "backend_blob" {
   }
 }
 
-
 # This uses azapi in order to avoid having to wait for data plane permissions and deal with propagation delay
 resource "azapi_resource" "tfstate_container" {
   for_each = toset(local.backend_levels)
@@ -86,9 +85,13 @@ resource "azapi_resource" "tfstate_container" {
   type      = "Microsoft.Storage/storageAccounts/blobServices/containers@2025-01-01"
   body = {
     properties = {
-      metadata                       = {}
-      publicAccess                   = "None"
-      immutableStorageWithVersioning = {}
+      defaultEncryptionScope      = "$account-encryption-key"
+      denyEncryptionScopeOverride = true
+      metadata                    = {}
+      immutableStorageWithVersioning = {
+        enabled = false
+      }
+      publicAccess = "None"
     }
   }
 }

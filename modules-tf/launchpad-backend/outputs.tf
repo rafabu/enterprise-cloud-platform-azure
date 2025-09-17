@@ -21,7 +21,8 @@ output "storage_accounts" {
         subresource_names  = azurerm_private_endpoint.backend_blob[key].private_service_connection[0].subresource_names
         subnet_id          = azurerm_private_endpoint.backend_blob[key].subnet_id
       }
-      ecp_level = key
+      ecp_level            = key
+      tf_backend_container = azapi_resource.tfstate_container[key].name
     }
   }
 }

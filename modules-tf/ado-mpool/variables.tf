@@ -97,6 +97,7 @@ variable "backend_storage_accounts" {
       private_ip_address = string
     }))
     ecp_level = string
+    tf_backend_container = string
   }))
   description = "Map of storage accounts created for each ECP deployment level, with information required for private endpoint access without DNS"
 }
