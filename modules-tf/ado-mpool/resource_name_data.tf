@@ -16,7 +16,7 @@ locals {
     join("-", try(var.azure_resource_name_elements.suffixes, []))
   )
   variable_group_name = format(
-    "ecp_%s_bootstrap",
+    "ecp_bootstrap_%s",
     join("-", try(var.azure_resource_name_elements.prefixes, []))
   )
 }

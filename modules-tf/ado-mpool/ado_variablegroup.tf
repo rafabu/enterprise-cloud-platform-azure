@@ -21,19 +21,32 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
     name  = "ecp_ado_agent_pool_azure"
     value = module.managed_devops_pool.name
   }
-
   variable {
     name = "ecp_ado_agent_pool_azure_images"
     value = join(", ", [
       for img in try(module.managed_devops_pool.resource.body.properties.fabricProfile.images, []) : img.wellKnownImageName
     ])
   }
-
   dynamic "variable" {
     for_each = local.ado_wid_permission_objects
     content {
       name  = "ecp_ado_service_connection_azure_${variable.key}"
       value = azuredevops_serviceendpoint_azurerm.mpool[variable.key].service_endpoint_name
+    }
+  }
+  # output details about backend resources
+  dynamic "variable" {
+    for_each = var.backend_storage_accounts
+    content {
+      name = "ecp_tf_backend_storage_azure_${variable.key}"
+      value = jsonencode(
+        {
+          name               = variable.value.name
+          fqdn               = try(variable.value.primary_blob_endpoint.fqdn, "${variable.value.name}.blob.core.windows.net")
+          private_ip_address = try(variable.value.private_endpoint_blob.private_ip_address, null)
+          ecp_level          = variable.value.ecp_level
+        }
+      )
     }
   }
 }

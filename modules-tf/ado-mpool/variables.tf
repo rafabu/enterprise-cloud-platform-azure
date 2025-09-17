@@ -100,8 +100,3 @@ variable "backend_storage_accounts" {
   }))
   description = "Map of storage accounts created for each ECP deployment level, with information required for private endpoint access without DNS"
 }
-  
-output "blob_storage_account_ids" {
-  description = "List of blob storage account IDs created for each ECP deployment level"
-  value       = var.backend_storage_accounts
-}
