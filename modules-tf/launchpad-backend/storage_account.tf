@@ -17,7 +17,7 @@ resource "azurerm_storage_account" "backend" {
   local_user_enabled              = false
   public_network_access_enabled   = false
   # you will need to enable the storage_use_azuread flag in the Provider block to use Azure AD for authentication
-  shared_access_key_enabled       = false
+  shared_access_key_enabled = false
 
   is_hns_enabled           = false
   large_file_share_enabled = false
@@ -73,5 +73,22 @@ resource "azurerm_private_endpoint" "backend_blob" {
     ignore_changes = [
       private_dns_zone_group # ignore changes to private DNS zone groups, as it is managed by Azure policy
     ]
+  }
+}
+
+
+# This uses azapi in order to avoid having to wait for data plane permissions and deal with propagation delay
+resource "azapi_resource" "tfstate_container" {
+  for_each = toset(local.backend_levels)
+
+  name      = "tfstate"
+  parent_id = "${azurerm_storage_account.backend[each.key].id}/blobServices/default"
+  type      = "Microsoft.Storage/storageAccounts/blobServices/containers@2025-01-01"
+  body = {
+    properties = {
+      metadata                       = {}
+      publicAccess                   = "None"
+      immutableStorageWithVersioning = {}
+    }
   }
 }
