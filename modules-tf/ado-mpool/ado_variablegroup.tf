@@ -34,6 +34,12 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
       value = azuredevops_serviceendpoint_azurerm.mpool[variable.key].service_endpoint_name
     }
   }
+  variable {
+    name = "ecp_tf_backend_levels"
+    value = join(", ", [
+      for key, val in var.backend_storage_accounts : key
+    ])
+  }
   # output details about backend resources
   dynamic "variable" {
     for_each = var.backend_storage_accounts
