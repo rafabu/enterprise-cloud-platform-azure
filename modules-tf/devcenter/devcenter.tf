@@ -92,14 +92,18 @@ resource "azapi_resource" "dev_center_project" {
 resource "azapi_resource" "dev_center_network_connection" {
   type = "Microsoft.DevCenter/networkConnections@2025-07-01-preview"
 
-  name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devcnc-")
-  parent_id = data.azapi_resource.resource_group.id
+  name      = azapi_resource.dev_center.name # replace(data.azurecaf_name.rg.result, "-rg-", "-devcnc-")
+  parent_id = azapi_resource.dev_center.id
+  location  = azapi_resource.dev_center.location
 
   body = {
     properties = {
       networkingResourceGroupName = "${data.azapi_resource.resource_group.name}-managed-nc"
       domainJoinType              = "AzureADJoin"
-      subnetId                    = azurerm_subnet.devbox.id
+      domainName                  = ""
+      organizationUnit            = ""
+      domainUsername              = ""
+      subnetId                    = azurerm_subnet.devbox[var.subnet_artefact_names[0]].id
     }
   }
 

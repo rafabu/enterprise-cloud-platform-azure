@@ -19,10 +19,10 @@ output "dev_center_project" {
 output "virtual_network_subnet" {
   description = "core properties of virtual networks subnet"
   value = {
-    id                   = azurerm_subnet.devbox.id,
-    name                 = azurerm_subnet.devbox.name,
-    virtual_network_name = azurerm_subnet.devbox.virtual_network_name
-    resource_group_name  = azurerm_subnet.devbox.resource_group_name
-    address_prefixes     = azurerm_subnet.devbox.address_prefixes
+    id                   = azurerm_subnet.devbox[var.subnet_artefact_names[0]].id,
+    name                 = azurerm_subnet.devbox[var.subnet_artefact_names[0]].name,
+    virtual_network_name = azurerm_subnet.devbox[var.subnet_artefact_names[0]].virtual_network_name,
+    resource_group_name  = azurerm_subnet.devbox[var.subnet_artefact_names[0]].resource_group_name,
+    address_prefixes     = azurerm_subnet.devbox[var.subnet_artefact_names[0]].address_prefixes
   }
 }
