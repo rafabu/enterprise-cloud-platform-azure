@@ -1,8 +1,7 @@
-resource "azurerm_resource_group" "lp" {
-  provider = azurerm.launchpad
+data "azapi_resource" "resource_group" {
+  type        = "Microsoft.Resources/resourceGroups@2021-04-01"
+  resource_id = var.resource_group_id
 
-  name     = data.azurecaf_name.rg.result
-  location = var.azure_location
-
-  tags = var.azure_tags
+  response_export_values = ["*"]
 }
+

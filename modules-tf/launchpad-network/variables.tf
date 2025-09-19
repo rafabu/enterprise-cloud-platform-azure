@@ -22,6 +22,11 @@ variable "azure_tags" {
   default = {}
 }
 
+variable "resource_group_id" {
+  type        = string
+  description = "The resource group where the resources will be deployed."
+}
+
 variable "virtual_network_definitions" {
   # https://learn.microsoft.com/en-us/graph/api/resources/countrynamedlocation?view=graph-rest-1.0
   type = map(object({
