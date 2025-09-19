@@ -30,10 +30,10 @@ resource "azuredevops_git_repository" "non_default" {
 }
 
 ########### Default Repository ###########
-data "azuredevops_git_repository" "default" {
-  project_id = azuredevops_project.this.id
-  name       = var.ecp_azure_devops_project_name
-}
+# data "azuredevops_git_repository" "default" {
+#   project_id = azuredevops_project.this.id
+#   name       = var.ecp_azure_devops_project_name
+# }
 
 # if non-default repo is used, disable the original one
 # import {
