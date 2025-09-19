@@ -34,11 +34,11 @@ resource "azurerm_subnet" "devbox" {
   private_endpoint_network_policies = try(var.virtual_network_subnet_definitions[each.key].privateEndpointNetworkPolicies, null)
   # defaults to true
   private_link_service_network_policies_enabled = try(var.virtual_network_subnet_definitions[each.key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
-  # delegation {
-  #   name = "Microsoft.DevOpsInfrastructure/pools"
-  #   service_delegation {
-  #     name    = "Microsoft.DevOpsInfrastructure/pools"
-  #     actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-  #   }
-  # }
+  delegation {
+    name = "Microsoft.DevCenter/networkConnection"
+    service_delegation {
+      name    = "Microsoft.DevCenter/networkConnection"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+    }
+  }
 }
