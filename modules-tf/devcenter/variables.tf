@@ -21,3 +21,37 @@ variable "resource_group_id" {
   type        = string
   description = "The resource group where the resources will be deployed."
 }
+
+variable "virtual_network_id" {
+  # e.g. output of launchpad-network module
+  type        = string
+  description = "Id of virtualNetwork"
+}
+
+variable "virtual_network_subnet_definitions" {
+  type = map(object({
+    artefactName          = string
+    name                  = optional(string)
+    addressPrefixes       = optional(list(string))
+    defaultOutboundAccess = optional(bool)
+    # delegations : optional(list(object({
+
+    # })))
+    virtualNetwork : object({
+      artefactName = string
+    })
+    baseAddressOffsets = optional(list(object({
+      netnum  = number
+      newbits = number
+    })))
+    privateEndpointNetworkPolicies    = optional(string)
+    privateLinkServiceNetworkPolicies = optional(string)
+  }))
+  description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
+}
+
+variable "subnet_artefact_names" {
+  type        = list(string)
+  default     = []
+  description = "List of virtualNetwork/subnet artefacts that are created"
+}

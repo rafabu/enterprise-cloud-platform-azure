@@ -1,5 +1,4 @@
 resource "azapi_resource" "dev_center" {
-
   type = "Microsoft.DevCenter/devcenters@2025-02-01"
   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devc-")
@@ -38,7 +37,6 @@ resource "azapi_resource" "dev_center" {
 }
 
 resource "azapi_resource" "dev_center_project" {
-
   type = "Microsoft.DevCenter/projects@2025-07-01-preview"
   # managed devops project does not (yet) exist in provider DS - just rename the RG one...
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devcproj-")
@@ -50,18 +48,18 @@ resource "azapi_resource" "dev_center_project" {
   location = data.azapi_resource.resource_group.location
   tags     = var.azure_tags
 
-   body = {
-     properties = {
-       azureAiServicesSettings = {
-         azureAiServicesMode = "Disabled"
-       }
-       catalogSettings = {
-         catalogItemSyncTypes = [
-           "EnvironmentDefinition",
-           "ImageDefinition"
-         ]
-       }
-       customizationSettings = null
+  body = {
+    properties = {
+      azureAiServicesSettings = {
+        azureAiServicesMode = "Disabled"
+      }
+      catalogSettings = {
+        catalogItemSyncTypes = [
+          "EnvironmentDefinition",
+          "ImageDefinition"
+        ]
+      }
+      customizationSettings = null
 
       description = "ECP Launchpad Project ${join("-", var.azure_resource_name_elements.prefixes)}"
 
@@ -89,4 +87,21 @@ resource "azapi_resource" "dev_center_project" {
       tags["hidden-title"]
     ]
   }
+}
+
+resource "azapi_resource" "dev_center_network_connection" {
+  type = "Microsoft.DevCenter/networkConnections@2025-07-01-preview"
+
+  name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devcnc-")
+  parent_id = data.azapi_resource.resource_group.id
+
+  body = {
+    properties = {
+      networkingResourceGroupName = "${data.azapi_resource.resource_group.name}-managed-nc"
+      domainJoinType              = "AzureADJoin"
+      subnetId                    = azurerm_subnet.devbox.id
+    }
+  }
+
+  tags = var.azure_tags
 }
