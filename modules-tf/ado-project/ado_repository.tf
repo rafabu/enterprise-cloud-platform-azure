@@ -62,7 +62,7 @@ resource "azuredevops_git_repository" "non_default" {
 
 locals {
   git_repository = merge(
-    data.azuredevops_git_repository.default,
+ #   data.azuredevops_git_repository.default,
     azuredevops_git_repository.non_default["do"]
   )
 }
