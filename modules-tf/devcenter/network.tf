@@ -12,7 +12,7 @@ locals {
   }
 }
 
-data "azurerm_virtual_network" "mpool" {
+data "azurerm_virtual_network" "main" {
   provider = azurerm.launchpad
 
   name                = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_name
@@ -26,8 +26,8 @@ resource "azurerm_subnet" "devbox" {
   for_each = toset(var.subnet_artefact_names)
 
   name                 = var.virtual_network_subnet_definitions[each.key].name
-  resource_group_name  = data.azurerm_virtual_network.mpool.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.mpool.name
+  resource_group_name  = data.azurerm_virtual_network.main.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.main.name
   address_prefixes     = local.subnet_address_prefixes[each.key].addressPrefixes
 
   default_outbound_access_enabled   = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)

@@ -36,29 +36,29 @@ data "azuredevops_git_repository" "default" {
 }
 
 # if non-default repo is used, disable the original one
-import {
-  to = azuredevops_git_repository.default_disable
-  id = "${azuredevops_project.this.id}/${var.ecp_azure_devops_project_name}"
-}
+# import {
+#   to = azuredevops_git_repository.default_disable
+#   id = "${azuredevops_project.this.id}/${var.ecp_azure_devops_project_name}"
+# }
 
-resource "azuredevops_git_repository" "default_disable" {
-  project_id = azuredevops_project.this.id
-  name       = var.ecp_azure_devops_project_name
+# resource "azuredevops_git_repository" "default_disable" {
+#   project_id = azuredevops_project.this.id
+#   name       = var.ecp_azure_devops_project_name
 
-  disabled = var.ecp_azure_devops_repository_name == var.ecp_azure_devops_project_name ? false : true
-  initialization {
-    init_type = "Clean"
-  }
+#   disabled = var.ecp_azure_devops_repository_name == var.ecp_azure_devops_project_name ? false : true
+#   initialization {
+#     init_type = "Clean"
+#   }
 
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to initialization to support importing existing repositories
-      # Given that a repo now exists, either imported into terraform state or created by terraform,
-      # we don't care for the configuration of initialization against the existing resource
-      initialization,
-    ]
-  }
-}
+#   lifecycle {
+#     ignore_changes = [
+#       # Ignore changes to initialization to support importing existing repositories
+#       # Given that a repo now exists, either imported into terraform state or created by terraform,
+#       # we don't care for the configuration of initialization against the existing resource
+#       initialization,
+#     ]
+#   }
+# }
 
 locals {
   git_repository = merge(

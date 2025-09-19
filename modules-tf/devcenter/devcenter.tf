@@ -113,9 +113,22 @@ resource "azapi_resource" "dev_center_network_connection" {
   tags = var.azure_tags
 }
 
+resource "azurerm_role_assignment" "dev_center_vnet" {
+  provider = azurerm.launchpad
+
+  for_each = toset([
+    "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+    "4d97b98b-1d4f-4787-a291-c67834d212e7"
+  ])
+
+  scope              = data.azurerm_virtual_network.main.id
+  role_definition_id = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
+  principal_id       = azapi_resource.dev_center.identity[0].principal_id
+}
+
 resource "azapi_resource" "dev_center_network_connection_attachment" {
   type      = "Microsoft.DevCenter/devcenters/attachednetworks@2025-02-01"
-  name      = "${data.azurerm_virtual_network.mpool.name}-${azurerm_subnet.devbox[var.subnet_artefact_names[0]].name}"
+  name      = "${data.azurerm_virtual_network.main.name}-${azurerm_subnet.devbox[var.subnet_artefact_names[0]].name}"
   parent_id = azapi_resource.dev_center.id
 
   body = {
@@ -123,4 +136,8 @@ resource "azapi_resource" "dev_center_network_connection_attachment" {
       networkConnectionId = azapi_resource.dev_center_network_connection.id
     }
   }
+
+  depends_on = [azurerm_role_assignment.dev_center_vnet]
 }
+
+
