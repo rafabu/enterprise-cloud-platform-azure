@@ -281,8 +281,10 @@ resource "azurerm_federated_identity_credential" "mpool" {
   issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
   subject  = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_subject
 
+
   depends_on = [
-    data.azuread_service_principal.mpool
+    data.azuread_service_principal.mpool,
+    time_sleep.serviceendpoint_azurerm_pre_destroy_delay
   ]
 }
 
@@ -348,7 +350,8 @@ resource "azuread_application_federated_identity_credential" "mpool" {
   subject   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_subject
 
   depends_on = [
-    azuread_service_principal.mpool
+    azuread_service_principal.mpool,
+    time_sleep.serviceendpoint_azurerm_pre_destroy_delay
   ]
 }
 

@@ -25,6 +25,17 @@ resource "azuredevops_serviceendpoint_azurerm" "mpool" {
   }
 }
 
+resource "time_sleep" "serviceendpoint_azurerm_pre_destroy_delay" {
+  # destroy only: after destroying *_federated_identity_credential resources
+  #     we have to wait for Entra Id replication or azuredevops_serviceendpoint_azurerm
+  #     destroy operation will fail.
+  for_each = local.ado_wid_permission_objects
+
+  destroy_duration = "60s" # Wait 1 minute ONLY on destroy
+
+  depends_on = [azuredevops_serviceendpoint_azurerm.mpool]
+}
+
 # grant access to service endpoint for all pipelines in the project
 resource "azuredevops_pipeline_authorization" "mpool_serviceendpoint" {
   for_each = local.ado_wid_permission_objects
@@ -34,6 +45,3 @@ resource "azuredevops_pipeline_authorization" "mpool_serviceendpoint" {
   type        = "endpoint"
   # authorized  = true
 }
-
-
-
