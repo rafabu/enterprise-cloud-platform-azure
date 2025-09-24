@@ -17,3 +17,18 @@ data "azurecaf_name" "st" {
   clean_input   = true
   use_slug      = true
 }
+
+locals {
+  # used to match service principal names against the naming convention used by ECP Launchpad
+  service_principal_name_begins_with = format(
+    "ar-%s-%s",
+    join("-", try(var.azure_resource_name_elements.prefixes, [])),
+    try(var.azure_resource_name_elements.name, null)
+  )
+
+  managed_identity_name_begins_with = format(
+    "%s-id-%s",
+    join("-", try(var.azure_resource_name_elements.prefixes, [])),
+    try(var.azure_resource_name_elements.name, null),
+  )
+}

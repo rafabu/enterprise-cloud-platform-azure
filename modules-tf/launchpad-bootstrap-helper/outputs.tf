@@ -27,3 +27,25 @@ output "backend_storage_accounts" {
     }
   }
 }
+
+output "actor_identity" {
+  description = "Information on the Entra ID identity (user or service principal) used to perform operations"
+
+  value = data.azuread_directory_object.this.type == "ServicePrincipal" ? {
+    tenant_id                 = data.azuread_client_config.this.tenant_id
+    object_id                 = data.azuread_service_principals.this.service_principals[0].object_id
+    client_id                 = data.azuread_service_principals.this.service_principals[0].client_id
+    display_name              = data.azuread_service_principals.this.service_principals[0].display_name
+    user_principal_name       = ""
+    type                      = data.azuread_service_principals.this.service_principals[0].type == "Application" ? "ServicePrincipal" : "ManagedIdentity"
+    is_ecp_launchpad_identity = data.azuread_service_principals.this.service_principals[0].type == "Application" ? startswith(data.azuread_service_principals.this.service_principals[0].display_name, local.service_principal_name_begins_with) : startswith(data.azuread_service_principals.this.service_principals[0].display_name, local.managed_identity_name_begins_with)
+    } : {
+    tenant_id                 = data.azuread_client_config.this.tenant_id
+    object_id                 = data.azuread_users.this.users[0].object_id
+    client_id                 = ""
+    display_name              = data.azuread_users.this.users[0].display_name
+    user_principal_name       = data.azuread_users.this.users[0].user_principal_name
+    type                      = data.azuread_directory_object.this.type
+    is_ecp_launchpad_identity = false
+  }
+}
