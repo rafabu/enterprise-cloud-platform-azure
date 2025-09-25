@@ -8,22 +8,16 @@ output "backend_resource_group" {
 }
 
 output "backend_storage_accounts" {
-  description = "Simulated (future) terraform backend storage accounts created for each ECP deployment level"
+  description = "Simulated (future) terraform backend storage accounts created for each ECP deployment level. See ecp_resource_exists to determine if the storage account already exists."
   value = {
     for key in local.backend_levels : key => {
-      id                  = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/Microsoft.Resources/resourceGroups/${data.azurecaf_name.rg.result}/providers/Microsoft.Storage/storageAccounts/${format("%s%s", data.azurecaf_name.st.result, key)}"
-      name                = format("%s%s", data.azurecaf_name.st.result, key)
-      resource_group_name = data.azurecaf_name.rg.result
-      location            = var.azure_location
-      # # include information required for private endpoint access without DNS
-      # private_endpoint_blob = {
-      #   fqdn               =
-      #   private_ip_address =
-      #   subresource_names  =
-      #   subnet_id          =
-      # }
+      id                   = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/Microsoft.Resources/resourceGroups/${data.azurecaf_name.rg.result}/providers/Microsoft.Storage/storageAccounts/${format("%s%s", data.azurecaf_name.st.result, key)}"
+      name                 = format("%s%s", data.azurecaf_name.st.result, key)
+      resource_group_name  = data.azurecaf_name.rg.result
+      location             = var.azure_location
       ecp_level            = key
       tf_backend_container = "tfstate"
+      ecp_resource_exists  = length(data.azurerm_resources.backend_storage_accounts[key].resources) == 1
     }
   }
 }
@@ -47,5 +41,14 @@ output "actor_identity" {
     user_principal_name       = data.azuread_users.this.users[0].user_principal_name
     type                      = data.azuread_directory_object.this.type
     is_ecp_launchpad_identity = false
+  }
+}
+
+output "actor_network_information" {
+  description = "Information on network the actor is connecting from"
+
+  value = {
+    public_ip = jsondecode(data.http.this_public_ip.response_body).ip
+    local_ip  = data.external.this_local_ip.result.local_ip
   }
 }
