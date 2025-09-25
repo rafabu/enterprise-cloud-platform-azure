@@ -16,3 +16,33 @@ variable "azure_resource_name_elements" {
   })
   description = "Object containing naming components to be used by the azurecaf_name data source to generate resource names."
 }
+
+variable "virtual_network_definitions" {
+  # https://learn.microsoft.com/en-us/graph/api/resources/countrynamedlocation?view=graph-rest-1.0
+  type = map(object({
+    artefactName = string
+    nameElement  = optional(string)
+    addressSpace = object({
+      addressPrefixes = optional(list(string))
+      baseAddressOffsets = optional(list(object({
+        netnum  = number
+        newbits = number
+      })))
+    })
+    dhcpOptions = optional(object({
+      dnsServers = optional(list(string))
+    }))
+    encryption = optional(object({
+      enabled     = bool
+      enforcement = string
+    }))
+    privateEndpointVNetPolicies    = optional(string)
+  }))
+  description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
+}
+
+variable "virtual_network_artefact_names" {
+  type        = list(string)
+  default     = []
+  description = "List of virtualNetwork artefacts that are created"
+}
