@@ -1,9 +1,10 @@
 output "backend_resource_group" {
   description = "Simulated (future) terraform backend resource group"
   value = {
-    id       = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/Microsoft.Resources/resourceGroups/${data.azurecaf_name.rg.result}"
-    name     = data.azurecaf_name.rg.result
-    location = var.azure_location
+    id              = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/Microsoft.Resources/resourceGroups/${data.azurecaf_name.rg.result}"
+    subscription_id = data.azurerm_client_config.this.subscription_id
+    name            = data.azurecaf_name.rg.result
+    location        = var.azure_location
   }
 }
 
@@ -12,6 +13,7 @@ output "backend_storage_accounts" {
   value = {
     for key in local.backend_levels : key => {
       id                   = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/Microsoft.Resources/resourceGroups/${data.azurecaf_name.rg.result}/providers/Microsoft.Storage/storageAccounts/${format("%s%s", data.azurecaf_name.st.result, key)}"
+      subscription_id      = data.azurerm_client_config.this.subscription_id
       name                 = format("%s%s", data.azurecaf_name.st.result, key)
       resource_group_name  = data.azurecaf_name.rg.result
       location             = var.azure_location
