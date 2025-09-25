@@ -47,9 +47,9 @@ output "actor_identity" {
 output "actor_network_information" {
   description = "Information on network the actor is connecting from"
   value = {
-    public_ip                             = jsondecode(data.http.this_public_ip.response_body).ip
-    local_ip                              = data.external.this_local_ip.result.local_ip
-    local_ip_within_ecp_launchpad_network = local.ip_is_contained
-    ecp_launchpad_network_cidr            = local.cidr_string
+    public_ip                        = jsondecode(data.http.this_public_ip.response_body).ip
+    local_ip                         = data.external.this_local_ip.result.local_ip
+    is_local_ip_within_ecp_launchpad = local.ip_is_contained
+    ecp_launchpad_network_cidr       = local.cidr_string
   }
 }
