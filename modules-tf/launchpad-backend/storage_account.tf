@@ -48,6 +48,26 @@ resource "azurerm_storage_account" "backend" {
   tags = var.azure_tags
 }
 
+# Assure that default action is deny
+resource "azurerm_storage_account_network_rules" "backend" {
+  provider = azurerm.launchpad
+
+  for_each = toset(local.backend_levels)
+
+  storage_account_id         = azurerm_storage_account.backend[each.key].id
+  default_action             = "Deny"
+  ip_rules                   = []
+  virtual_network_subnet_ids = []
+  bypass                     = ["AzureServices"]
+
+  lifecycle {
+    ignore_changes = [
+      ip_rules, # remote state access may require temporary IP access, so ignore changes to ip_rules
+      virtual_network_subnet_ids
+    ]
+  }
+}
+
 resource "azurerm_private_endpoint" "backend_blob" {
   provider = azurerm.launchpad
 
