@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "backend" {
   allow_nested_items_to_be_public = false
   default_to_oauth_authentication = true
   local_user_enabled              = false
-  public_network_access_enabled   = false
+  public_network_access_enabled   = var.storage_account_public_network_access_enabled
   # you will need to enable the storage_use_azuread flag in the Provider block to use Azure AD for authentication
   shared_access_key_enabled = false
 
