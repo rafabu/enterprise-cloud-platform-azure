@@ -31,8 +31,6 @@ data "azurerm_resources" "backend_storage_accounts" {
   provider = azurerm.launchpad
 
   type = "Microsoft.Storage/storageAccounts"
-
-  # resource_group_name = data.azurecaf_name.rg.result
   name                = format("%s%s", data.azurecaf_name.st.result, each.key)
 }
 
