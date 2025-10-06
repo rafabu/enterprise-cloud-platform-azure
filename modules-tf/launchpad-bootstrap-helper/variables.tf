@@ -36,7 +36,7 @@ variable "virtual_network_definitions" {
       enabled     = bool
       enforcement = string
     }))
-    privateEndpointVNetPolicies    = optional(string)
+    privateEndpointVNetPolicies = optional(string)
   }))
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
 }
@@ -45,4 +45,13 @@ variable "virtual_network_artefact_names" {
   type        = list(string)
   default     = []
   description = "List of virtualNetwork artefacts that are created"
+}
+
+variable "launchpad_backend_type_previous_run" {
+  type = map(object({
+    backend_type    = string
+    apply_timestamp = optional(string)
+  }))
+  description = "The backend type used in the previous successful run of this module"
+  default     = {}
 }

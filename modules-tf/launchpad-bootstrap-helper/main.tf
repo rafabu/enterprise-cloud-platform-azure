@@ -4,6 +4,14 @@ locals {
     "l1",
     "l2",
   ]
+
+  backend_type = {
+    for key in local.backend_levels : key => length(data.azurerm_resources.backend_storage_accounts[key].resources) == 1 ? "azurerm" : "local"
+  }
+  # flag to indicate if the backend type has changed between apply runs
+  backend_type_changed = {
+    for key in local.backend_levels : key => try(var.launchpad_backend_type_previous_run[key].backend_type, "local") != local.backend_type[key] && terraform_data.backend_storage_accounts[key].output.apply_date != try(var.launchpad_backend_type_previous_run[key].apply_timestamp, "") ? true : false
+  }
 }
 
 data "azurerm_client_config" "this" {
@@ -31,7 +39,7 @@ data "azurerm_resources" "backend_storage_accounts" {
   provider = azurerm.launchpad
 
   type = "Microsoft.Storage/storageAccounts"
-  name                = format("%s%s", data.azurecaf_name.st.result, each.key)
+  name = format("%s%s", data.azurecaf_name.st.result, each.key)
 }
 
 ###### IP Adress Information ######
@@ -47,3 +55,16 @@ data "external" "this_local_ip" {
 
   query = null
 }
+
+resource "terraform_data" "backend_storage_accounts" {
+  for_each = toset(local.backend_levels)
+
+  input = {
+    apply_date = plantimestamp()
+  }
+
+  triggers_replace = [
+    plantimestamp()
+  ]
+}
+

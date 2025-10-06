@@ -12,14 +12,17 @@ output "backend_storage_accounts" {
   description = "Simulated (future) terraform backend storage accounts created for each ECP deployment level. See ecp_resource_exists to determine if the storage account already exists."
   value = {
     for key in local.backend_levels : key => {
-      id                   = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/Microsoft.Resources/resourceGroups/${data.azurecaf_name.rg.result}/providers/Microsoft.Storage/storageAccounts/${format("%s%s", data.azurecaf_name.st.result, key)}"
-      subscription_id      = data.azurerm_client_config.this.subscription_id
-      name                 = format("%s%s", data.azurecaf_name.st.result, key)
-      resource_group_name  = data.azurecaf_name.rg.result
-      location             = var.azure_location
-      ecp_level            = key
-      tf_backend_container = "tfstate"
-      ecp_resource_exists  = length(data.azurerm_resources.backend_storage_accounts[key].resources) == 1
+      id                                             = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/Microsoft.Resources/resourceGroups/${data.azurecaf_name.rg.result}/providers/Microsoft.Storage/storageAccounts/${format("%s%s", data.azurecaf_name.st.result, key)}"
+      subscription_id                                = data.azurerm_client_config.this.subscription_id
+      name                                           = format("%s%s", data.azurecaf_name.st.result, key)
+      resource_group_name                            = data.azurecaf_name.rg.result
+      location                                       = var.azure_location
+      ecp_level                                      = key
+      tf_backend_container                           = "tfstate"
+      ecp_resource_exists                            = length(data.azurerm_resources.backend_storage_accounts[key].resources) == 1
+      ecp_terraform_backend                          = local.backend_type[key]
+      ecp_terraform_backend_changed_since_last_apply = local.backend_type_changed[key]
+      ecp_terraform_backend_apply_timestamp          = terraform_data.backend_storage_accounts[key].output.apply_date
     }
   }
 }
