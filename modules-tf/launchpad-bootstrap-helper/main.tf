@@ -32,10 +32,9 @@ data "azurerm_resources" "backend_storage_accounts" {
 
   type = "Microsoft.Storage/storageAccounts"
 
-  resource_group_name = data.azurecaf_name.rg.result
+  # resource_group_name = data.azurecaf_name.rg.result
   name                = format("%s%s", data.azurecaf_name.st.result, each.key)
 }
-
 
 ###### IP Adress Information ######
 data "http" "this_public_ip" {
