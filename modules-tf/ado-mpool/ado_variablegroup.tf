@@ -1,7 +1,7 @@
 resource "azuredevops_variable_group" "mpool_variablegroup" {
   name         = local.variable_group_name
   description  = "Variable group for ${var.ecp_azure_devops_project_name} project. Get important information for your project automation from here. This variable group is automatically created and maintained by the ECP DevOps module."
-  project_id   = data.azuredevops_project.ecp.id
+  project_id   = local.azure_devops_project.project_id
   allow_access = true
 
   variable {
@@ -59,7 +59,7 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
 }
 
 resource "azuredevops_pipeline_authorization" "mpool_variablegroup" {
-  project_id  = data.azuredevops_project.ecp.id
+  project_id  = local.azure_devops_project.project_id
   resource_id = azuredevops_variable_group.mpool_variablegroup.id
   type        = "variablegroup"
 }

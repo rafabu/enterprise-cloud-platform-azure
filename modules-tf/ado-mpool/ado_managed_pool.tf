@@ -1,6 +1,6 @@
 # DevOpsInfrastructure service principal needs "Reader" and "Network Contributor"
 data "azuread_service_principal" "devops_infrastructure" {
-  # DevOpsInfrastructure
+  # DevOpsInfrastructure (MS-SPI)
   client_id = "31687f79-5e43-4c1e-8c63-d9f4bff5cf8b"
 
   depends_on = [
@@ -16,7 +16,7 @@ resource "azurerm_role_assignment" "devops_infrastructure_vnet" {
     "4d97b98b-1d4f-4787-a291-c67834d212e7"
   ])
 
-  scope              = data.azurerm_virtual_network.mpool.id
+  scope              = var.virtual_network_id
   role_definition_id = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
   principal_id       = data.azuread_service_principal.devops_infrastructure.object_id
 }
@@ -75,7 +75,7 @@ data "azuredevops_agent_pool" "mpool" {
 }
 
 data "azuredevops_agent_queue" "mpool" {
-  project_id = data.azuredevops_project.ecp.id
+  project_id = local.azure_devops_project.project_id
   name       = module.managed_devops_pool.name
 
   depends_on = [
@@ -84,7 +84,7 @@ data "azuredevops_agent_queue" "mpool" {
 }
 
 resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
-  project_id  = data.azuredevops_project.ecp.id
+  project_id  = local.azure_devops_project.project_id
   resource_id = data.azuredevops_agent_queue.mpool.id
   type        = "queue"
 }

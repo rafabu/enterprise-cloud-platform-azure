@@ -2,12 +2,12 @@ resource "azapi_resource" "dev_center" {
   type = "Microsoft.DevCenter/devcenters@2025-02-01"
   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devc-")
-  parent_id = data.azapi_resource.resource_group.id
+  parent_id = var.resource_group_id
 
   identity {
     type = "SystemAssigned"
   }
-  location = data.azapi_resource.resource_group.location
+  location = local.resource_group.location
   tags     = var.azure_tags
 
   body = {
@@ -40,12 +40,12 @@ resource "azapi_resource" "dev_center_project" {
   type = "Microsoft.DevCenter/projects@2025-07-01-preview"
   # managed devops project does not (yet) exist in provider DS - just rename the RG one...
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devcproj-")
-  parent_id = data.azapi_resource.resource_group.id
+  parent_id = var.resource_group_id
 
   identity {
     type = "SystemAssigned"
   }
-  location = data.azapi_resource.resource_group.location
+  location = local.resource_group.location
   tags     = var.azure_tags
 
   body = {
@@ -92,8 +92,8 @@ resource "azapi_resource" "dev_center_project" {
 resource "azapi_resource" "dev_center_network_connection" {
   type      = "Microsoft.DevCenter/networkConnections@2025-02-01"
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devcnc-")
-  parent_id = data.azapi_resource.resource_group.id
-  location  = data.azapi_resource.resource_group.location
+  parent_id = var.resource_group_id
+  location  = local.resource_group.location
 
   body = {
     properties = {
@@ -102,7 +102,7 @@ resource "azapi_resource" "dev_center_network_connection" {
       domainPassword              = null
       domainUsername              = ""
       organizationUnit            = ""
-      networkingResourceGroupName = "${data.azapi_resource.resource_group.name}-managed-nc"
+      networkingResourceGroupName = "${local.resource_group.name}-managed-nc"
       subnetId                    = azurerm_subnet.devbox[var.subnet_artefact_names[0]].id
     }
   }
@@ -121,14 +121,14 @@ resource "azurerm_role_assignment" "dev_center_vnet" {
     "4d97b98b-1d4f-4787-a291-c67834d212e7"
   ])
 
-  scope              = data.azurerm_virtual_network.main.id
+  scope              = var.virtual_network_id
   role_definition_id = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
   principal_id       = azapi_resource.dev_center.identity[0].principal_id
 }
 
 resource "azapi_resource" "dev_center_network_connection_attachment" {
   type      = "Microsoft.DevCenter/devcenters/attachednetworks@2025-02-01"
-  name      = "${data.azurerm_virtual_network.main.name}-${azurerm_subnet.devbox[var.subnet_artefact_names[0]].name}"
+  name      = "${local.virtual_network.name}-${azurerm_subnet.devbox[var.subnet_artefact_names[0]].name}"
   parent_id = azapi_resource.dev_center.id
 
   body = {

@@ -29,8 +29,8 @@ resource "azurerm_virtual_network" "lp" {
   for_each = toset(var.virtual_network_artefact_names)
 
   name                = data.azurecaf_name.vnet[each.key].result
-  location            = data.azapi_resource.resource_group.location
-  resource_group_name = data.azapi_resource.resource_group.name
+  location            = local.resource_group.location
+  resource_group_name = local.resource_group.name
 
   address_space = local.virtual_network_address_prefixes[each.key].addressPrefixes
   dynamic "encryption" {

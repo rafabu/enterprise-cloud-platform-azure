@@ -1,7 +1,7 @@
 resource "azuredevops_serviceendpoint_azurerm" "mpool" {
   for_each = local.ado_wid_permission_objects
 
-  project_id            = data.azuredevops_project.ecp.id
+  project_id            = local.azure_devops_project.project_id
   service_endpoint_name = "spc-${each.key}-${data.azurerm_management_group.ecp_root_parent.name}"
   description           = "Managed by ECP DevOps"
 
@@ -40,7 +40,7 @@ resource "time_sleep" "serviceendpoint_azurerm_pre_destroy_delay" {
 resource "azuredevops_pipeline_authorization" "mpool_serviceendpoint" {
   for_each = local.ado_wid_permission_objects
 
-  project_id  = data.azuredevops_project.ecp.id
+  project_id  = local.azure_devops_project.project_id
   resource_id = azuredevops_serviceendpoint_azurerm.mpool[each.key].id
   type        = "endpoint"
   # authorized  = true

@@ -12,13 +12,26 @@ locals {
   }
 }
 
-data "azurerm_virtual_network" "mpool" {
+# mock output-safe resource group info retrieval
+#      to allow plan to complete without actual resource group
+data "azurerm_resources" "virtual_networks" {
   provider = azurerm.launchpad
 
-  name                = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_name
-  resource_group_name = provider::azurerm::parse_resource_id(var.virtual_network_id).resource_group_name
+  type = "Microsoft.Network/virtualNetworks"
 }
 
+locals {
+  virtual_network = try([
+    for vnet in data.azurerm_resources.virtual_networks.resources : {
+      name                = vnet.name
+      location            = vnet.location
+      resource_group_name = vnet.resource_group_name
+    } if vnet.id == var.virtual_network_id][0], {
+    name                = "mock-vnet"
+    resource_group_name = "mock-rg"
+    location            = "westeurope"
+  })
+}
 
 resource "azurerm_subnet" "mpool" {
   provider = azurerm.launchpad
@@ -26,8 +39,8 @@ resource "azurerm_subnet" "mpool" {
   for_each = toset(var.subnet_artefact_names)
 
   name                 = var.virtual_network_subnet_definitions[each.key].name
-  resource_group_name  = data.azurerm_virtual_network.mpool.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.mpool.name
+  resource_group_name  = local.virtual_network.resource_group_name
+  virtual_network_name = local.virtual_network.name
   address_prefixes     = local.subnet_address_prefixes[each.key].addressPrefixes
 
   default_outbound_access_enabled   = try(var.virtual_network_subnet_definitions[each.key].defaultOutboundAccess, null)

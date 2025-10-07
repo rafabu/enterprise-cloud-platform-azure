@@ -29,7 +29,7 @@ locals {
       ado-project-memberships = [
         {
           displayName = "Readers"
-          projectId   = data.azuredevops_project.ecp.id
+          projectId   = local.azure_devops_project.project_id
         }
       ],
       entra-application-requiredResourceAccess = [
@@ -94,7 +94,7 @@ locals {
       ado-project-memberships = [
         {
           displayName = "Project Administrators"
-          projectId   = data.azuredevops_project.ecp.id
+          projectId   = local.azure_devops_project.project_id
         }
       ],
       entra-application-requiredResourceAccess = [
