@@ -10,7 +10,7 @@ locals {
   }
   # flag to indicate if the backend type has changed between apply runs
   backend_type_changed = {
-    for key in local.backend_levels : key => try(var.launchpad_backend_type_previous_run[key].backend_type, "local") != local.backend_type[key] && terraform_data.backend_storage_accounts[key].output.apply_date != try(var.launchpad_backend_type_previous_run[key].apply_timestamp, "") ? true : false
+    for key in local.backend_levels : key => try(var.launchpad_backend_type_previous_run[key].backend_type, "local") != local.backend_type[key] ? true : false
   }
 }
 
