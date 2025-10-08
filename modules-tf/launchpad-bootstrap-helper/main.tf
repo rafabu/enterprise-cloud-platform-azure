@@ -55,16 +55,3 @@ data "external" "this_local_ip" {
 
   query = null
 }
-
-resource "terraform_data" "backend_storage_accounts" {
-  for_each = toset(local.backend_levels)
-
-  input = {
-    apply_date = plantimestamp()
-  }
-
-  triggers_replace = [
-    plantimestamp()
-  ]
-}
-

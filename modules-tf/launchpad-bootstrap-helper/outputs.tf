@@ -22,7 +22,6 @@ output "backend_storage_accounts" {
       ecp_resource_exists                            = length(data.azurerm_resources.backend_storage_accounts[key].resources) == 1
       ecp_terraform_backend                          = local.backend_type[key]
       ecp_terraform_backend_changed_since_last_apply = local.backend_type_changed[key]
-      ecp_terraform_backend_apply_timestamp          = terraform_data.backend_storage_accounts[key].output.apply_date
     }
   }
 }
