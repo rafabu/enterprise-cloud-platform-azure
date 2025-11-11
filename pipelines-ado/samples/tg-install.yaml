@@ -1,0 +1,44 @@
+parameters:
+  - name: terragrunt_version
+    type: string
+    default: 'latest'
+
+variables:
+- group: "ecp_bootstrap_rabu-d7"
+
+pool: $[variables.ecp_ado_agent_pool_azure]
+
+steps:
+- task: Bash@3
+  displayName: install Terragrunt ${{ parameters.terragrunt_version }}
+  name: terragrunt_install
+  inputs:
+    targetType: 'inline'
+    script: |
+      set -e
+      
+      if [ "${{ parameters.terragrunt_version }}" = "latest" ]; then
+        # Get latest version from GitHub API
+        VERSION=$(curl -s https://api.github.com/repos/gruntwork-io/terragrunt/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+      else
+        VERSION="v${{ parameters.terragrunt_version }}"
+      fi
+      
+      echo "Installing Terragrunt version: $VERSION"
+      
+      # Download terragrunt binary
+      curl -L "https://github.com/gruntwork-io/terragrunt/releases/download/$VERSION/terragrunt_linux_amd64" -o terragrunt
+      
+      # Make executable and move to PATH
+      chmod +x terragrunt
+      sudo mv terragrunt /usr/local/bin/
+      
+      echo "Terragrunt $VERSION installed successfully"
+
+- task: Bash@3
+  displayName: check Terragrunt
+  name: terragrunt_check
+  inputs:
+    targetType: 'inline'
+    script: |
+      terragrunt --version
