@@ -5,6 +5,21 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   allow_access = true
 
   variable {
+    name  = "ecp_configuration_repo"
+    value = var.ecp_configuration_repo
+  }
+
+  variable {
+    name  = "ecp_configuration_repo_tag"
+    value = var.ecp_configuration_repo_version
+  }
+
+  variable {
+    name  = "ecp_configuration_repo_deployment_root_path"
+    value = var.ecp_configuration_repo_deployment_root_path
+  }
+
+  variable {
     name  = "ecp_environment_name"
     value = var.azure_resource_name_elements.prefixes[0]
   }

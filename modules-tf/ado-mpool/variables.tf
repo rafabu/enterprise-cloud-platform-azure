@@ -18,6 +18,22 @@ variable "ecp_azure_root_parent_management_group_id" {
   description = "ID of parent management group under which the ECP hierarchy for the environment will be created. Recommended: One level below Azure's Root Management Group."
 }
 
+variable "ecp_configuration_repo" {
+  type        = string
+  description = "URL of the Git repository containing the ECP configuration for this environment."
+}
+
+variable "ecp_configuration_repo_version" {
+  type        = string
+  default = "main"
+  description = "Version (git tag) of the Git repository containing the ECP configuration for this environment."
+}
+
+variable "ecp_configuration_repo_deployment_root_path" {
+  type        = string
+  description = "subfolder path within the ecp_configuration_repo where the environment deployment files are located."
+}
+
 variable "azure_location" {
   type = string
 }
