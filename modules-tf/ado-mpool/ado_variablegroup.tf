@@ -5,8 +5,8 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   allow_access = true
 
   variable {
-    name  = "ecp_configuration_repo"
-    value = var.ecp_configuration_repo
+    name  = "ecp_configuration_repo_url"
+    value = "https://${var.ecp_configuration_repo}"
   }
 
   variable {
