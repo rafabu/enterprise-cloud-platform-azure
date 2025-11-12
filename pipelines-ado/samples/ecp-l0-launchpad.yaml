@@ -1,0 +1,37 @@
+name: "$(BuildDefinitionName)_$(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)_${{ parameters.environment }}"
+
+trigger:
+  branches:
+    include:
+      - "main"
+
+parameters:
+  - name: environment
+    displayName: 'Environment (e.g. production, test)'
+    type: string
+    default: test
+    values:
+      - production
+      - test
+  - name: ecp_environment_name
+    type: string
+    default: 'rabu-d7'
+  - name: terragrunt_version
+    type: string
+    default: 'latest'
+
+variables:
+- group: "ecp_bootstrap_${{ parameters.ecp_environment_name }}"
+
+pool: $[variables.ecp_ado_agent_pool_azure]
+
+stages:
+  - stage: ecp-level0-launchpad
+    displayName: "0: Launchpad"
+    jobs:
+      - template: ../templates/jb-tg-paa-template.yaml
+        parameters:
+          name: level0_launchpad
+          azureSubscription: $(ecp_ado_service_connection_azure_l0-contribute)
+          workingDir: $(Build.SourcesDirectory)/environments/$(environment)/level0/launchpad
+          displayName: "Level0/Launchpad"
