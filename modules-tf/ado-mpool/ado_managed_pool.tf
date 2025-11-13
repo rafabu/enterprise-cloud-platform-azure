@@ -43,8 +43,8 @@ module "managed_devops_pool" {
   version_control_system_type = "azuredevops"
   subnet_id                   = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
 
-  agent_profile_resource_prediction_profile = Manual
-  agent_profile_kind                        = Stateless
+  agent_profile_resource_prediction_profile = "Manual"
+  agent_profile_kind                        = "Stateless"
   agent_profile_resource_predictions_manual = {
     time_zone = "W. Europe Standard Time"
     days_data = [
