@@ -32,8 +32,7 @@ module "managed_devops_pool" {
 
   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
   name = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
-  # prevent changes by ""known after apply"
-  resource_group_name = "/subscriptions/${data.azurerm_client_config.this.subscription_id}/resourceGroups/${data.azurecaf_name.rg.result}"
+  resource_group_name = azurerm_resource_group.mpool.name
   location            = azurerm_resource_group.mpool.location
 
   dev_center_project_resource_id           = var.dev_center_project_resource_id
