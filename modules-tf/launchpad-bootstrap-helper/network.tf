@@ -23,5 +23,5 @@ locals {
   ip_count = pow(2, 32 - local.cidr_prefix)
   max_int  = local.base_int + local.ip_count - 1
   # Perform containment check
-  ip_is_contained = local.ip_int >= local.base_int && local.ip_int <= local.max_int ? "true" : "false"
+  ip_is_contained = local.ip_int >= local.base_int && local.ip_int <= local.max_int
 }
