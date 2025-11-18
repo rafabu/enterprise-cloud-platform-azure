@@ -53,13 +53,10 @@ data "azurerm_resources" "backend_storage_accounts" {
 data "external" "public_ip_robust" {
   program = ["pwsh",
     "-File",
-    "${path.module}/Get-PublicIPAddress.ps1",
-    "-MaxRetries", "3",
-    "-TimeoutSeconds", "10",
-    "-RetryDelaySeconds", "2"
+    "${path.module}/Get-PublicIPAddress.ps1"
   ]
 
-  query = {}
+  query = null
 }
 
 data "external" "this_local_ip" {
