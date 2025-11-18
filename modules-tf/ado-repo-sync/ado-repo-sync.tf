@@ -10,7 +10,7 @@ resource "terraform_data" "repo_sync" {
     # Trigger on Azure DevOps commit changes (in case of external updates)
     ado_commit = data.azuredevops_git_repository.target.default_branch
     # Force sync trigger
-    force_sync = var.force_sync ? timestamp() : "disabled"
+    force_sync = var.force_sync ? plantimestamp() : "disabled"
     # Configuration changes
     config_hash = md5(jsonencode({
       submodule_path = var.local_submodule_path
@@ -31,10 +31,10 @@ resource "terraform_data" "repo_sync" {
   }
   
   # Optional: Add a provisioner to validate authentication before sync
-  provisioner "local-exec" {
-    command     = "az devops project show --project '${var.ecp_azure_devops_project_name}' --organization 'https://dev.azure.com/${var.ecp_azure_devops_organization_name}' --output none"
-    interpreter = ["pwsh", "-Command"]
-  }
+  # provisioner "local-exec" {
+  #   command     = "az devops project show --project '${var.ecp_azure_devops_project_name}' --organization 'https://dev.azure.com/${var.ecp_azure_devops_organization_name}' --output none"
+  #   interpreter = ["pwsh", "-Command"]
+  # }
   
   depends_on = [
     data.azuredevops_git_repository.target
