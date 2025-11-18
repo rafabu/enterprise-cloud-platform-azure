@@ -12,13 +12,6 @@ locals {
   backend_type_changed = {
     for key in local.backend_levels : key => try(var.launchpad_backend_type_previous_run[key].backend_type, "local") != local.backend_type[key] ? true : false
   }
-
-  # Reliable public IP detection with multiple fallbacks
-  # Try each HTTP source and use the first successful one
-  public_ip_result = try(
-    jsondecode(data.external.public_ip_robust.result).status == "success" ? jsondecode(data.external.public_ip_robust.result).public_ip : null,
-    null
-  )
 }
 
 data "azurerm_client_config" "this" {

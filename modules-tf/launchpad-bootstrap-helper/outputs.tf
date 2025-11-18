@@ -51,7 +51,7 @@ output "actor_identity" {
 output "actor_network_information" {
   description = "Information on network the actor is connecting from with reliable IP detection"
   value = {
-    public_ip                        = local.public_ip_result
+    public_ip                        = data.external.public_ip_robust.result.public_ip
     local_ip                         = data.external.this_local_ip.result.local_ip
     is_local_ip_within_ecp_launchpad = local.ip_is_contained
     ecp_launchpad_network_cidr       = local.cidr_string
