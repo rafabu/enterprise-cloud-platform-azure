@@ -24,7 +24,7 @@ resource "terraform_data" "repo_sync" {
     #command = "./scripts/sync-repository.ps1 -LocalSubmodulePath '${var.local_submodule_path}' -AdoOrg '${var.ecp_azure_devops_organization_name}' -AdoProject '${var.ecp_azure_devops_project_name}' -AdoRepo '${var.ecp_azure_devops_repository_name}' -TargetBranch '${var.ecp_azure_devops_target_branch}' -ForceSync ${var.force_sync}"
     # command = "./scripts/sync-repository.ps1"
     interpreter = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-Command"]
-    command = "& './scripts/sync-repository.ps1' -LocalSubmodulePath '${var.local_submodule_path}' -AdoOrg '${var.ecp_azure_devops_organization_name}' -AdoProject '${var.ecp_azure_devops_project_name}' -AdoRepo '${var.ecp_azure_devops_repository_name}' -TargetBranch '${var.ecp_azure_devops_target_branch}' -ForceSync $${var.force_sync}"
+    command = "& './scripts/sync-repository.ps1' -LocalSubmodulePath '${var.local_submodule_path}' -AdoOrg '${var.ecp_azure_devops_organization_name}' -AdoProject '${var.ecp_azure_devops_project_name}' -AdoRepo '${var.ecp_azure_devops_repository_name}' -TargetBranch '${var.ecp_azure_devops_target_branch}' -ForceSync ([bool]${var.force_sync})"
     
     
     environment = {
