@@ -27,8 +27,7 @@ try {
     # === AUTHENTICATION SETUP ===
     Write-Host "INFO: Validating authentication..."
     
-    # Test Azure DevOps access (now simplified without --organization and --project)
-    az devops project show --output none
+    az devops project show --organization "https://dev.azure.com/$AdoOrg"--project $AdoProject--output none
     
     if ($LASTEXITCODE -ne 0) {
         Write-Error "ERROR: Azure DevOps authentication failed. Please ensure:"
