@@ -12,6 +12,13 @@ locals {
   backend_type_changed = {
     for key in local.backend_levels : key => try(var.launchpad_backend_type_previous_run[key].backend_type, "local") != local.backend_type[key] ? true : false
   }
+
+  # Reliable public IP detection with multiple fallbacks
+  # Try each HTTP source and use the first successful one
+  public_ip_result = try(
+    jsondecode(data.external.public_ip_robust.result).status == "success" ? jsondecode(data.external.public_ip_robust.result).public_ip : null,
+    null
+  )
 }
 
 data "azurerm_client_config" "this" {
@@ -42,9 +49,17 @@ data "azurerm_resources" "backend_storage_accounts" {
   name = format("%s%s", data.azurecaf_name.st.result, each.key)
 }
 
-###### IP Adress Information ######
-data "http" "this_public_ip" {
-  url = "https://api.ipify.org?format=json"
+# PowerShell-based public IP detection with multiple sources and retry logic
+data "external" "public_ip_robust" {
+  program = ["pwsh",
+    "-File",
+    "${path.module}/Get-PublicIPAddress.ps1",
+    "-MaxRetries", "3",
+    "-TimeoutSeconds", "10",
+    "-RetryDelaySeconds", "2"
+  ]
+
+  query = {}
 }
 
 data "external" "this_local_ip" {
