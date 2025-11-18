@@ -138,8 +138,6 @@ function Get-PublicIPFromSource {
     
     for ($attempt = 1; $attempt -le $MaxRetries; $attempt++) {
         try {
-            Write-Host "INFO: Attempting to get IP from $($Source.Name) (attempt $attempt/$MaxRetries)..." -ForegroundColor Yellow
-            
             # Create web client with proper error handling and user agent
             $webClient = New-Object System.Net.WebClient
             $webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) PowerShell-PublicIP-Detector/1.0")
@@ -149,19 +147,15 @@ function Get-PublicIPFromSource {
                 $ipAddress = & $Source.Parser $response
                 
                 if (Test-ValidIPAddress -IPAddress $ipAddress) {
-                    Write-Host "SUCCESS: Got valid IP address $ipAddress from $($Source.Name)" -ForegroundColor Green
                     return $ipAddress
                 } else {
-                    Write-Host "WARNING: Invalid or private IP address '$ipAddress' from $($Source.Name)" -ForegroundColor Yellow
                 }
             } finally {
                 $webClient.Dispose()
             }
         } catch {
-            Write-Host "WARNING: Failed to get IP from $($Source.Name) on attempt $attempt`: $($_.Exception.Message)" -ForegroundColor Yellow
             
             if ($attempt -lt $MaxRetries) {
-                Write-Host "INFO: Waiting $RetryDelaySeconds seconds before retry..." -ForegroundColor Yellow
                 Start-Sleep -Seconds $RetryDelaySeconds
             }
         }
@@ -176,30 +170,23 @@ function Get-PublicIPFallback {
     Last resort method to detect public IP using DNS resolution techniques
     #>
     
-    Write-Host "INFO: Attempting fallback IP detection using DNS methods..." -ForegroundColor Cyan
-    
     try {
         # Try to resolve opendns resolver and get the response
         $dnsResult = Resolve-DnsName -Name "myip.opendns.com" -Server "208.67.222.222" -Type "A" -ErrorAction Stop
         if ($dnsResult -and $dnsResult.IPAddress) {
             $ip = $dnsResult.IPAddress
             if (Test-ValidIPAddress -IPAddress $ip) {
-                Write-Host "SUCCESS: Got IP $ip from DNS fallback method" -ForegroundColor Green
                 return $ip
             }
         }
     } catch {
-        Write-Host "WARNING: DNS fallback method failed: $($_.Exception.Message)" -ForegroundColor Yellow
     }
     
     # If DNS method fails, return a safe fallback
-    Write-Host "WARNING: Using safe fallback IP (0.0.0.0)" -ForegroundColor Yellow
     return "0.0.0.0"
 }
 
 # Main execution
-Write-Host "INFO: Starting public IP detection with $($ipSources.Count) sources and $MaxRetries retries per source..." -ForegroundColor Cyan
-
 $detectedIP = $null
 $usedSource = $null
 
@@ -210,13 +197,10 @@ foreach ($source in $ipSources) {
         $usedSource = $source.Name
         break
     }
-    
-    Write-Host "INFO: Moving to next source..." -ForegroundColor Yellow
 }
 
 # If all HTTP sources failed, try DNS fallback
 if (-not $detectedIP) {
-    Write-Host "INFO: All HTTP sources failed, trying DNS fallback..." -ForegroundColor Yellow
     $detectedIP = Get-PublicIPFallback
     $usedSource = "dns_fallback"
 }
@@ -229,11 +213,8 @@ if ($detectedIP -and $detectedIP -ne "0.0.0.0") {
         "status" = "success"
     } | ConvertTo-Json -Compress
     
-    Write-Host "SUCCESS: Final result - Public IP: $detectedIP from $usedSource" -ForegroundColor Green
     Write-Output $output
 } else {
-    Write-Host "ERROR: Failed to detect public IP address from all sources" -ForegroundColor Red
-    
     # Return a response that Terraform can handle gracefully
     $output = @{
         "public_ip" = "0.0.0.0"
