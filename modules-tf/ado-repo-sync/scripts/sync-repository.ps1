@@ -27,7 +27,7 @@ try {
     # === AUTHENTICATION SETUP ===
     Write-Host "INFO: Validating authentication..."
     
-    az devops project show --organization "https://dev.azure.com/$AdoOrg"--project $AdoProject --output none
+    az devops project show --organization "https://dev.azure.com/$AdoOrg" --project $AdoProject --output none
     
     if ($LASTEXITCODE -ne 0) {
         Write-Error "ERROR: Azure DevOps authentication failed. Please ensure:"
@@ -74,10 +74,30 @@ try {
         # Copy submodule to temp directory for processing
         Set-Location $tempDir
         Write-Host "INFO: Copying submodule contents to temp directory..."
-        Copy-Item -Path "$submoduleAbsPath/*" -Destination "./source" -Recurse -Force -Exclude ".git"
+        
+        # Create source directory first
+        New-Item -ItemType Directory -Path "./source" -Force | Out-Null
+        
+        # Copy all contents including subdirectories, preserving structure
+        Get-ChildItem -Path $submoduleAbsPath -Force | Where-Object { $_.Name -ne '.git' } | ForEach-Object {
+            $destinationPath = Join-Path "./source" $_.Name
+            if ($_.PSIsContainer) {
+                Write-Host "INFO:   Copying directory: $($_.Name)"
+                Copy-Item -Path $_.FullName -Destination $destinationPath -Recurse -Force
+            } else {
+                Write-Host "INFO:   Copying file: $($_.Name)"
+                Copy-Item -Path $_.FullName -Destination $destinationPath -Force
+            }
+        }
+        
+        # Verify directory structure was preserved
+        Write-Host "INFO: Copied directory structure:"
+        Get-ChildItem -Path "./source" -Recurse -Directory | ForEach-Object {
+            $relativePath = $_.FullName.Replace((Resolve-Path "./source").Path, "").TrimStart('\', '/')
+            Write-Host "INFO:   Directory: $relativePath"
+        }
         
         # Create a minimal source info for commit tracking
-        New-Item -ItemType Directory -Path "./source" -Force | Out-Null
         Set-Content -Path "./source/.sync-info" -Value @"
 # Sync Information
 Commit: $submoduleCommit
