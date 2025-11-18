@@ -83,14 +83,23 @@ try {
     }
     else {
         Write-Host "INFO: Using existing Azure CLI authentication context"
-        
-        # Try to configure git credential helper for Azure CLI
+    
+        # Try to get access token from Azure CLI session
         try {
-            git config --global credential."https://dev.azure.com".helper ""
-            git config --global credential."https://dev.azure.com".helper "!az repos credential-helper"
+            $cliToken = az account get-access-token --resource "499b84ac-1321-427f-aa17-267ca6975798" --query "accessToken" -o tsv 2>$null
+        
+            if ($LASTEXITCODE -eq 0 -and $cliToken) {
+                Write-Host "INFO: Using Azure CLI session token for git authentication"
+                git config --global credential."https://dev.azure.com".helper ""
+                git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$cliToken; }; f"
+            }
+            else {
+                throw "No valid Azure CLI session found"
+            }
         }
         catch {
-            Write-Warning "INFO: Could not configure Azure CLI credential helper, proceeding with default authentication"
+            Write-Warning "INFO: Could not use Azure CLI authentication. Please ensure 'az login' was run or use AZURE_DEVOPS_EXT_PAT"
+            Write-Warning "INFO: Proceeding without explicit git credential configuration - git may prompt for credentials"
         }
     }
     
