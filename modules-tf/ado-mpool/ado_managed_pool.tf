@@ -52,27 +52,27 @@ module "managed_devops_pool" {
       {}, # Empty map to skip Sunday
       # Monday
       {
-        "08:00:00" = 1
+        "08:00:00" = 2
         "19:00:00" = 0
       },
       # Tuesday
       {
-        "08:00:00" = 1
+        "08:00:00" = 2
         "19:00:00" = 0
       },
       # Wednesday
       {
-        "08:00:00" = 1
+        "08:00:00" = 2
         "19:00:00" = 0
       },
       # Thursday
       {
-        "08:00:00" = 1
+        "08:00:00" = 2
         "19:00:00" = 0
       },
       # Friday
       {
-        "08:00:00" = 1
+        "08:00:00" = 2
         "19:00:00" = 0
       },
       # Saturday
@@ -92,6 +92,8 @@ module "managed_devops_pool" {
   fabric_profile_os_disk_storage_account_type = "StandardSSD"
   fabric_profile_os_profile_logon_type        = "Service"
   fabric_profile_sku_name                     = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
+
+  maximum_concurrency = 2
 
   tags = var.azure_tags
 
