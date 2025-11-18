@@ -37,7 +37,6 @@ resource "terraform_data" "repo_sync" {
   }
   
   depends_on = [
-    data.azuredevops_git_repository.target,
-    data.github_repository.source
+    data.azuredevops_git_repository.target
   ]
 }
