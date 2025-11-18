@@ -11,7 +11,7 @@ data "azuredevops_project" "this" {
 
 # Local data source for submodule commit detection
 data "local_file" "submodule_head" {
-  count = var.sync_enabled && fileexists("${var.local_submodule_path}/.git/HEAD") ? 1 : 0
+  count = var.sync_enabled && try(fileexists("${var.local_submodule_path}/.git/HEAD"), false) ? 1 : 0
   
   filename = "${var.local_submodule_path}/.git/HEAD"
 }
