@@ -25,14 +25,85 @@ try {
     }
     
     # === AUTHENTICATION SETUP ===
-    Write-Host "INFO: Validating authentication..."
+    Write-Host "INFO: Setting up authentication for Azure DevOps..."
     
-    az devops project show --organization "https://dev.azure.com/$AdoOrg" --project $AdoProject --output none
+    # Check if running in Azure DevOps pipeline with service principal
+    $isAzureDevOpsPipeline = $env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI -and $env:SYSTEM_ACCESSTOKEN
+    $hasServicePrincipal = $env:servicePrincipalId -and $env:servicePrincipalKey
+    $hasAzureDevOpsPat = $env:AZURE_DEVOPS_EXT_PAT
+    
+    if ($isAzureDevOpsPipeline) {
+        Write-Host "INFO: Detected Azure DevOps pipeline environment"
+        
+        if ($env:SYSTEM_ACCESSTOKEN) {
+            Write-Host "INFO: Using System.AccessToken for authentication"
+            # Set up git credential helper for Azure DevOps using the pipeline token
+            git config --global credential."https://dev.azure.com".helper ""
+            git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:SYSTEM_ACCESSTOKEN; }; f"
+        }
+        else {
+            throw "Error: System.AccessToken not available in pipeline"
+        }
+    }
+    elseif ($hasServicePrincipal) {
+        Write-Host "INFO: Using service principal authentication"
+        
+        # For service principal, we need to get an access token and use it with git
+        try {
+            # Get access token using service principal
+            $tokenResponse = az account get-access-token --resource "499b84ac-1321-427f-aa17-267ca6975798" --query "accessToken" -o tsv
+            
+            if ($LASTEXITCODE -ne 0 -or -not $tokenResponse) {
+                throw "Failed to get access token with service principal"
+            }
+            
+            Write-Host "INFO: Successfully obtained access token with service principal"
+            
+            # Configure git to use the access token
+            git config --global credential."https://dev.azure.com".helper ""
+            git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$tokenResponse; }; f"
+        }
+        catch {
+            Write-Warning "INFO: Service principal token method failed, trying PAT fallback..."
+            
+            if ($hasAzureDevOpsPat) {
+                Write-Host "INFO: Using AZURE_DEVOPS_EXT_PAT for authentication"
+                git config --global credential."https://dev.azure.com".helper ""
+                git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZURE_DEVOPS_EXT_PAT; }; f"
+            }
+            else {
+                throw "Error: No valid authentication method available"
+            }
+        }
+    }
+    elseif ($hasAzureDevOpsPat) {
+        Write-Host "INFO: Using AZURE_DEVOPS_EXT_PAT for authentication"
+        git config --global credential."https://dev.azure.com".helper ""
+        git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZURE_DEVOPS_EXT_PAT; }; f"
+    }
+    else {
+        Write-Host "INFO: Using existing Azure CLI authentication context"
+        
+        # Try to configure git credential helper for Azure CLI
+        try {
+            git config --global credential."https://dev.azure.com".helper ""
+            git config --global credential."https://dev.azure.com".helper "!az repos credential-helper"
+        }
+        catch {
+            Write-Warning "INFO: Could not configure Azure CLI credential helper, proceeding with default authentication"
+        }
+    }
+    
+    # Validate authentication
+    Write-Host "INFO: Validating authentication..."
+    az devops project show --output none
     
     if ($LASTEXITCODE -ne 0) {
         Write-Error "ERROR: Azure DevOps authentication failed. Please ensure:"
-        Write-Error "ERROR:   1. You've run 'az login' or set AZURE_DEVOPS_EXT_PAT"
-        Write-Error "ERROR:   2. You have access to organization '$AdoOrg' and project '$AdoProject'"
+        Write-Error "ERROR:   1. You've run 'az login' or have valid service principal credentials"
+        Write-Error "ERROR:   2. AZURE_DEVOPS_EXT_PAT is set (if using PAT)"
+        Write-Error "ERROR:   3. System.AccessToken is available (if in Azure DevOps pipeline)"
+        Write-Error "ERROR:   4. You have access to organization '$AdoOrg' and project '$AdoProject'"
         exit 1
     }
     
@@ -84,7 +155,8 @@ try {
             if ($_.PSIsContainer) {
                 Write-Host "INFO:   Copying directory: $($_.Name)"
                 Copy-Item -Path $_.FullName -Destination $destinationPath -Recurse -Force
-            } else {
+            }
+            else {
                 Write-Host "INFO:   Copying file: $($_.Name)"
                 Copy-Item -Path $_.FullName -Destination $destinationPath -Force
             }
@@ -106,16 +178,18 @@ Message: $submoduleMessage
 SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
 "@
         
-        # Clone Azure DevOps repository
+        # Clone Azure DevOps repository with authentication
         Write-Host "INFO: Cloning Azure DevOps repository..."
         $adoRepoUrl = "https://dev.azure.com/$AdoOrg/$AdoProject/_git/$AdoRepo"
-        git clone $adoRepoUrl target
+        
+        # Clone with explicit credential handling
+        git -c core.askpass=true clone $adoRepoUrl target
         
         if ($LASTEXITCODE -ne 0) {
-            throw "Error: Failed to clone Azure DevOps repository"
+            throw "Error: Failed to clone Azure DevOps repository. Check authentication and repository access."
         }
         
-        # Copy files from GitHub to Azure DevOps repo (excluding .git)
+        # Copy files from submodule to Azure DevOps repo (excluding .git)
         Write-Host "INFO: Syncing files..."
         Set-Location target
         
@@ -155,18 +229,24 @@ SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
             }
             
             Write-Host "INFO: Successfully synchronized repository"
-        } else {
+        }
+        else {
             Write-Host "INFO: No changes detected, skipping commit"
         }
         
-    } finally {
-        # Cleanup
+    }
+    finally {
+        # Cleanup git configuration
+        git config --global --unset credential."https://dev.azure.com".helper 2>$null
+        
+        # Cleanup temporary directory
         Set-Location $env:TEMP
         Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
         Write-Host "INFO: Cleaned up temporary directory"
     }
     
-} catch {
+}
+catch {
     Write-Error "Synchronization failed: $($_.Exception.Message)"
     exit 1
 }
