@@ -1,5 +1,5 @@
 data "azurecaf_name" "pipeline" {
-  for_each = toset(var.ado_yaml_pipeline_names)
+  for_each = toset(var.ado_yaml_pipeline_artefact_names)
 
   name          = try(var.azure_resource_name_elements.name, null)
   resource_type = "azurerm_virtual_network"
