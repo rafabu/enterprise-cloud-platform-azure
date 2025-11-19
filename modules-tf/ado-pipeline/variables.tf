@@ -87,7 +87,6 @@ variable "ado_yaml_pipeline_definitions" {
   }
 }
 
-
 variable "ado_yaml_pipeline_artefact_names" {
   type = list(string)
   # default     = []

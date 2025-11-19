@@ -28,7 +28,7 @@ resource "azuredevops_build_definition" "pipelines" {
     value = "dev"
   }
   features {
-    skip_first_run = coalesce(var.ado_yaml_pipeline_definitions[each.key].skipFirstRun, false)
+    skip_first_run = coalesce(var.ado_yaml_pipeline_definitions[each.key].skipFirstRun, true)
   }
   queue_status            = coalesce(var.ado_yaml_pipeline_definitions[each.key].queueStatus, "enabled")
   job_authorization_scope = coalesce(var.ado_yaml_pipeline_definitions[each.key].jobAuthorizationScope, "projectCollection")
