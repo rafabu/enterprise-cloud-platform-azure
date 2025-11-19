@@ -14,7 +14,7 @@ data "azuredevops_git_repository" "this" {
 # }
 
 resource "azuredevops_build_definition" "pipelines" {
-  for_each = toset(var.ado_yaml_pipeline_artifact_names)
+  for_each = toset(var.ado_yaml_pipeline_artefact_names)
 
   project_id = data.azuredevops_project.this.id
   name       = var.ado_yaml_pipeline_definitions[each.key].nameElement
