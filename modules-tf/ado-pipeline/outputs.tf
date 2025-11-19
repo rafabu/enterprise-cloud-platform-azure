@@ -9,3 +9,8 @@ output "yaml_pipelines" {
     }
   }
 }
+
+
+output "zzz_azure_resource_name_elements" {
+  value       = var.azure_resource_name_elements
+}

@@ -57,41 +57,10 @@ variable "ado_yaml_pipeline_definitions" {
 
   }))
   description = "Map of Azure DevOps Pipelines (pipelines), where the key is the artefactName and the value is an object containing properties of the pipeline."
-
-  default = {
-    ecp-l0-launchpad-pipeline = {
-      artefactName = "ecp-l0-launchpad-pipeline"
-      nameElement  = "ECP L0 Launchpad Pipeline"
-
-      process = {
-        yamlFilename = "/pipelines-ado/ecp-l0-launchpad.yaml"
-      }
-
-      repository = {
-        name = "isol-ecp"
-        # id            = "" # filled in dynamically
-        type          = "TfsGit"
-        defaultBranch = "refs/heads/main"
-        properties = {
-          reportBuildStatus = true
-        }
-      }
-
-      queue = {
-        name = "rabu-d7-mpool-ecpalp-ado-mpool"
-      }
-      queueStatus  = "enabled"
-      skipFirstRun = true
-      # jobAuthorizationScope = "project"
-    }
-  }
 }
 
 variable "ado_yaml_pipeline_artefact_names" {
   type = list(string)
   # default     = []
   description = "List of Azure DevOps pipeline artefacts that are created"
-  default = [
-    "ecp-l0-launchpad-pipeline"
-  ]
 }
