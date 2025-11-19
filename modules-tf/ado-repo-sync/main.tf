@@ -1,14 +1,28 @@
-# Terraform data resource that triggers when commits change
-resource "terraform_data" "repo_sync" {
+data "azuredevops_git_repository" "target" {
+  project_id = data.azuredevops_project.this.id
+  name       = var.ecp_azure_devops_repository_name
+}
+
+data "azuredevops_project" "this" {
+  name = var.ecp_azure_devops_project_name
+}
+
+# run git command to get current commit of submodule
+#     git rev-parse HEAD
+data "external" "git_submodule_head_commit" {
+  program     = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-Command", "$commit = git rev-parse HEAD; @{commit=$commit} | ConvertTo-Json -Compress"]
+  working_dir = var.local_submodule_path
+  query       = {}
+}
+
+resource "terraform_data" "ado_repo_sync" {
   count = var.sync_enabled ? 1 : 0
 
   triggers_replace = {
     # Trigger on local submodule commit changes
-    submodule_commit = local.submodule_current_commit
-    # Fallback: Trigger on content hash changes (slower but more reliable)
-    submodule_content = local.submodule_content_hash
+    git_submodule_commit = data.external.git_submodule_head_commit.result.commit
     # Trigger on Azure DevOps commit changes (in case of external updates)
-    ado_commit = data.azuredevops_git_repository.target.default_branch
+    ado_default_branch = data.azuredevops_git_repository.target.default_branch
     # Force sync trigger
     force_sync = var.force_sync ? plantimestamp() : "disabled"
     # Configuration changes
@@ -24,19 +38,8 @@ resource "terraform_data" "repo_sync" {
     interpreter = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-Command"]
     command     = "& '${path.module}/scripts/sync-repository.ps1' -LocalSubmodulePath '${var.local_submodule_path}' -AdoOrg '${var.ecp_azure_devops_organization_name}' -AdoProject '${var.ecp_azure_devops_project_name}' -AdoRepo '${var.ecp_azure_devops_repository_name}' -TargetBranch '${var.ecp_azure_devops_target_branch}' -ForceSync ([bool]$${var.force_sync})"
 
-    environment = {
-      # Azure DevOps authentication will use the existing az cli context
-      # or AZURE_DEVOPS_EXT_PAT environment variable if set
-      # AZURE_DEVOPS_EXT_PAT = ""
-      # GITHUB_TOKEN = ""
-    }
+    environment = {}
   }
-
-  # Optional: Add a provisioner to validate authentication before sync
-  # provisioner "local-exec" {
-  #   command     = "az devops project show --project '${var.ecp_azure_devops_project_name}' --organization 'https://dev.azure.com/${var.ecp_azure_devops_organization_name}' --output none"
-  #   interpreter = ["pwsh", "-Command"]
-  # }
 
   depends_on = [
     data.azuredevops_git_repository.target

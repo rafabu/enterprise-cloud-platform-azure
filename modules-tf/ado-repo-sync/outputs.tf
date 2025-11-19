@@ -13,23 +13,17 @@ output "local_submodule_path" {
   value       = var.local_submodule_path
 }
 
-output "sync_trigger" {
-  description = "Current sync trigger value (changes when sync is needed)"
-  value       = local.sync_trigger
-}
-
-output "submodule_current_commit" {
+output "git_submodule_current_commit" {
   description = "Current commit SHA from local submodule"
-  value       = local.submodule_current_commit
-}
-
-output "submodule_content_hash" {
-  description = "Content hash of submodule files (fallback change detection)"
-  value       = local.submodule_content_hash
-  sensitive   = false
+  value       = data.external.git_submodule_head_commit.result.commit
 }
 
 output "sync_enabled" {
   description = "Whether synchronization is enabled"
   value       = var.sync_enabled
+}
+
+output "ado_git_repo" {
+  description = "Default branch of the target Azure DevOps repository"
+  value       = data.azuredevops_git_repository.target
 }
