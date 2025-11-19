@@ -14,14 +14,13 @@ data "azuredevops_git_repository" "this" {
 # }
 
 resource "azuredevops_build_definition" "pipelines" {
-  for_each = toset(var.ado_yaml_pipeline_names)
+  for_each = toset(var.ado_yaml_pipeline_artifact_names)
 
   project_id = data.azuredevops_project.this.id
   name       = var.ado_yaml_pipeline_definitions[each.key].nameElement
   path       = coalesce(var.ado_yaml_pipeline_definitions[each.key].path, "\\")
 
   agent_pool_name = coalesce(var.ado_yaml_pipeline_definitions[each.key].queue.name, "Azure Pipelines")
-
   #  A list of variable group IDs (integers) 
   variable_groups = null # []
   variable {
@@ -34,9 +33,6 @@ resource "azuredevops_build_definition" "pipelines" {
   queue_status            = coalesce(var.ado_yaml_pipeline_definitions[each.key].queueStatus, "enabled")
   job_authorization_scope = coalesce(var.ado_yaml_pipeline_definitions[each.key].jobAuthorizationScope, "projectCollection")
 
-  # NOT SUPPORTED ON tfs
-  # build_completion_trigger {}
-
   ci_trigger {
     use_yaml = true
     # forks {
@@ -45,25 +41,12 @@ resource "azuredevops_build_definition" "pipelines" {
     # }
   }
 
-  # not supported on tfs
-  # pull_request_trigger {
-  #   use_yaml = true
-  #    forks {
-  #     enabled = false
-  #     share_secrets = false
-  #   }
-  # }
-
-  # YAML pipeline definition
-  dynamic "repository" {
-    for_each = [0]
-    content {
-      repo_id             = data.azuredevops_git_repository.this.id
-      repo_type           = coalesce(var.ado_yaml_pipeline_definitions[each.key].repository.type, "TfsGit")
-      branch_name         = coalesce(var.ado_yaml_pipeline_definitions[each.key].repository.defaultBranch, "refs/heads/main")
-      yml_path            = var.ado_yaml_pipeline_definitions[each.key].process.yamlFilename
-      report_build_status = true
-    }
+  repository {
+    repo_id             = data.azuredevops_git_repository.this.id
+    repo_type           = coalesce(var.ado_yaml_pipeline_definitions[each.key].repository.type, "TfsGit")
+    branch_name         = coalesce(var.ado_yaml_pipeline_definitions[each.key].repository.defaultBranch, "refs/heads/main")
+    yml_path            = var.ado_yaml_pipeline_definitions[each.key].process.yamlFilename
+    report_build_status = try(var.ado_yaml_pipeline_definitions[each.key].repository.properties.reportBuildStatus, true)
   }
 
   # Variable Groups
