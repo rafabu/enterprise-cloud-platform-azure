@@ -38,13 +38,13 @@ variable "ado_yaml_pipeline_definitions" {
       name = string
     })
     queueStatus = optional(string) # paused or disabled
-    repository = (object({
+    repository = object({
       name          = optional(string)
       id            = optional(string)
       type          = optional(string)
       defaultBranch = optional(string)
       checkoutSubmodules = optional(bool)
-    }))
+    })
     skipFirstRun          = optional(bool)
     jobAuthorizationScope = optional(string)
 
