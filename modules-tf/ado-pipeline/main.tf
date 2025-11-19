@@ -30,13 +30,13 @@ resource "azuredevops_build_definition" "pipelines" {
     # }
   }
 
-  pull_request_trigger {
-    use_yaml = true
-     forks {
-      enabled = false
-      share_secrets = false
-    }
-  }
+  # pull_request_trigger {
+  #   use_yaml = true
+  #    forks {
+  #     enabled = false
+  #     share_secrets = false
+  #   }
+  # }
 
   # YAML pipeline definition
   dynamic "repository" {
