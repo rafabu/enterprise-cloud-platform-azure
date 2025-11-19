@@ -60,7 +60,7 @@ resource "azuredevops_build_definition" "pipelines" {
     content {
       repo_id             = data.azuredevops_git_repository.this.id
       repo_type           = "TfsGit"
-      branch_name         = coalesce(var.ado_yaml_pipeline_definitions[each.key].branchName, "main")
+      branch_name         = coalesce(var.ado_yaml_pipeline_definitions[each.key].branchName, "refs/heads/main")
       yml_path            = var.ado_yaml_pipeline_definitions[each.key].yamlFilename
       report_build_status = true
     }

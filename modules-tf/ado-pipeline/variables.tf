@@ -41,7 +41,7 @@ default = {
     ecp-l0-launchpad-pipeline = {
       artefactName  = "ecp-l0-launchpad-pipeline"
       nameElement   = "ECP L0 Launchpad Pipeline"
-      # branchName    = "main"
+      # branchName    = "refs/heads/main"
       yamlFilename  = "/pipelines-ado/ecp-l0-launchpad.yaml"
       skipFirstRun = true
     }
