@@ -71,7 +71,7 @@ resource "azuredevops_build_definition" "pipelines" {
 
   # Features
   features {
-    skip_first_run = coalesce(each.value.skipFirstRun, false)
+    skip_first_run = coalesce(var.ado_yaml_pipeline_definitions[each.key].skipFirstRun, false)
   }
 
   # Queue settings
