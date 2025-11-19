@@ -23,7 +23,7 @@ resource "azuredevops_build_definition" "pipelines" {
   agent_pool_name = "Azure Pipelines"
 
   #  A list of variable group IDs (integers) 
-  variable_groups = []
+  variable_groups = null # []
   variable {
     name  = "environment"
     value = "dev"
