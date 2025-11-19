@@ -20,16 +20,22 @@ resource "azuredevops_build_definition" "pipelines" {
   name       = var.ado_yaml_pipeline_definitions[each.key].nameElement
   path       = coalesce(var.ado_yaml_pipeline_definitions[each.key].path, "\\")
 
-  build_completion_triggers {
-    use_yaml = true
-  }
+  build_completion_trigger {}
 
   ci_trigger {
     use_yaml = true
+    forks {
+      enabled = false
+      share_secrets = false
+    }
   }
 
   pull_request_trigger {
     use_yaml = true
+     forks {
+      enabled = false
+      share_secrets = false
+    }
   }
 
   # YAML pipeline definition
