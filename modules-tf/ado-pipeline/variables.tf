@@ -30,6 +30,7 @@ variable "ado_yaml_pipeline_definitions" {
     nameElement  = optional(string)
     path    = optional(string)
 
+    branchName       = optional(string)
     yamlFilename       = string
     skipFirstRun      = optional(bool)
     
@@ -40,6 +41,7 @@ default = {
     ecp-l0-launchpad-pipeline = {
       artefactName  = "ecp-l0-launchpad-pipeline"
       nameElement   = "ECP L0 Launchpad Pipeline"
+      # branchName    = "main"
       yamlFilename  = "/pipelines-ado/ecp-l0-launchpad.yaml"
       skipFirstRun = true
     }
