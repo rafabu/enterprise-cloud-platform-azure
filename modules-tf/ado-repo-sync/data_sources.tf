@@ -16,11 +16,23 @@ data "local_file" "submodule_head" {
   filename = "${var.local_submodule_path}/.git/HEAD"
 }
 
+output "submodule_head_content_file" {
+  description = "Content of the submodule HEAD file for debugging"
+  value       = data.local_file.submodule_head[0].content
+  sensitive   = false
+}
+
 # Fallback: read current branch ref if HEAD points to a branch
 data "local_file" "submodule_current_branch_ref" {
   count = var.sync_enabled && can(regex("ref: refs/heads/", try(data.local_file.submodule_head[0].content, ""))) ? 1 : 0
   
   filename = "${var.local_submodule_path}/.git/${trimspace(replace(try(data.local_file.submodule_head[0].content, ""), "ref: ", ""))}"
+}
+
+output "submodule_head_content_file_ref" {
+  description = "Content of the submodule current branch ref file for debugging"
+  value       = data.local_file.submodule_current_branch_ref[0].content
+  sensitive   = false
 }
 
 # Alternative: direct commit hash if HEAD contains a commit hash
