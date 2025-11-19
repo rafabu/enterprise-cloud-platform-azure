@@ -37,7 +37,7 @@ variable "ado_yaml_pipeline_definitions" {
   description = "Map of Azure DevOps Pipelines (pipelines), where the key is the artefactName and the value is an object containing properties of the pipeline."
 
 default = {
-    ecp_l0_launchpad_pipeline = {
+    ecp-l0-launchpad-pipeline = {
       artefactName  = "ecp-l0-launchpad-pipeline"
       nameElement   = "ECP L0 Launchpad Pipeline"
       yamlFilename  = "pipelines-ado/ecp-l0-launchpad.yaml"
