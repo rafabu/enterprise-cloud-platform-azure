@@ -8,6 +8,11 @@ variable "azure_resource_name_elements" {
   description = "Object containing naming components to be used by the azurecaf_name data source to generate resource names."
 }
 
+variable "ecp_azure_devops_organization_name" {
+  type        = string
+  description = "name of Azure DevOps organization"
+}
+
 variable "ecp_azure_devops_project_name" {
   type        = string
   description = "Name of Azure DevOps project for ECP"
