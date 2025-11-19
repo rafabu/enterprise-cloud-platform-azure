@@ -40,7 +40,7 @@ default = {
     ecp-l0-launchpad-pipeline = {
       artefactName  = "ecp-l0-launchpad-pipeline"
       nameElement   = "ECP L0 Launchpad Pipeline"
-      yamlFilename  = "pipelines-ado/ecp-l0-launchpad.yaml"
+      yamlFilename  = "/pipelines-ado/ecp-l0-launchpad.yaml"
       skipFirstRun = true
     }
   }
