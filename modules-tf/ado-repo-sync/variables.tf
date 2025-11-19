@@ -22,7 +22,6 @@ variable "ecp_azure_devops_target_branch" {
 variable "local_git_submodule_path" {
   type        = string
   description = "Path to local submodule directory relative to module root"
-  default     = "../../lib/ecp-automation"
 }
 
 variable "sync_enabled" {
