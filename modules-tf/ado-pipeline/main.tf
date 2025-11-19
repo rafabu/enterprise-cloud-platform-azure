@@ -24,7 +24,10 @@ resource "azuredevops_build_definition" "pipelines" {
 
   #  A list of variable group IDs (integers) 
   variable_groups = []
-  variable        = []
+  variable {
+    name  = "environment"
+    value = "dev"
+  }
   features {
     skip_first_run = coalesce(var.ado_yaml_pipeline_definitions[each.key].skipFirstRun, false)
   }
