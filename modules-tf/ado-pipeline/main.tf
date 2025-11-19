@@ -20,14 +20,14 @@ resource "azuredevops_build_definition" "pipelines" {
   name       = var.ado_yaml_pipeline_definitions[each.key].nameElement
   path       = coalesce(var.ado_yaml_pipeline_definitions[each.key].path, "\\")
 
-  build_completion_trigger {}
+  # build_completion_trigger {}
 
   ci_trigger {
     use_yaml = true
-    forks {
-      enabled = false
-      share_secrets = false
-    }
+    # forks {
+    #   enabled = false
+    #   share_secrets = false
+    # }
   }
 
   pull_request_trigger {
@@ -82,7 +82,7 @@ resource "azuredevops_build_definition" "pipelines" {
   #   }
   # }
 
-  schedules {}
+  # schedules {}
 }
 
 # # Build Definition Permissions
