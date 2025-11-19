@@ -20,7 +20,7 @@ resource "azuredevops_build_definition" "pipelines" {
   name       = var.ado_yaml_pipeline_definitions[each.key].nameElement
   path       = coalesce(var.ado_yaml_pipeline_definitions[each.key].path, "\\")
 
-  agent_pool_name = "Azure Pipelines"
+  agent_pool_name = coalesce(var.ado_yaml_pipeline_definitions[each.key].queue.name, "Azure Pipelines")
 
   #  A list of variable group IDs (integers) 
   variable_groups = null # []
@@ -31,8 +31,8 @@ resource "azuredevops_build_definition" "pipelines" {
   features {
     skip_first_run = coalesce(var.ado_yaml_pipeline_definitions[each.key].skipFirstRun, false)
   }
-  queue_status            = "enabled"
-  job_authorization_scope = "project"
+  queue_status            = coalesce(var.ado_yaml_pipeline_definitions[each.key].queueStatus, "enabled")
+  job_authorization_scope = coalesce(var.ado_yaml_pipeline_definitions[each.key].jobAuthorizationScope, "projectCollection")
 
   # NOT SUPPORTED ON tfs
   # build_completion_trigger {}
@@ -59,9 +59,9 @@ resource "azuredevops_build_definition" "pipelines" {
     for_each = [0]
     content {
       repo_id             = data.azuredevops_git_repository.this.id
-      repo_type           = "TfsGit"
-      branch_name         = coalesce(var.ado_yaml_pipeline_definitions[each.key].branchName, "refs/heads/main")
-      yml_path            = var.ado_yaml_pipeline_definitions[each.key].yamlFilename
+      repo_type           = coalesce(var.ado_yaml_pipeline_definitions[each.key].repository.type, "TfsGit")
+      branch_name         = coalesce(var.ado_yaml_pipeline_definitions[each.key].repository.defaultBranch, "refs/heads/main")
+      yml_path            = var.ado_yaml_pipeline_definitions[each.key].process.yamlFilename
       report_build_status = true
     }
   }
