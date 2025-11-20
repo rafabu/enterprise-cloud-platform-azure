@@ -32,7 +32,7 @@ module "managed_devops_pool" {
 
   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
   name = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
-  resource_group_name = "rabu-d7-rg-ecpalp-ado-mpool" # azurerm_resource_group.mpool.name
+  resource_group_name = azurerm_resource_group.mpool.name
   location            = azurerm_resource_group.mpool.location
 
   dev_center_project_resource_id           = var.dev_center_project_resource_id
