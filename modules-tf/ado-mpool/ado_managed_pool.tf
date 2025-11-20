@@ -21,81 +21,98 @@ resource "azurerm_role_assignment" "devops_infrastructure_vnet" {
   principal_id       = data.azuread_service_principal.devops_infrastructure.object_id
 }
 
-module "managed_devops_pool" {
-  providers = {
-    azurerm = azurerm.launchpad
-    azapi   = azapi
-  }
-
-  source  = "Azure/avm-res-devopsinfrastructure-pool/azurerm"
-  version = "0.3.1"
-
+resource "azapi_resource" "managed_devops_pool" {
   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
-  name = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
-  resource_group_name = azurerm_resource_group.mpool.name
-  location            = azurerm_resource_group.mpool.location
+  name      = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
+  parent_id = azurerm_resource_group.mpool.id
+  type      = "Microsoft.DevOpsInfrastructure/pools@2025-09-20"
+  location  = azurerm_resource_group.mpool.location
+  body = {
+    properties = {
+      devCenterProjectResourceId = var.dev_center_project_resource_id
+      maximumConcurrency         = 2
+      organizationProfile = {
+        kind = "AzureDevOps"
+        organizations = [
+          {
+            url = "https://dev.azure.com/${var.ecp_azure_devops_organization_name}"
+            projects = [
+              var.ecp_azure_devops_project_name
+            ]
+            parallelism = 2
+            openAccess  = false
+          }
+        ]
+        permissionProfile = {
+          kind = "CreatorOnly"
+        }
+      }
 
-  dev_center_project_resource_id           = var.dev_center_project_resource_id
-  version_control_system_organization_name = var.ecp_azure_devops_organization_name
-  version_control_system_project_names = [
-    var.ecp_azure_devops_project_name
-  ]
-  version_control_system_type = "azuredevops"
-  subnet_id                   = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
+      agentProfile = {
+        kind = "Stateless"
+        resourcePredictions = {
+          timeZone = "W. Europe Standard Time",
+          daysData = [
+            {},
+            {
+              "07:30:00" = 2,
+              "21:00:00" = 0
+            },
+            {
+              "07:30:00" = 2,
+              "21:00:00" = 0
+            },
+            {
+              "07:30:00" = 2,
+              "21:00:00" = 0
+            },
+            {
+              "07:30:00" = 2,
+              "21:00:00" = 0
+            },
+            {
+              "07:30:00" = 2,
+              "21:00:00" = 0
+            },
+            {}
+          ]
+        },
+        resourcePredictionsProfile = {
+          kind = "Manual"
+        }
+      }
 
-  agent_profile_resource_prediction_profile = "Manual"
-  agent_profile_kind                        = "Stateless"
-  agent_profile_resource_predictions_manual = {
-    time_zone = "W. Europe Standard Time"
-    days_data = [
-      # Sunday
-      {}, # Empty map to skip Sunday
-      # Monday
-      {
-        "07:30:00" = 2
-        "21:00:00" = 0
-      },
-      # Tuesday
-      {
-        "07:30:00" = 2
-        "21:00:00" = 0
-      },
-      # Wednesday
-      {
-        "07:30:00" = 2
-        "21:00:00" = 0
-      },
-      # Thursday
-      {
-        "07:30:00" = 2
-        "21:00:00" = 0
-      },
-      # Friday
-      {
-        "07:30:00" = 2
-        "21:00:00" = 0
-      },
-      # Saturday
-      {} # Empty map to skip Saturday
-    ]
-  }
+      fabricProfile = {
+        sku = {
+          name = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
+        }
+        images = [for image in var.fabric_profile_images : {
+          wellKnownImageName = "ubuntu-24.04/latest"
+          aliases = [
+            "ubuntu-24.04/latest"
+          ]
+          buffer     = "*"
+          resourceId = null
+        }]
 
-  fabric_profile_data_disks = []
-  fabric_profile_images = [
-    {
-      "aliases" : [
-        "ubuntu-24.04/latest"
-      ],
-      "well_known_image_name" : "ubuntu-24.04/latest"
+        networkProfile = {
+          subnetId = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
+        }
+        osProfile = {
+          logonType = "Service"
+        }
+        storageProfile = {
+          osDiskStorageAccountType = "StandardSSD"
+          dataDisks                = []
+        }
+        kind = "Vmss"
+      }
     }
-  ]
-  fabric_profile_os_disk_storage_account_type = "StandardSSD"
-  fabric_profile_os_profile_logon_type        = "Service"
-  fabric_profile_sku_name                     = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
-
-  maximum_concurrency = 2
+  }
 
   tags = var.azure_tags
+
+  schema_validation_enabled = true
 
   depends_on = [
     azuredevops_group_membership.mpool,
@@ -109,16 +126,16 @@ data "azuredevops_agent_pool" "mpool" {
   name = module.managed_devops_pool.name
 
   depends_on = [
-    module.managed_devops_pool
+    azapi_resource.managed_devops_pool
   ]
 }
 
 data "azuredevops_agent_queue" "mpool" {
   project_id = local.azure_devops_project.project_id
-  name       = module.managed_devops_pool.name
+  name       = azapi_resource.managed_devops_pool.name
 
   depends_on = [
-    module.managed_devops_pool
+    azapi_resource.managed_devops_pool
   ]
 }
 

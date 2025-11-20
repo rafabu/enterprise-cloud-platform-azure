@@ -34,12 +34,12 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
   variable {
     name  = "ecp_ado_agent_pool_azure"
-    value = module.managed_devops_pool.name
+    value = azapi_resource.managed_devops_pool.name
   }
   variable {
     name = "ecp_ado_agent_pool_azure_images"
     value = join(", ", [
-      for img in try(module.managed_devops_pool.resource.body.properties.fabricProfile.images, []) : img.wellKnownImageName
+      for img in try(azapi_resource.managed_devops_pool.body.properties.fabricProfile.images, []) : img.wellKnownImageName
     ])
   }
   dynamic "variable" {

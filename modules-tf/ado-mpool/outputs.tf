@@ -9,8 +9,8 @@ output "resource_group" {
 
 output "managed_devops_pool" {
   value = {
-    id                  = module.managed_devops_pool.resource_id
-    name                = module.managed_devops_pool.name
+    id                  = azapi_resource.managed_devops_pool.id
+    name                = azapi_resource.managed_devops_pool.name
     resource_group_name = azurerm_resource_group.mpool.name
     location            = azurerm_resource_group.mpool.location
   }
