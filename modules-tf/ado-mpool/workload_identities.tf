@@ -7,13 +7,11 @@ locals {
       azure-roleAssignments = [
         {
           scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
-          # reader
           roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7", # Reader
           condition        = null
         },
         {
           scope = var.backend_storage_accounts["l0"].id, # backend storage account
-          # security reader
           roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
           condition        = null
         }
