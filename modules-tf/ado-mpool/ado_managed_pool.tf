@@ -86,14 +86,16 @@ resource "azapi_resource" "managed_devops_pool" {
         sku = {
           name = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
         }
-        images = [for image in var.fabric_profile_images : {
-          wellKnownImageName = "ubuntu-24.04/latest"
-          aliases = [
-            "ubuntu-24.04/latest"
-          ]
-          buffer     = "*"
-          resourceId = null
-        }]
+        images = [
+          {
+            wellKnownImageName = "ubuntu-24.04/latest"
+            aliases = [
+              "ubuntu-24.04/latest"
+            ]
+            buffer     = "*"
+            resourceId = null
+          }
+        ]
 
         networkProfile = {
           subnetId = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
