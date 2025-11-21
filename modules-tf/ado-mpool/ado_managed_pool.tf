@@ -141,8 +141,11 @@ resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
   lifecycle {
     ignore_changes = [
       # leads to terraform phantom changes due to unstable API response
-      resource_id
-     ]
+      id,
+      project_id,
+      resource_id,
+      type
+    ]
   }
 }
 
