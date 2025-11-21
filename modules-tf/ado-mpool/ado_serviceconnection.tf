@@ -19,9 +19,9 @@ resource "azuredevops_serviceendpoint_azurerm" "mpool" {
   azurerm_management_group_name = data.azurerm_management_group.ecp_root_parent.display_name
 
   lifecycle {
-    ignore_changes = [
-      description,
-    ]
+    ignore_changes = all #[
+      # description,
+    #]
   }
 
   depends_on = [
