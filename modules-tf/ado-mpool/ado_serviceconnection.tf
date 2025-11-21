@@ -41,15 +41,16 @@ resource "time_sleep" "serviceendpoint_azurerm_pre_destroy_delay" {
 }
 
 # grant access to service endpoint for all pipelines in the project
-resource "azuredevops_pipeline_authorization" "mpool_serviceendpoint" {
-  for_each = local.ado_wid_permission_objects
-
-  project_id  = local.azure_devops_project.project_id
-  resource_id = azuredevops_serviceendpoint_azurerm.mpool[each.key].id
-  type        = "endpoint"
-  # authorized  = true
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
+# COMMENTED OUT DUE TO PROVIDER INSTABILITY ON LINUX - REPLACED WITH terraform_data IN ado_instable_resources_fix.tf
+# resource "azuredevops_pipeline_authorization" "mpool_serviceendpoint" {
+#   for_each = local.ado_wid_permission_objects
+#
+#   project_id  = local.azure_devops_project.project_id
+#   resource_id = azuredevops_serviceendpoint_azurerm.mpool[each.key].id
+#   type        = "endpoint"
+#   # authorized  = true
+#
+#   lifecycle {
+#     ignore_changes = all
+#   }
+# }
