@@ -24,12 +24,8 @@ resource "azuredevops_service_principal_entitlement" "mpool" {
   ]
 
   lifecycle {
-    ignore_changes = all
+    # ignore_changes = all
   }
-}
-
-output "zzz_service_principal_entitlement" {
-  value = azuredevops_service_principal_entitlement.mpool
 }
 
 # Organization-wide permission might no longer be required once Azure DevOps Managed Pools support
@@ -44,7 +40,7 @@ resource "azuredevops_group_membership" "mpool" {
   mode = "add"
 
   lifecycle {
-    ignore_changes = all
+    # ignore_changes = all
   }
 }
 
@@ -77,6 +73,6 @@ resource "azuredevops_group_membership" "mpool_project" {
   mode = "add"
 
   lifecycle {
-    ignore_changes = all
+    # ignore_changes = all
   }
 }
