@@ -22,6 +22,10 @@ locals {
         {
           displayName = "Project-Scoped Users" # "Project Collection Service Accounts"
           projectId   = null
+        },
+        {
+          displayName = "Enterprise Service Accounts" # "--> fix-me and create a lower-priv org-wide group! we need read access on org-level"
+          projectId   = null
         }
       ],
       ado-project-memberships = [
