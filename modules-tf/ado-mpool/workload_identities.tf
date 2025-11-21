@@ -266,6 +266,9 @@ resource "azurerm_federated_identity_credential" "mpool" {
   issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
   subject  = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_subject
 
+lifecycle {
+  ignore_changes = all
+}
 
   depends_on = [
     time_sleep.wait_after_user_assigned_identity,
