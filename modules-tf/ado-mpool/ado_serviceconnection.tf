@@ -48,4 +48,8 @@ resource "azuredevops_pipeline_authorization" "mpool_serviceendpoint" {
   resource_id = azuredevops_serviceendpoint_azurerm.mpool[each.key].id
   type        = "endpoint"
   # authorized  = true
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
