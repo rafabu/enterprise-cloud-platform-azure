@@ -16,6 +16,10 @@ output "managed_devops_pool" {
   }
 }
 
+output "managed_devops_pool_ado" {
+  value = data.azuredevops_agent_pool.mpool
+}
+
 output "service_principals" {
   value = { for key, val in local.workload_identity_objects : key => {
     id           = val.id

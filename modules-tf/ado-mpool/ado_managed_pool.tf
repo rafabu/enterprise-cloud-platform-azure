@@ -137,5 +137,12 @@ resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
   project_id  = local.azure_devops_project.project_id
   resource_id = data.azuredevops_agent_queue.mpool.id
   type        = "queue"
+
+  lifecycle {
+    ignore_changes = [
+      # leads to terraform phantom changes due to unstable API response
+      resource_id
+     ]
+  }
 }
 
