@@ -33,6 +33,13 @@ resource "azuredevops_group_membership" "mpool" {
     azuredevops_service_principal_entitlement.mpool[each.value["wid_key"]].descriptor
   ]
   mode = "add"
+
+  lifecycle {
+    ignore_changes = [
+      # leads to terraform phantom changes due to unstable API response
+      members
+    ]
+  }
 }
 
 ######################### Project Permissions ##########################
@@ -61,5 +68,12 @@ resource "azuredevops_group_membership" "mpool_project" {
     azuredevops_service_principal_entitlement.mpool[each.value["wid_key"]].descriptor
   ]
   mode = "add"
+
+  lifecycle {
+    ignore_changes = [
+      # leads to terraform phantom changes due to unstable API response
+      members
+    ]
+  }
 }
 
