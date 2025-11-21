@@ -10,14 +10,11 @@ output "resource_group" {
 output "managed_devops_pool" {
   value = {
     id                  = azapi_resource.managed_devops_pool.id
+    id_azuredevops      = data.azuredevops_agent_pool.mpool.id
     name                = azapi_resource.managed_devops_pool.name
     resource_group_name = azurerm_resource_group.mpool.name
     location            = azurerm_resource_group.mpool.location
   }
-}
-
-output "managed_devops_pool_ado" {
-  value = data.azuredevops_agent_pool.mpool
 }
 
 output "service_principals" {
