@@ -17,7 +17,8 @@ resource "terraform_data" "mpool_serviceendpoint_authorization" {
   # Triggers for recreation when dependencies change
   triggers_replace = {
     project_id            = local.azure_devops_project.project_id
-    service_endpoint_id   = azuredevops_serviceendpoint_azurerm.mpool[each.key].id
+    # known after apply...
+    # service_endpoint_id   = azuredevops_serviceendpoint_azurerm.mpool[each.key].id
     service_endpoint_name = azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name
     organization          = var.ecp_azure_devops_organization_name
     project_name          = var.ecp_azure_devops_project_name
