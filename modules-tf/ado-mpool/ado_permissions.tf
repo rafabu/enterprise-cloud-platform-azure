@@ -21,6 +21,10 @@ resource "azuredevops_service_principal_entitlement" "mpool" {
   depends_on = [
     time_sleep.wait_after_user_assigned_identity
   ]
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Organization-wide permission might no longer be required once Azure DevOps Managed Pools support
