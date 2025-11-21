@@ -17,7 +17,7 @@ output "managed_devops_pool" {
 }
 
 output "service_principals" {
-  value = { for key, val in local.workload_identity_service_principals : key => {
+  value = { for key, val in local.workload_identity_objects : key => {
     id           = val.id
     display_name = val.display_name
     client_id    = val.client_id

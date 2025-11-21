@@ -12,11 +12,15 @@ data "azuredevops_group" "reference" {
 resource "azuredevops_service_principal_entitlement" "mpool" {
   for_each = local.ado_wid_permission_objects
 
-  origin_id = var.workload_identity_type == "userAssignedIdentity" ? data.azuread_service_principal.mpool[each.key].object_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.key].object_id : "error"
+  origin_id = var.workload_identity_type == "userAssignedIdentity" ? azurerm_user_assigned_identity.mpool[each.key].principal_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.key].object_id : "error"
   origin    = "aad"
   # ensure that the service principal has at least a Basic ('express') license. Stakeholder licenses don't provide repository access.
   account_license_type = "express" # "stakeholder"
   licensing_source     = "account"
+
+  depends_on = [
+    time_sleep.wait_after_user_assigned_identity
+  ]
 }
 
 # Organization-wide permission might no longer be required once Azure DevOps Managed Pools support

@@ -8,7 +8,7 @@ resource "azuredevops_serviceendpoint_azurerm" "mpool" {
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
 
   credentials {
-    serviceprincipalid = local.workload_identity_service_principals[each.key].client_id
+    serviceprincipalid = local.workload_identity_objects[each.key].client_id
   }
   azurerm_spn_tenantid      = data.azurerm_client_config.this.tenant_id
   azurerm_subscription_id   = null # data.azurerm_subscription.launchpad.subscription_id
@@ -23,6 +23,10 @@ resource "azuredevops_serviceendpoint_azurerm" "mpool" {
       description,
     ]
   }
+
+  depends_on = [
+    time_sleep.wait_after_user_assigned_identity
+  ]
 }
 
 resource "time_sleep" "serviceendpoint_azurerm_pre_destroy_delay" {

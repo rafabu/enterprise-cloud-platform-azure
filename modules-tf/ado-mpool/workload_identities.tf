@@ -6,12 +6,12 @@ locals {
       ecp_level = "l0"
       azure-roleAssignments = [
         {
-          scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
-          roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7", # Reader
+          scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+          roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
           condition        = null
         },
         {
-          scope = var.backend_storage_accounts["l0"].id, # backend storage account
+          scope            = var.backend_storage_accounts["l0"].id,  # backend storage account
           roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
           condition        = null
         }
@@ -249,18 +249,6 @@ resource "time_sleep" "wait_after_user_assigned_identity" {
     client_id = azurerm_user_assigned_identity.mpool[each.key].client_id
   }
 }
-data "azuread_service_principal" "mpool" {
-  for_each = {
-    for key, val in local.ado_wid_permission_objects : key => val
-    if var.workload_identity_type == "userAssignedIdentity"
-  }
-
-  client_id = azurerm_user_assigned_identity.mpool[each.key].client_id
-
-  depends_on = [
-    time_sleep.wait_after_user_assigned_identity
-  ]
-}
 
 resource "azurerm_federated_identity_credential" "mpool" {
   for_each = {
@@ -274,14 +262,13 @@ resource "azurerm_federated_identity_credential" "mpool" {
   name                = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
   resource_group_name = azurerm_user_assigned_identity.mpool[each.key].resource_group_name
 
-  #   local.workload_identity_service_principals[each.key].id
   audience = ["api://AzureADTokenExchange"]
   issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
   subject  = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_subject
 
 
   depends_on = [
-    data.azuread_service_principal.mpool,
+    time_sleep.wait_after_user_assigned_identity,
     time_sleep.serviceendpoint_azurerm_pre_destroy_delay
   ]
 }
@@ -354,9 +341,25 @@ resource "azuread_application_federated_identity_credential" "mpool" {
 }
 
 locals {
-  workload_identity_service_principals = merge(
-    data.azuread_service_principal.mpool,
-    azuread_service_principal.mpool,
+  # unified information about all workload identity service principals
+  #   service_principal --> object_id == user_assigned_identity --> principal_id
+  workload_identity_objects = merge(
+    { for k, v in azurerm_user_assigned_identity.mpool : k => {
+      id           = "/servicePrincipals/${v.principal_id}"
+      client_id    = v.client_id
+      display_name = v.name
+      object_id    = v.principal_id
+      type         = "ManagedIdentity"
+      }
+    },
+    { for k, v in azuread_service_principal.mpool : k => {
+      id           = v.id
+      client_id    = v.client_id
+      display_name = v.display_name
+      object_id    = v.object_id
+      type         = "ServicePrincipal"
+      }
+    }
   )
 }
 
@@ -370,6 +373,10 @@ resource "azurerm_role_assignment" "mpool" {
   # if scope is management group, subscription must not be added at the beginning
   role_definition_id = format("%s/providers/Microsoft.Authorization/roleDefinitions/%s", startswith(each.value["scope"], "/subscriptions/") ? data.azapi_client_config.this.subscription_resource_id : "", each.value["roleDefinitionId"])
   principal_id       = var.workload_identity_type == "userAssignedIdentity" ? azurerm_user_assigned_identity.mpool[each.value["wid_key"]].principal_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.value["wid_key"]].object_id : "error"
+
+  depends_on = [
+    time_sleep.wait_after_user_assigned_identity
+  ]
 }
 
 ####################### Entra App Permission #######################
@@ -390,6 +397,10 @@ resource "azuread_app_role_assignment" "mpool" {
   }
 
   app_role_id         = each.value.id
-  principal_object_id = var.workload_identity_type == "userAssignedIdentity" ? data.azuread_service_principal.mpool[each.value["wid_key"]].object_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.value["wid_key"]].object_id : "error"
+  principal_object_id = var.workload_identity_type == "userAssignedIdentity" ? azurerm_user_assigned_identity.mpool[each.value["wid_key"]].principal_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.value["wid_key"]].object_id : "error"
   resource_object_id  = data.azuread_service_principal.resource[each.key].object_id
+
+  depends_on = [
+    time_sleep.wait_after_user_assigned_identity
+  ]
 }
