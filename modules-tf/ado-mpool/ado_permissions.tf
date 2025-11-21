@@ -10,23 +10,27 @@ data "azuredevops_group" "reference" {
 }
 
 # COMMENTED OUT DUE TO PROVIDER INSTABILITY ON LINUX - REPLACED WITH terraform_data IN ado_instable_resources_fix.tf
-# resource "azuredevops_service_principal_entitlement" "mpool" {
-#   for_each = local.ado_wid_permission_objects
-#
-#   origin_id = var.workload_identity_type == "userAssignedIdentity" ? azurerm_user_assigned_identity.mpool[each.key].principal_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.key].object_id : "error"
-#   origin    = "aad"
-#   # ensure that the service principal has at least a Basic ('express') license. Stakeholder licenses don't provide repository access.
-#   account_license_type = "express" # "stakeholder"
-#   licensing_source     = "account"
-#
-#   depends_on = [
-#     time_sleep.wait_after_user_assigned_identity
-#   ]
-#
-#   lifecycle {
-#     ignore_changes = all
-#   }
-# }
+resource "azuredevops_service_principal_entitlement" "mpool" {
+  for_each = local.ado_wid_permission_objects
+
+  origin_id = var.workload_identity_type == "userAssignedIdentity" ? azurerm_user_assigned_identity.mpool[each.key].principal_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.key].object_id : "error"
+  origin    = "aad"
+  # ensure that the service principal has at least a Basic ('express') license. Stakeholder licenses don't provide repository access.
+  account_license_type = "express" # "stakeholder"
+  licensing_source     = "account"
+
+  depends_on = [
+    time_sleep.wait_after_user_assigned_identity
+  ]
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+output "zzz_service_principal_entitlement" {
+  value = azuredevops_service_principal_entitlement.mpool
+}
 
 # Organization-wide permission might no longer be required once Azure DevOps Managed Pools support
 #     project-level only permissions
@@ -35,17 +39,15 @@ resource "azuredevops_group_membership" "mpool" {
 
   group = data.azuredevops_group.reference[each.key].descriptor
   members = [
-    local.service_principal_entitlement_descriptors[each.value["wid_key"]]
+    azuredevops_service_principal_entitlement.mpool[each.value["wid_key"]].descriptor
   ]
   mode = "add"
 
   lifecycle {
-    ignore_changes = [
-      # leads to terraform phantom changes due to unstable API response
-      members
-    ]
+    ignore_changes = all
   }
 }
+
 
 ######################### Project Permissions ##########################
 data "azuredevops_groups" "groups" {
@@ -70,15 +72,11 @@ resource "azuredevops_group_membership" "mpool_project" {
 
   group = local.project_references[each.key].descriptor
   members = [
-    local.service_principal_entitlement_descriptors[each.value["wid_key"]]
+    azuredevops_service_principal_entitlement.mpool[each.value["wid_key"]].descriptor
   ]
   mode = "add"
 
   lifecycle {
-    ignore_changes = [
-      # leads to terraform phantom changes due to unstable API response
-      members
-    ]
+    ignore_changes = all
   }
 }
-
