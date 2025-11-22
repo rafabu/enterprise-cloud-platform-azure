@@ -5,3 +5,8 @@ locals {
   matchpattern_mail              = "(?i)^<MAIL>:(.+)$"
   matchpattern_userprincipalname = "(?i)^<USERPRINCIPALNAME>:(.+)$"
 }
+
+
+locals {
+  ecp_environment_name = var.azure_resource_name_elements.prefixes[0]
+}

@@ -94,32 +94,35 @@ resource "azuredevops_build_definition" "pipelines" {
 #   build_definition_id = azuredevops_build_definition.pipelines[each.key].id
 #   permissions         = each.value.permissions.permissions
 # }
-
-# # Environment for deployment pipelines
-# resource "azuredevops_environment" "deployment_environments" {
-#   for_each = {
-#     for key, pipeline in var.ado_pipeline_definitions : key => pipeline
-#     if pipeline.create_environment == true
-#   }
-
-#   project_id  = data.azuredevops_project.this.id
-#   name        = "${data.azurecaf_name.pipeline[each.key].result}-env"
-#   description = "Environment for ${data.azurecaf_name.pipeline[each.key].result} pipeline deployments"
-# }
+locals {
+  pip_env_list = [
+    for pip_item in var.ado_yaml_pipeline_artefact_names : {
+      for env_key, env_value in local.ecp_pipeline_environments :
+      "${pip_item}-${env_key}" => {
+        pip_item  = pip_item
+        env_key   = env_key
+        env_value = env_value
+      }
+    }
+  ]
+  pip_env_object = zipmap(
+    flatten([for entry, attr in local.pip_env_list : keys(attr)]),
+    flatten([for entry, attr in local.pip_env_list : values(attr)])
+  )
+}
 
 # # Environment Resource Authorization
-# resource "azuredevops_resource_authorization" "environment_auth" {
-#   for_each = {
-#     for key, pipeline in var.ado_pipeline_definitions : key => pipeline
-#     if pipeline.create_environment == true && var.create_service_connection
-#   }
+resource "azuredevops_pipeline_authorization" "ecp_environment" {
+  # for_each = toset(var.ado_yaml_pipeline_artefact_names)
 
-#   project_id    = data.azuredevops_project.this.id
-#   resource_id   = azuredevops_environment.deployment_environments[each.key].id
-#   definition_id = azuredevops_build_definition.pipelines[each.key].id
-#   authorized    = true
-#   type          = "environment"
-# }
+  for_each = local.pip_env_object
+
+  project_id          = data.azuredevops_project.this.id
+  resource_id         = azuredevops_environment.ecp[each.value.env_key].id
+  type                = "environment"
+  pipeline_id         = azuredevops_build_definition.pipelines[each.value.pip_item].id
+  pipeline_project_id = null
+}
 
 # # Service Connection Authorization  
 # resource "azuredevops_resource_authorization" "service_connection_auth" {
