@@ -80,6 +80,11 @@ resource "azuredevops_build_definition" "pipelines" {
   # }
 
   # schedules {}
+
+  depends_on = [
+    azuredevops_environment.ecp,
+    azuredevops_build_folder.two
+  ]
 }
 
 # # Build Definition Permissions
