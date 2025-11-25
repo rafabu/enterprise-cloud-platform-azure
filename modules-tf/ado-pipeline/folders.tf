@@ -39,20 +39,12 @@ locals {
 }
 
 # shared folder if more than a single ECP environment is deployed
-#     TODO: enhance to create multiple folders if multiple environments are deployed
-
-# resource "azuredevops_build_folder" "zero" {
-#   for_each = try(local.ecp_pipeline_folders["zero"], {})
-
-#   project_id  = data.azuredevops_project.this.id
-#   path        = "\\${each.value.name}"
-#   description = "Enterprise Cloud Platform (ECP) root folder"
-# }
-
+#     as provider creates parent folders implicitly (and does not destroy them),
+#     it is ok NOT TO DEPLOY the level zero folder (ECP)
 resource "azuredevops_build_folder" "one" {
   for_each = try(local.ecp_pipeline_folders["one"], {})
 
-  project_id  = data.azuredevops_project.this.id
+  project_id = data.azuredevops_project.this.id
   #path        = "${azuredevops_build_folder.zero[each.value.parent_key].path}\\${each.value.name}"
   path        = "\\${local.ecp_pipeline_folders["zero"]["ecp"].name}\\${each.value.name}"
   description = "Enterprise Cloud Platform (ECP) environment folder"
