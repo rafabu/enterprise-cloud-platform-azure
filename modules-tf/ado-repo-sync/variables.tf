@@ -34,22 +34,22 @@ variable "template_replacements" {
     use_regex            = optional(bool, false)      # Use regex for search patterns
   }))
   description = "Template replacement configurations supporting both content and name replacements"
-  default = {
-    "ecp_environment_replacement" = {
-      directory_patterns = [
-        "**/pipelines-ado"
-      ]
-      name_replacements = {
-        "pipelines-ado" = "pipelines-rabu-d7-ado"
-      }
-      file_patterns = [
-        "**/ecp-tg-deploy-platform.yaml"
-      ]
-      content_replacements = {
-        "<ecp_environment_name>" = "rabu-d7"
-      }
-    }
-  }
+  # default = {
+  #   "ecp_environment_replacement" = {
+  #     directory_patterns = [
+  #       "**/pipelines-ado"
+  #     ]
+  #     name_replacements = {
+  #       "pipelines-ado" = "pipelines-rabu-d7-ado"
+  #     }
+  #     file_patterns = [
+  #       "**/ecp-tg-deploy-platform.yaml"
+  #     ]
+  #     content_replacements = {
+  #       "<ecp_environment_name>" = "rabu-d7"
+  #     }
+  #   }
+  # }
 
   # Example:
   # {

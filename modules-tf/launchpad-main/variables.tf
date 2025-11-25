@@ -1,3 +1,8 @@
+variable "ecp_environment_name" {
+  type        = string
+  description = "Name of the ECP environment (used for naming resources)"
+}
+
 variable "azure_location" {
   type = string
 }

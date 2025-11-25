@@ -9,7 +9,7 @@ locals {
     }
     one = {
       ecp_environment = {
-        name        = local.ecp_environment_name
+        name        = var.ecp_environment_name
         parent_key  = "ecp"
         description = "Enterprise Cloud Platform (ECP) environment folder"
         permissions = []

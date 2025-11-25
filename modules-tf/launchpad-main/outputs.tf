@@ -7,3 +7,7 @@ output "resource_group" {
   }
 }
 
+output "ecp_environment_name" {
+  description = "Name of the ECP environment (used for naming resources)"
+  value = var.ecp_environment_name
+}
