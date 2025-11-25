@@ -508,7 +508,7 @@ SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
             $syncInfo = Get-Content "../source/.sync-info" -Raw -ErrorAction SilentlyContinue
             
             # Commit changes with submodule information
-            $commitMessage = "Sync from local submodule`n`nSubmodule commit: $submoduleCommit`nMessage: $submoduleMessage`nBranch: $submoduleBranch`n`nSync Details:`n$syncInfo"
+            $commitMessage = "ECP config: Automation submodule sync: $(Get-Date -Format 'yy-MM-dd HH:mm UTC')`n`nSubmodule commit: $submoduleCommit`nMessage: $submoduleMessage`nBranch: $submoduleBranch`n`nSync Details:`n$syncInfo"
             git commit -m "$commitMessage"
             
             if ($LASTEXITCODE -ne 0) {

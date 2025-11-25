@@ -49,6 +49,15 @@ variable "ado_yaml_pipeline_definitions" {
     })
     skipFirstRun          = optional(bool)
     jobAuthorizationScope = optional(string)
+    variables = optional(map(object({
+      value         = string
+      isSecret      = optional(bool)
+      allowOverride = optional(bool)
+    })))
+    variableGroups = optional(list(object({
+      name = optional(string)
+      id   = optional(number)
+    })))
 
   }))
   description = "Map of Azure DevOps Pipelines (pipelines), where the key is the artefactName and the value is an object containing properties of the pipeline."
