@@ -33,9 +33,9 @@ variable "ado_yaml_pipeline_definitions" {
       name = optional(string)
       id   = optional(string)
     }))
-    queue = object({
+    queue = optional(object({
       name = string
-    })
+    }))
     queueStatus = optional(string) # paused or disabled
     repository = object({
       name               = optional(string)
