@@ -81,10 +81,6 @@ resource "azuredevops_build_definition" "pipelines" {
   ]
 }
 
-output "zzz_ado_yaml_pipeline_definitions_normalized" {
-  value       = local.ado_yaml_pipeline_definitions_normalized
-}
-
 locals {
   pip_env_list = [
     for pip_item in var.ado_yaml_pipeline_artefact_names : {
