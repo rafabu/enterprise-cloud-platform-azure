@@ -5,14 +5,12 @@ moved {
   to   = azuredevops_git_repository.non_default["ECP.Automation"]
 }
 resource "azuredevops_git_repository" "non_default" {
-  # for_each = toset(var.ecp_azure_devops_repository_name != var.ecp_azure_devops_project_name ? ["do"] : [])
   for_each = toset([
     for r in var.ecp_azure_devops_repository_names : r
     if r != var.ecp_azure_devops_project_name
   ])
 
   project_id = azuredevops_project.this.id
-  # name           = var.ecp_azure_devops_repository_name
   name           = each.key
   default_branch = "refs/heads/main"
 
@@ -37,7 +35,6 @@ resource "azuredevops_git_repository" "non_default" {
 resource "time_sleep" "git_repository_non_default_destroy_helper_destroy_delay" {
   # destroy only: after recreating the default repo, wait a little while before destroying the non-default repo
   #     to allow Azure DevOps to catch up
-  # for_each = toset(var.ecp_azure_devops_repository_name != var.ecp_azure_devops_project_name ? ["do"] : [])
   for_each = toset(contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name) == false ? ["do"] : [])
 
   destroy_duration = "15s" # Wait 15' ONLY on destroy
@@ -49,7 +46,6 @@ resource "time_sleep" "git_repository_non_default_destroy_helper_destroy_delay" 
 
 # before being able to delete non-default repository and the project, the default repository needs to exist (again)
 resource "terraform_data" "git_repository_non_default_destroy_helper" {
-  #for_each = toset(var.ecp_azure_devops_repository_name != var.ecp_azure_devops_project_name ? ["do"] : [])
   for_each = toset(contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name) == false ? ["do"] : [])
 
   input = {
@@ -59,7 +55,7 @@ resource "terraform_data" "git_repository_non_default_destroy_helper" {
   }
 
   triggers_replace = {
-    repository_id = azuredevops_git_repository.non_default[each.key].id
+    is_default = contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name)
   }
 
   provisioner "local-exec" {
@@ -77,8 +73,7 @@ resource "terraform_data" "git_repository_non_default_destroy_helper" {
 ########### Default Repository ###########
 #     this is just for output
 data "azuredevops_git_repository" "default" {
-  # for_each = toset(var.ecp_azure_devops_repository_name == var.ecp_azure_devops_project_name ? ["do"] : [])
-  for_each = toset(contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name) == false ? ["do"] : [])
+  for_each = toset(contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name) == true ? ["do"] : [])
 
   project_id = azuredevops_project.this.id
   name       = var.ecp_azure_devops_project_name
@@ -86,7 +81,7 @@ data "azuredevops_git_repository" "default" {
 
 locals {
   git_repositories = merge(
-    contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name) == false ? {
+    contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name) == true ? {
       "${data.azuredevops_git_repository.default["do"].name}" = data.azuredevops_git_repository.default["do"]
     } : {},
     try(azuredevops_git_repository.non_default, {})

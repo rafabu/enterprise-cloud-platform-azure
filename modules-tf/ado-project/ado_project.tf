@@ -1,7 +1,3 @@
-# import {
-#   to = azuredevops_project.this
-#   id = "<<<project_id>>>"
-# }
 data "azuredevops_projects" "all" {
 }
 
@@ -55,7 +51,7 @@ locals {
 }
 
 resource "terraform_data" "git_repository_default_delete" {
-  for_each = toset(var.ecp_azure_devops_repository_name != var.ecp_azure_devops_project_name ? ["do"] : [])
+  for_each = toset(contains([var.ecp_azure_devops_repository_names], var.ecp_azure_devops_project_name) == false ? ["do"] : [])
 
   triggers_replace = {
     project_id = azuredevops_project.this.id

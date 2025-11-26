@@ -16,7 +16,6 @@ output "all_azuredevops_projects" {
   }
 }
 
-
 output "azuredevops_git_repositories" {
   value = {
     for r in local.git_repositories : r.name => {
