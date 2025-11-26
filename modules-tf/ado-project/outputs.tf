@@ -17,12 +17,14 @@ output "all_azuredevops_projects" {
 }
 
 
-output "azuredevops_git_repository" {
+output "azuredevops_git_repositories" {
   value = {
-    id             = local.git_repository.id
-    name           = local.git_repository.name
-    default_branch = local.git_repository.default_branch
-    url            = local.git_repository.url
-    web_url        = local.git_repository.web_url
+    for r in local.git_repositories : r.name => {
+      id             = r.id
+      name           = r.name
+      default_branch = r.default_branch
+      url            = r.url
+      web_url        = r.web_url
+    }
   }
 }

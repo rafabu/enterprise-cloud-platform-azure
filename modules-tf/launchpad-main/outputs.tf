@@ -11,3 +11,18 @@ output "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
   value = var.ecp_environment_name
 }
+
+output "ecp_azure_devops_automation_repository_name" {
+  description = "Name of the ECP Azure DevOps automation repository"
+  value       = var.ecp_azure_devops_automation_repository_name
+}
+
+output "ecp_azure_devops_configuration_repository_name" {
+  description = "Name of the ECP Azure DevOps configuration repository"
+  value       = var.ecp_azure_devops_configuration_repository_name
+}
+
+output "azuredevops_organization_name" {
+  description = "name of Azure DevOps organization"
+  value       = var.ecp_azure_devops_organization_name
+}

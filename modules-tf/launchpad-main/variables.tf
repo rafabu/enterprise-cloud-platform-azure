@@ -3,6 +3,23 @@ variable "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
 }
 
+variable "ecp_azure_devops_automation_repository_name" {
+  type        = string
+  default    = "ECP.Automation"
+  description = "Name of the ECP Azure DevOps automation repository"
+}
+
+variable "ecp_azure_devops_configuration_repository_name" {
+  type        = string
+  default     = "ECP.Configuration"
+  description = "Name of the ECP Azure DevOps configuration repository"
+}
+
+variable "ecp_azure_devops_organization_name" {
+  type        = string
+  description = "name of Azure DevOps organization"
+}
+
 variable "azure_location" {
   type = string
 }
