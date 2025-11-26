@@ -44,7 +44,8 @@ resource "terraform_data" "ado_repo_sync" {
     -AdoRepo '${var.ecp_azure_devops_repository_name}' `
     -TargetBranch '${var.ecp_azure_devops_target_branch}' `
     -ForceSync ([bool]$${var.force_sync}) `
-    -TemplateReplacements $templateObj
+    -TemplateReplacements $templateObj `
+    -IncludeSubfolders @("deployments/managed/rabu-m365-sandbox")
 EOT
 
     environment = {}

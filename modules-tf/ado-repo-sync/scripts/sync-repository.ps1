@@ -6,13 +6,13 @@ param(
     [string]$AdoRepo,
     [string]$TargetBranch,
     [object]$TemplateReplacements = @{},
-    [bool]$ForceSync = $false
+    [bool]$ForceSync = $false,
+    [string[]]$IncludeSubfolders = @()  # Optional: specific subfolders to sync (e.g., @("modules", "scripts"))
 )
 
 # Set error handling
 $ErrorActionPreference = 'Stop'
 
-#!/usr/bin/env pwsh
 function Apply-TemplateReplacements {
     param(
         [string]$SourceDirectory,
@@ -434,16 +434,83 @@ try {
         # Create source directory first
         New-Item -ItemType Directory -Path "./source" -Force | Out-Null
         
-        # Copy all contents including subdirectories, preserving structure
-        Get-ChildItem -Path $submoduleAbsPath -Force | Where-Object { $_.Name -ne '.git' } | ForEach-Object {
-            $destinationPath = Join-Path "./source" $_.Name
-            if ($_.PSIsContainer) {
-                Write-Host "INFO:   Copying directory: $($_.Name)"
-                Copy-Item -Path $_.FullName -Destination $destinationPath -Recurse -Force
+        # Determine what to copy based on IncludeSubfolders parameter
+        if ($IncludeSubfolders -and $IncludeSubfolders.Count -gt 0) {
+            Write-Host "INFO: Selective sync enabled - including only specified subfolders:"
+            foreach ($subfolder in $IncludeSubfolders) {
+                Write-Host "INFO:   - $subfolder"
             }
-            else {
-                Write-Host "INFO:   Copying file: $($_.Name)"
-                Copy-Item -Path $_.FullName -Destination $destinationPath -Force
+            
+            # Copy only specified subfolders, respecting .gitignore
+            Set-Location $submoduleAbsPath
+            
+            foreach ($subfolder in $IncludeSubfolders) {
+                $sourcePath = Join-Path $submoduleAbsPath $subfolder
+                
+                if (Test-Path $sourcePath) {
+                    $destinationPath = Join-Path "$tempDir/source" $subfolder
+                    
+                    # Ensure parent directory exists
+                    $parentDir = Split-Path $destinationPath -Parent
+                    if ($parentDir -and -not (Test-Path $parentDir)) {
+                        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+                    }
+                    
+                    if (Test-Path $sourcePath -PathType Container) {
+                        Write-Host "INFO:   Copying directory (respecting .gitignore): $subfolder"
+                        
+                        # Use git archive to respect .gitignore
+                        $archiveFile = Join-Path $tempDir "archive-$([guid]::NewGuid().ToString()).tar"
+                        git archive --format=tar --output="$archiveFile" HEAD "$subfolder" 2>$null
+                        
+                        if ($LASTEXITCODE -eq 0 -and (Test-Path $archiveFile)) {
+                            # Extract archive to temp location
+                            $extractDir = Join-Path $tempDir "extract-$([guid]::NewGuid().ToString())"
+                            New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
+                            tar -xf "$archiveFile" -C "$extractDir"
+                            
+                            # Copy extracted contents to destination
+                            $extractedSource = Join-Path $extractDir $subfolder
+                            if (Test-Path $extractedSource) {
+                                Copy-Item -Path $extractedSource -Destination $destinationPath -Recurse -Force
+                            }
+                            
+                            # Cleanup
+                            Remove-Item $archiveFile -Force -ErrorAction SilentlyContinue
+                            Remove-Item $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+                        }
+                        else {
+                            # Fallback to regular copy if git archive fails
+                            Write-Warning "git archive failed for $subfolder, using regular copy"
+                            Copy-Item -Path $sourcePath -Destination $destinationPath -Recurse -Force
+                        }
+                    }
+                    else {
+                        Write-Host "INFO:   Copying file: $subfolder"
+                        Copy-Item -Path $sourcePath -Destination $destinationPath -Force
+                    }
+                }
+                else {
+                    Write-Warning "Specified subfolder/file not found in source: $subfolder"
+                }
+            }
+            
+            Set-Location $tempDir
+        }
+        else {
+            Write-Host "INFO: Full repository sync - copying all contents"
+            
+            # Copy all contents including subdirectories, preserving structure
+            Get-ChildItem -Path $submoduleAbsPath -Force | Where-Object { $_.Name -ne '.git' } | ForEach-Object {
+                $destinationPath = Join-Path "./source" $_.Name
+                if ($_.PSIsContainer) {
+                    Write-Host "INFO:   Copying directory: $($_.Name)"
+                    Copy-Item -Path $_.FullName -Destination $destinationPath -Recurse -Force
+                }
+                else {
+                    Write-Host "INFO:   Copying file: $($_.Name)"
+                    Copy-Item -Path $_.FullName -Destination $destinationPath -Force
+                }
             }
         }
         
@@ -478,11 +545,49 @@ SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
         Write-Host "INFO: Syncing files..."
         Set-Location target
         
-        # Remove existing files (except .git)
-        Get-ChildItem -Force | Where-Object { $_.Name -ne '.git' } | Remove-Item -Recurse -Force
-        
-        # Copy new files
-        Copy-Item -Path "../source/*" -Destination "." -Recurse -Force -Exclude ".git"
+        # Selective sync mode: only remove and update specified folders
+        if ($IncludeSubfolders -and $IncludeSubfolders.Count -gt 0) {
+            Write-Host "INFO: Selective sync mode - updating only specified paths"
+            
+            foreach ($subfolder in $IncludeSubfolders) {
+                $sourcePath = Join-Path "../source" $subfolder
+                $targetPath = $subfolder
+                
+                if (Test-Path $sourcePath) {
+                    # Remove existing target path if it exists
+                    if (Test-Path $targetPath) {
+                        Write-Host "INFO:   Removing existing: $targetPath"
+                        Remove-Item -Path $targetPath -Recurse -Force
+                    }
+                    
+                    # Ensure parent directory exists
+                    $parentDir = Split-Path $targetPath -Parent
+                    if ($parentDir -and -not (Test-Path $parentDir)) {
+                        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+                    }
+                    
+                    # Copy new content
+                    Write-Host "INFO:   Copying new content: $targetPath"
+                    if (Test-Path $sourcePath -PathType Container) {
+                        Copy-Item -Path $sourcePath -Destination $targetPath -Recurse -Force
+                    }
+                    else {
+                        Copy-Item -Path $sourcePath -Destination $targetPath -Force
+                    }
+                }
+            }
+            
+            Write-Host "INFO: Selective sync complete - other files/folders in repo preserved"
+        }
+        else {
+            Write-Host "INFO: Full repository sync - replacing all contents"
+            
+            # Remove existing files (except .git)
+            Get-ChildItem -Force | Where-Object { $_.Name -ne '.git' } | Remove-Item -Recurse -Force
+            
+            # Copy new files
+            Copy-Item -Path "../source/*" -Destination "." -Recurse -Force -Exclude ".git"
+        }
         
         # ========================================
         # APPLY TEMPLATE REPLACEMENTS (after copying to temp folder)
@@ -508,7 +613,7 @@ SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
             $syncInfo = Get-Content "../source/.sync-info" -Raw -ErrorAction SilentlyContinue
             
             # Commit changes with submodule information
-            $commitMessage = "ECP config: Automation submodule sync: $(Get-Date -Format 'yy-MM-dd HH:mm UTC')`n`nSubmodule commit: $submoduleCommit`nMessage: $submoduleMessage`nBranch: $submoduleBranch`n`nSync Details:`n$syncInfo"
+            $commitMessage = "ECP config: git repo sync: $(Get-Date -Format 'yy-MM-dd HH:mm UTC')`n`nSubmodule commit: $submoduleCommit`nMessage: $submoduleMessage`nBranch: $submoduleBranch`n`nSync Details:`n$syncInfo"
             git commit -m "$commitMessage"
             
             if ($LASTEXITCODE -ne 0) {
