@@ -20,6 +20,11 @@ variable "ecp_azure_devops_organization_name" {
   description = "name of Azure DevOps organization"
 }
 
+variable "ecp_configuration_repo_deployment_root_path" {
+  type        = string
+  description = "Root path in ECP.Configuration repository where environment configurations are stored"
+}
+
 variable "azure_location" {
   type = string
 }

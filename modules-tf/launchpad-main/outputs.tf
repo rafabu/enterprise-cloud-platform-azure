@@ -9,7 +9,7 @@ output "resource_group" {
 
 output "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
-  value = var.ecp_environment_name
+  value       = var.ecp_environment_name
 }
 
 output "ecp_azure_devops_automation_repository_name" {
@@ -20,6 +20,11 @@ output "ecp_azure_devops_automation_repository_name" {
 output "ecp_azure_devops_configuration_repository_name" {
   description = "Name of the ECP Azure DevOps configuration repository"
   value       = var.ecp_azure_devops_configuration_repository_name
+}
+
+variable "ecp_configuration_repo_deployment_root_path" {
+  description = "Root path in ECP.Configuration repository where environment configurations are stored"
+  value       = var.ecp_configuration_repo_deployment_root_path
 }
 
 output "azuredevops_organization_name" {
