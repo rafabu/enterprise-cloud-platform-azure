@@ -22,7 +22,7 @@ output "ecp_azure_devops_configuration_repository_name" {
   value       = var.ecp_azure_devops_configuration_repository_name
 }
 
-variable "ecp_configuration_repo_deployment_root_path" {
+output "ecp_configuration_repo_deployment_root_path" {
   description = "Root path in ECP.Configuration repository where environment configurations are stored"
   value       = var.ecp_configuration_repo_deployment_root_path
 }
