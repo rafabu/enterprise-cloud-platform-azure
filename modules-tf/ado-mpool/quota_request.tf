@@ -1,20 +1,68 @@
 # need to get the actual quota usages via Microsoft.DevOpsInfrastructure/locations/usages
 #     currently that kind of quota cannot be queried directly via GET on Microsoft.Quota/quotas
-data "azapi_resource_action" "provider_usage" {
-  type = "Microsoft.DevOpsInfrastructure/locations@2024-04-04-preview"
-  resource_id            = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.DevOpsInfrastructure/locations/${var.azure_location}"
-  action                 = "usages"
-  method                 = "GET"
-  response_export_values = ["*"]
-}
+# data "azapi_resource_action" "provider_usage" {
+#   type = "Microsoft.DevOpsInfrastructure/locations@2024-04-04-preview"
+#   resource_id            = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.DevOpsInfrastructure/locations/${var.azure_location}"
+#   action                 = "usages"
+#   method                 = "GET"
+#   response_export_values = ["*"]
+# }
 
-output "zzz_quota_check" {
-  description = "Debug output of ADO managed pool quota check"
-  value = {
-    output = { for family in data.azapi_resource_action.provider_usage.output.value : family.name.value => family if family.name.value == "standardDSv5Family" },
-    id     = data.azapi_resource_action.provider_usage.id
+data "external" "provider_usage" {
+  program = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-Command", <<-EOT
+    try {
+      $sku_family = '${local.managed_devops_pool_sku_family}'
+      
+      $sku_family = "standardDDSv5Family"
+      $location = "switzerlandnorth"
+      $subscription = "e1b3be0d-0df0-4e0a-a585-ffc97f60bd42"
+
+      $result = az rest --method get --url "https://management.azure.com/subscriptions/$subscription/providers/Microsoft.DevOpsInfrastructure/locations/$location/usages?api-version=2024-04-04-preview" | ConvertFrom-Json
+  
+
+      # $result = az rest --method get --url "https://management.azure.com/subscriptions/${data.azapi_client_config.this.subscription_id}/providers/Microsoft.DevOpsInfrastructure/locations/${var.azure_location}/usages?api-version=2024-04-04-preview" | ConvertFrom-Json
+      
+      $usage = $result.value | Where-Object { $_.name.value -ieq $sku_family } | Select-Object -First 1
+      
+      if (-not $usage) {
+        throw "SKU family '$sku_family' not found in usage data"
+      }
+      
+      # Return flat string values
+      @{
+        sku_family           = $usage.name.value
+        sku_family_localized = $usage.name.localizedValue
+        current_value        = $usage.currentValue.ToString()
+        limit                = $usage.limit.ToString()
+        unit                 = $usage.unit
+      } | ConvertTo-Json -Compress
+    }
+    catch {
+      Write-Error $_.Exception.Message
+      exit 1
+    }
+  EOT
+  ]
+  
+  query = {
+    sku_family = local.managed_devops_pool_sku_family
   }
 }
+
+output "zzzzz_provider_usage_external" {
+  description = "Debug output of ADO managed pool provider usage data"
+  value = {
+    output = data.external.provider_usage.result
+  }
+}
+
+# output "zzzz_quota_check" {
+#   description = "Debug output of ADO managed pool quota check"
+#   value = {
+#     output = { for family in data.azapi_resource_action.provider_usage.output.value : family.name.value => family if lower(family.name.value) ==  lower(local.managed_devops_pool_sku_family) },
+#     id     = data.azapi_resource_action.provider_usage.id
+#   }
+# }
 
 locals {
   # current usage of SKU family and details on the allotment required by this mpool instance
@@ -22,22 +70,33 @@ locals {
   managed_devops_pool_sku_family          = "${join("", regexall("^([^_]+)_([A-Za-z]+)\\d+([A-Za-z]*)_(.+)$", local.managed_devops_pool_sku)[0])}Family"
   managed_devops_pool_sku_cpu_count       = tonumber(try(regexall("^[^_]+_[A-Za-z]+(\\d+)[A-Za-z]*_.+$", local.managed_devops_pool_sku)[0][0], 0))
   managed_devops_pool_sku_cpu_count_total = local.managed_devops_pool_properties.maximumConcurrency * local.managed_devops_pool_sku_cpu_count
-  managed_devops_pool_usage = try([
-    for usage in data.azapi_resource_action.provider_usage.output.value :
-    {
-      usage                    = usage
-      limit                    = usage.limit
-      current_usage            = usage.currentValue
-      sku_family               = usage.name.value
-      sku_family_localized     = usage.name.localizedValue
-      this_sku_family          = local.managed_devops_pool_sku
-      this_sku_cpu_count       = local.managed_devops_pool_sku_cpu_count
-      this_sku_cpu_count_total = local.managed_devops_pool_sku_cpu_count_total
-      this_has_room            = usage.currentValue + local.managed_devops_pool_sku_cpu_count_total <= usage.limit ? true : false
-      this_missing_cpu_count   = usage.currentValue + local.managed_devops_pool_sku_cpu_count_total > usage.limit ? (usage.currentValue + local.managed_devops_pool_sku_cpu_count_total) - usage.limit : 0
-    }
-    if lower(usage.name.value) == lower(local.managed_devops_pool_sku_family)
-  ][0], {})
+  # managed_devops_pool_usage = try([
+  #   for usage in data.azapi_resource_action.provider_usage.output.value :
+  #   {
+  #     usage                    = usage
+  #     limit                    = usage.limit
+  #     current_usage            = usage.currentValue
+  #     sku_family               = usage.name.value
+  #     sku_family_localized     = usage.name.localizedValue
+  #     this_sku_family          = local.managed_devops_pool_sku
+  #     this_sku_cpu_count       = local.managed_devops_pool_sku_cpu_count
+  #     this_sku_cpu_count_total = local.managed_devops_pool_sku_cpu_count_total
+  #     this_has_room            = usage.currentValue + local.managed_devops_pool_sku_cpu_count_total <= usage.limit ? true : false
+  #     this_missing_cpu_count   = usage.currentValue + local.managed_devops_pool_sku_cpu_count_total > usage.limit ? (usage.currentValue + local.managed_devops_pool_sku_cpu_count_total) - usage.limit : 0
+  #   }
+  #   if lower(usage.name.value) == lower(local.managed_devops_pool_sku_family)
+  # ][0], {})
+   managed_devops_pool_usage = {
+    sku_family               = data.external.provider_usage.result.sku_family
+    sku_family_localized     = data.external.provider_usage.result.sku_family_localized
+    current_usage            = tonumber(data.external.provider_usage.result.current_value)
+    limit                    = tonumber(data.external.provider_usage.result.limit)
+    this_sku_family          = local.managed_devops_pool_sku
+    this_sku_cpu_count       = local.managed_devops_pool_sku_cpu_count
+    this_sku_cpu_count_total = local.managed_devops_pool_sku_cpu_count_total
+    this_has_room            = tonumber(data.external.provider_usage.result.current_value) + local.managed_devops_pool_sku_cpu_count_total <= tonumber(data.external.provider_usage.result.limit)
+    this_missing_cpu_count   = max(0, (tonumber(data.external.provider_usage.result.current_value) + local.managed_devops_pool_sku_cpu_count_total) - tonumber(data.external.provider_usage.result.limit))
+  }
 }
 
 output "zzz_managed_devops_pool_usage" {
@@ -65,12 +124,12 @@ locals {
 #     if no increase is required, just do a GET to satisfy TF resource requirements, which currently returns an empty list
 resource "azapi_resource_action" "provider_quota_request" {
   type        = "Microsoft.Quota/quotas@2025-09-01"
-  resource_id = local.managed_devops_pool_usage.this_has_room == true ? local.quota_request_set_url : local.quota_request_get_url
+  resource_id = local.managed_devops_pool_usage.this_has_room == false ? local.quota_request_set_url : local.quota_request_get_url
 
   # post only when INCREASE is required; otherwise just do a GET to satisfy TF resource requirements
   action = ""
-  method = local.managed_devops_pool_usage.this_has_room == true ? "POST" : "GET"
-  body = local.managed_devops_pool_usage.this_has_room == true ? {
+  method = local.managed_devops_pool_usage.this_has_room == false ? "POST" : "GET"
+  body = local.managed_devops_pool_usage.this_has_room == false ? {
     properties = {
       name = {
         value = local.managed_devops_pool_usage.sku_family
