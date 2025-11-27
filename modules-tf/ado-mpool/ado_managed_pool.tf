@@ -84,7 +84,8 @@ resource "azapi_resource" "managed_devops_pool" {
 
       fabricProfile = {
         sku = {
-          name = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
+          # name = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
+           name = "Standard_D2ds_v5" # Default
         }
         images = [
           {
@@ -104,7 +105,7 @@ resource "azapi_resource" "managed_devops_pool" {
           logonType = "Service"
         }
         storageProfile = {
-          osDiskStorageAccountType = "StandardSSD"
+          osDiskStorageAccountType = "Standard" # "StandardSSD"
           dataDisks                = []
         }
         kind = "Vmss"
