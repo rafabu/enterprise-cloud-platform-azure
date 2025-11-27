@@ -87,7 +87,8 @@ resource "azapi_resource" "managed_devops_pool" {
           # name = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
            # name = "Standard_D2d_v5" # Default
            
-           name = "Standard_D4s_v5" # Default
+           # name = "Standard_D4s_v5"
+           name = "Standard_D8s_v5" # ~165 EUR/month
         }
         images = [
           {
