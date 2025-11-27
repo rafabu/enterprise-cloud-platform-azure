@@ -1,3 +1,63 @@
+locals {
+  managed_devops_pool_properties = {
+    maximumConcurrency = 2
+    agentProfile = {
+      kind = "Stateless"
+      resourcePredictions = {
+        timeZone = "W. Europe Standard Time"
+        daysData = [
+          {},
+          {
+            "07:30:00" : 2,
+            "21:00:00" : 0
+          },
+          {
+            "07:30:00" : 2,
+            "21:00:00" : 0
+          },
+          {
+            "07:30:00" : 2,
+            "21:00:00" : 0
+          },
+          {
+            "07:30:00" : 2,
+            "21:00:00" : 0
+          },
+          {
+            "07:30:00" : 2,
+            "21:00:00" : 0
+          },
+          {}
+        ]
+      },
+      resourcePredictionsProfile = {
+        kind = "Manual"
+      }
+    }
+    fabricProfile = {
+      sku = {
+        name = "Standard_D2ds_v5" # "Standard_D8s_v5"
+      }
+      images = [
+        {
+          aliases = [
+            "ubuntu-24.04/latest"
+          ]
+          buffer             = "*"
+          wellKnownImageName = "ubuntu-24.04/latest"
+        }
+      ],
+      osProfile = {
+        logonType = "Service"
+      },
+      storageProfile = {
+        osDiskStorageAccountType = "Standard",
+        dataDisks                = []
+      }
+    }
+  }
+}
+
 # DevOpsInfrastructure service principal needs "Reader" and "Network Contributor"
 data "azuread_service_principal" "devops_infrastructure" {
   # DevOpsInfrastructure (MS-SPI)
@@ -85,10 +145,15 @@ resource "azapi_resource" "managed_devops_pool" {
       fabricProfile = {
         sku = {
           # name = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
-           # name = "Standard_D2d_v5" # Default
-           
-           # name = "Standard_D4s_v5"
-           name = "Standard_D8s_v5" # ~165 EUR/month
+          # name = "Standard_D2d_v5" 
+
+          # name = "Standard_D2s_v5" # ~45 EUR/month
+          #     name = "Standard_D2ds_v5" # ~50 EUR/month   << Default
+
+          # name = "Standard_D4s_v5"
+          # name = "Standard_D8s_v5" # ~165 EUR/month
+
+          name = local.managed_devops_pool_properties.fabricProfile.sku.name
         }
         images = [
           {
@@ -108,7 +173,7 @@ resource "azapi_resource" "managed_devops_pool" {
           logonType = "Service"
         }
         storageProfile = {
-          osDiskStorageAccountType = "Standard" # "StandardSSD"
+          osDiskStorageAccountType = local.managed_devops_pool_properties.fabricProfile.storageProfile.osDiskStorageAccountType
           dataDisks                = []
         }
         kind = "Vmss"
@@ -123,7 +188,8 @@ resource "azapi_resource" "managed_devops_pool" {
   depends_on = [
     azuredevops_group_membership.mpool,
     azuredevops_group_membership.mpool_project,
-    azurerm_role_assignment.devops_infrastructure_vnet
+    azurerm_role_assignment.devops_infrastructure_vnet,
+    azapi_resource_action.provider_quota_request
   ]
 }
 
