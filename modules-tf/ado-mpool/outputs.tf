@@ -17,6 +17,19 @@ output "managed_devops_pool" {
   }
 }
 
+output "managed_devops_pool_quota" {
+  value = {
+    id       = local.quota_request_set_url
+    provider = "Microsoft.DevOpsInfrastructure"
+    region   = var.azure_location
+
+    name          = local.managed_devops_pool_sku_family
+    # values as forseen after successful quota request
+    limit         = local.managed_devops_pool_usage.limit + local.managed_devops_pool_usage.this_missing_cpu_count
+    current_usage = local.managed_devops_pool_usage.current_usage + local.managed_devops_pool_usage.this_sku_cpu_count_total
+  }
+}
+
 output "service_principals" {
   value = { for key, val in local.workload_identity_objects : key => {
     id           = val.id
