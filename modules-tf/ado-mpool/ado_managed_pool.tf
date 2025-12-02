@@ -37,7 +37,8 @@ locals {
     fabricProfile = {
       sku = {
         # AMD EPYC 9654 (Genoa)
-        name = "Standard_D2as_v5"
+        # name = "Standard_D2as_v5"
+        name = "Standard_D16as_v5"
       }
       images = [
         {
