@@ -13,6 +13,19 @@ data "azapi_resource_action" "provider_usage" {
 }
 
 locals {
+  # IMPORTANT: Most of the SKU family names for quotas are derivable from the managed devops pool's SKU name, but some are exceptions (reminds me of French classes I took in the last millennium ...)
+  #      if such are encountered, add them to the following local: managed_devops_pool_sku_family_exceptions
+  managed_devops_pool_sku_family_exceptions = {
+    dasv6 = { # DaS_v6 does not have the "s" in the family name
+      sku_regex  = "(?i)^Standard_D\\d+as_v6$"
+      sku_family = "standardDav6Family"
+    }
+  }
+
+  managed_devops_pool_sku_family_exception = try([
+    for key, attr in local.managed_devops_pool_sku_family_exceptions : attr.sku_family if length(regexall(attr.sku_regex, local.managed_devops_pool_sku)) > 0
+  ][0], "")
+
   # current usage of SKU family and details on the allotment required by this mpool instance
   managed_devops_pool_sku                 = local.managed_devops_pool_properties.fabricProfile.sku.name
   managed_devops_pool_sku_family          = "${join("", regexall("^([^_]+)_([A-Za-z]+)\\d+([A-Za-z]*)_(.+)$", local.managed_devops_pool_sku)[0])}Family"
@@ -26,13 +39,13 @@ locals {
       current_usage            = usage.currentValue
       sku_family               = usage.name.value
       sku_family_localized     = usage.name.localizedValue
-      this_sku_family          = local.managed_devops_pool_sku
+      this_sku_family          = length(local.managed_devops_pool_sku_family_exception) > 0 ? local.managed_devops_pool_sku_family_exception : local.managed_devops_pool_sku_family
       this_sku_cpu_count       = local.managed_devops_pool_sku_cpu_count
       this_sku_cpu_count_total = local.managed_devops_pool_sku_cpu_count_total
       this_has_room            = usage.currentValue + local.managed_devops_pool_sku_cpu_count_total <= usage.limit ? true : false
       this_missing_cpu_count   = usage.currentValue + local.managed_devops_pool_sku_cpu_count_total > usage.limit ? (usage.currentValue + local.managed_devops_pool_sku_cpu_count_total) - usage.limit : 0
     }
-    if lower(usage.name.value) == lower(local.managed_devops_pool_sku_family)
+    if length(local.managed_devops_pool_sku_family_exception) > 0 ? lower(usage.name.value) == lower(local.managed_devops_pool_sku_family_exception) : lower(usage.name.value) == lower(local.managed_devops_pool_sku_family)
   ][0], {})
 }
 
@@ -40,12 +53,12 @@ resource "terraform_data" "managed_devops_quota_request" {
   triggers_replace = {
     # force re-evaluation when relevant inputs change
     managed_devops_pool_sku                 = local.managed_devops_pool_sku
+    managed_devops_pool_sku_family          = local.managed_devops_pool_usage.this_sku_family
     managed_devops_pool_sku_cpu_count_total = local.managed_devops_pool_sku_cpu_count_total
   }
 
   # the SET operation on this is extremely sensitive to throttling; make sure it doesn't run too often!!!
   #     if no increase is required, just do a GET (on another provider) to satisfy TF resource requirements
-
   provisioner "local-exec" {
     when        = create
     interpreter = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-command"]
@@ -69,7 +82,7 @@ resource "terraform_data" "managed_devops_quota_request" {
 
 locals {
   quota_request_scope = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.DevOpsInfrastructure/locations/${lower(var.azure_location)}"
-  quota_request_id = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.DevOpsInfrastructure/locations/${lower(var.azure_location)}/providers/Microsoft.Quota/quotas/${local.managed_devops_pool_usage.sku_family}"
+  quota_request_id    = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.DevOpsInfrastructure/locations/${lower(var.azure_location)}/providers/Microsoft.Quota/quotas/${local.managed_devops_pool_usage.sku_family}"
 }
 
 data "azapi_resource_action" "provider_usage_recheck" {
@@ -88,9 +101,9 @@ data "azapi_resource_action" "provider_usage_recheck" {
     postcondition {
       condition = [
         for usage in self.output.value : usage.limit
-        if lower(usage.name.value) == lower(local.managed_devops_pool_sku_family)
+        if lower(usage.name.value) == lower(local.managed_devops_pool_usage.sku_family)
       ][0] >= local.managed_devops_pool_usage.limit + local.managed_devops_pool_usage.this_missing_cpu_count
-      error_message = "Microsoft.DevOpsInfrastructure quota request for ${local.managed_devops_pool_sku_family} in region ${lower(var.azure_location)} has not been fulfilled; current limit is still insufficient."
+      error_message = "Microsoft.DevOpsInfrastructure quota request for ${local.managed_devops_pool_usage.sku_family} in region ${lower(var.azure_location)} has not been fulfilled; current limit is still insufficient."
     }
   }
 }
@@ -104,6 +117,6 @@ locals {
       sku_family           = usage.name.value
       sku_family_localized = usage.name.localizedValue
     }
-    if lower(usage.name.value) == lower(local.managed_devops_pool_sku_family)
+    if lower(usage.name.value) == lower(local.managed_devops_pool_usage.sku_family)
   ][0], {})
 }

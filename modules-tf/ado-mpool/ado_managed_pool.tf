@@ -36,9 +36,9 @@ locals {
     }
     fabricProfile = {
       sku = {
+        # Default Managed_DevOps_Pool: "Standard_D2ds_v5"
         # AMD EPYC 9654 (Genoa)
-        # name = "Standard_D2as_v5"
-        name = "Standard_D16as_v5"
+        name = "Standard_D2as_v5" # --> Standard_D*as_v6 is not compatible (v2 VM image only)
       }
       images = [
         {
@@ -53,8 +53,7 @@ locals {
         logonType = "Service"
       },
       storageProfile = {
-        # osDiskStorageAccountType = "Standard",
-        osDiskStorageAccountType = "Premium",
+        osDiskStorageAccountType = "StandardSSD", # "Standard" / "Premium"
         dataDisks                = []
       },
       networkProfile = {
@@ -150,16 +149,7 @@ resource "azapi_resource" "managed_devops_pool" {
 
       fabricProfile = {
         sku = {
-          # name = "Standard_B2as_v2" # Default: "Standard_D2ds_v5"
-          # name = "Standard_D2d_v5" 
-
-          # name = "Standard_D2s_v5" # ~45 EUR/month
-          #     name = "Standard_D2ds_v5" # ~50 EUR/month   << Default
-
-          # name = "Standard_D4s_v5"
-          # name = "Standard_D8s_v5" # ~165 EUR/month
-
-          name = local.managed_devops_pool_properties.fabricProfile.sku.name
+          name = try(local.managed_devops_pool_properties.fabricProfile.sku.name, "Standard_D2ds_v5")
         }
         images = [
           {
@@ -175,7 +165,7 @@ resource "azapi_resource" "managed_devops_pool" {
         networkProfile = {
           # public IP address to allow outpund connections from the pool VMs in subnets without default outbound access
           staticIpAddressCount = local.managed_devops_pool_properties.fabricProfile.networkProfile.staticIpAddressCount
-          subnetId = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
+          subnetId             = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
         }
         osProfile = {
           logonType = "Service"
@@ -197,6 +187,7 @@ resource "azapi_resource" "managed_devops_pool" {
     azuredevops_group_membership.mpool,
     azuredevops_group_membership.mpool_project,
     azurerm_role_assignment.devops_infrastructure_vnet,
+    azurerm_subnet_nat_gateway_association.mpool,
     data.azapi_resource_action.provider_usage_recheck
   ]
 }

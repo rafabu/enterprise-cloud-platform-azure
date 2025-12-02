@@ -23,11 +23,21 @@ output "managed_devops_pool_quota" {
     provider = "Microsoft.DevOpsInfrastructure"
     region   = var.azure_location
 
-    name = local.managed_devops_pool_sku_family
+    name = local.managed_devops_pool_usage.sku_family
     # values as after (hopefully) successful quota request
     limit         = local.managed_devops_pool_usage_finally.limit
     current_usage = local.managed_devops_pool_usage_finally.current_usage
   }
+}
+
+output "nat_gateway" {
+  value = local.mpool_nat_gateway_deploy ? {
+    id                  = azurerm_nat_gateway.mpool["do"].id
+    name                = azurerm_nat_gateway.mpool["do"].name
+    resource_group_name = azurerm_resource_group.mpool.name
+    location            = azurerm_resource_group.mpool.location
+    public_ip_address   = azurerm_public_ip.mpool["do"].ip_address
+  } : null
 }
 
 output "service_principals" {
