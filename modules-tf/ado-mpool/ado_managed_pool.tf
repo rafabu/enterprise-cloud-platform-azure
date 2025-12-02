@@ -59,6 +59,7 @@ locals {
       },
       networkProfile = {
         staticIpAddressCount = 1
+      }
     }
   }
 }
