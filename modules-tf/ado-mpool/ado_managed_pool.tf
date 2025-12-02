@@ -58,7 +58,7 @@ locals {
         dataDisks                = []
       },
       networkProfile = {
-        staticIpAddressCount = 1
+        staticIpAddressCount = 0
       }
     }
   }
