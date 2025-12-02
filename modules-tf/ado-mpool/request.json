@@ -1,0 +1,69 @@
+{
+    {
+        "requests": [
+            {
+                "content": {
+                    "properties": {
+                        "limit": {
+                            "limitObjectType": "LimitValue",
+                            "value": "2"
+                        },
+                        "name": {
+                            "value": "standardDv5Family"
+                        },
+                        "properties": {
+                            "requestOrigin": "Microsoft_Azure_Capacity/QuotaApproval.ReactView"
+                        }
+                    }
+                },
+                "httpMethod": "PUT",
+                "name": "4aa924d1-0bf5-4ab4-9002-1d51ac8c0209",
+                "requestHeaderDetails": {
+                    "commandName": "Microsoft_Azure_Capacity.QuotaApproval.ReactView/QuotaRequest"
+                },
+                "url": "/subscriptions/e1b3be0d-0df0-4e0a-a585-ffc97f60bd42/providers/Microsoft.DevOpsInfrastructure/locations/switzerlandnorth/providers/Microsoft.Quota/quotas/standardDv5Family?api-version=2021-03-15-preview"
+            }
+        ]
+    },
+    {
+        "requests": [
+            {
+                "httpMethod": "GET",
+                "name": "4aa924d1-0bf5-4ab4-9002-1d51ac8c0311",
+                "requestHeaderDetails": {
+                    "commandName": "Microsoft_Azure_Capacity."
+                },
+                "url": "/subscriptions/e1b3be0d-0df0-4e0a-a585-ffc97f60bd42/providers/Microsoft.DevOpsInfrastructure/locations/switzerlandnorth/usages?api-version=2024-04-04-preview"
+            }
+        ]
+    }
+},
+{
+    "properties": {
+        "limit": {
+            "limitObjectType": "LimitValue",
+            "limitType": "Independent",
+            "value": 32
+        },
+        "name": {
+            "value": "STANDARDDASV5FAMILY"
+        },
+        "properties": {},
+        "provisioningState": "InProgress",
+        "isQuotaApplicable": true
+    },
+    "id": "/subscriptions/e1b3be0d-0df0-4e0a-a585-ffc97f60bd42/providers/Microsoft.DevOpsInfrastructure/locations/switzerlandnorth/providers/Microsoft.Quota/quotaRequests/f3f5ad07-cd31-4445-9ef0-4ea8da69d8f6",
+    "type": "Microsoft.Quota/Quotas",
+    "name": "f3f5ad07-cd31-4445-9ef0-4ea8da69d8f6"
+},
+{
+    "properties": {
+        "limit": {
+            "limitObjectType": "LimitValue",
+            "value": 32
+        },
+        "name": {
+            "value": "standardDASv5Family"
+        }
+    }
+}

@@ -56,7 +56,9 @@ locals {
         # osDiskStorageAccountType = "Standard",
         osDiskStorageAccountType = "Premium",
         dataDisks                = []
-      }
+      },
+      networkProfile = {
+        staticIpAddressCount = 1
     }
   }
 }
@@ -170,6 +172,8 @@ resource "azapi_resource" "managed_devops_pool" {
         ]
 
         networkProfile = {
+          # public IP address to allow outpund connections from the pool VMs in subnets without default outbound access
+          staticIpAddressCount = local.managed_devops_pool_properties.fabricProfile.networkProfile.staticIpAddressCount
           subnetId = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
         }
         osProfile = {
