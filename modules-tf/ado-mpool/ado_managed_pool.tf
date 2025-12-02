@@ -37,7 +37,7 @@ locals {
     fabricProfile = {
       sku = {
         # AMD EPYC 9654 (Genoa)
-        name = "Standard_D2as_v5", # "Standard_B2s_v2", # "Standard_B2as_v2" # "Standard_D16as_v5" # "Standard_D2ds_v5" # "Standard_D8s_v5"
+        name = "Standard_D2as_v5"
       }
       images = [
         {
@@ -190,7 +190,7 @@ resource "azapi_resource" "managed_devops_pool" {
     azuredevops_group_membership.mpool,
     azuredevops_group_membership.mpool_project,
     azurerm_role_assignment.devops_infrastructure_vnet,
-    # azapi_resource_action.provider_quota_request
+    data.azapi_resource_action.provider_usage_recheck
   ]
 }
 

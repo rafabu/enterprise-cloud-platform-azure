@@ -19,14 +19,14 @@ output "managed_devops_pool" {
 
 output "managed_devops_pool_quota" {
   value = {
-    id       = local.quota_request_set_url
+    id       = local.quota_request_id
     provider = "Microsoft.DevOpsInfrastructure"
     region   = var.azure_location
 
-    name          = local.managed_devops_pool_sku_family
-    # values as forseen after successful quota request
-    limit         = local.managed_devops_pool_usage.limit + local.managed_devops_pool_usage.this_missing_cpu_count
-    current_usage = local.managed_devops_pool_usage.current_usage + local.managed_devops_pool_usage.this_sku_cpu_count_total
+    name = local.managed_devops_pool_sku_family
+    # values as after (hopefully) successful quota request
+    limit         = local.managed_devops_pool_usage_finally.limit
+    current_usage = local.managed_devops_pool_usage_finally.current_usage
   }
 }
 
