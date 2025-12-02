@@ -53,7 +53,8 @@ locals {
         logonType = "Service"
       },
       storageProfile = {
-        osDiskStorageAccountType = "Standard",
+        # osDiskStorageAccountType = "Standard",
+        osDiskStorageAccountType = "Premium",
         dataDisks                = []
       }
     }
