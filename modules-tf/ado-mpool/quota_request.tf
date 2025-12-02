@@ -36,7 +36,7 @@ locals {
   ][0], {})
 }
 
-resource "terraform_data" "managed_devops_pool_usage" {
+resource "terraform_data" "managed_devops_quota_request" {
   triggers_replace = {
     # force re-evaluation when relevant inputs change
     managed_devops_pool_sku                 = local.managed_devops_pool_sku
@@ -80,7 +80,7 @@ data "azapi_resource_action" "provider_usage_recheck" {
   response_export_values = ["*"]
 
   depends_on = [
-    terraform_data.managed_devops_pool_usage
+    terraform_data.managed_devops_quota_request
   ]
 
   lifecycle {
