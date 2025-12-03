@@ -57,7 +57,9 @@ locals {
         dataDisks                = []
       },
       networkProfile = {
-        staticIpAddressCount = 0
+        # static ip address is only needed if pool is not subnet integrated
+        staticIpAddressCount = length(var.subnet_artefact_names) == 0 ? 1 : 0
+        subnetId             = length(var.subnet_artefact_names) > 0 ? azurerm_subnet.mpool[var.subnet_artefact_names[0]].id : null
       }
     }
   }
@@ -165,7 +167,7 @@ resource "azapi_resource" "managed_devops_pool" {
         networkProfile = {
           # public IP address to allow outpund connections from the pool VMs in subnets without default outbound access
           staticIpAddressCount = local.managed_devops_pool_properties.fabricProfile.networkProfile.staticIpAddressCount
-          subnetId             = azurerm_subnet.mpool[var.subnet_artefact_names[0]].id
+          subnetId             = local.managed_devops_pool_properties.fabricProfile.networkProfile.subnetId
         }
         osProfile = {
           logonType = "Service"

@@ -87,6 +87,12 @@ variable "subnet_artefact_names" {
   description = "List of virtualNetwork/subnet artefacts that are created"
 }
 
+variable "virtual_network_island_mode" {
+  type        = bool
+  default     = false
+  description = "If true, indicates that the virtual network is in island mode (no outbound access by default); ADO managed pool will require a NAT gateway for outbound access if subnet integration is used."
+}
+
 variable "workload_identity_type" {
   type        = string
   default     = "userAssignedIdentity"

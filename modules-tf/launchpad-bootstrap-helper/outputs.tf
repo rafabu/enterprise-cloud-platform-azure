@@ -55,5 +55,7 @@ output "actor_network_information" {
     local_ip                         = data.external.this_local_ip.result.local_ip
     is_local_ip_within_ecp_launchpad = local.ip_is_contained
     ecp_launchpad_network_cidr       = local.cidr_string
+    # TODO: determine if ECP network is (still) in island mode - not connected to the internet by ECP infrastructure
+    ecp_launchpad_network_island_mode = true
   }
 }
