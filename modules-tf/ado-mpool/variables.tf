@@ -25,7 +25,7 @@ variable "ecp_configuration_repo" {
 
 variable "ecp_configuration_repo_version" {
   type        = string
-  default = "main"
+  default     = "main"
   description = "Version (git tag) of the Git repository containing the ECP configuration for this environment."
 }
 
@@ -118,8 +118,106 @@ variable "backend_storage_accounts" {
       fqdn               = string
       private_ip_address = string
     }))
-    ecp_level = string
+    ecp_level            = string
     tf_backend_container = string
   }))
   description = "Map of storage accounts created for each ECP deployment level, with information required for private endpoint access without DNS"
+}
+
+variable "managed_devops_pool_maximum_concurrency" {
+  type        = number
+  default     = 2
+  description = "(Optional) The maximum concurrency for the managed DevOps pool. Defaults to 2."
+}
+
+variable "managed_devops_pool_stateless_agent_profile" {
+  type = object({
+    manual_resource_predictions_profile = optional(object({
+      time_zone          = string
+      all_week_schedule  = optional(number)
+      monday_schedule    = optional(map(number))
+      tuesday_schedule   = optional(map(number))
+      wednesday_schedule = optional(map(number))
+      thursday_schedule  = optional(map(number))
+      friday_schedule    = optional(map(number))
+      saturday_schedule  = optional(map(number))
+      sunday_schedule    = optional(map(number))
+    }))
+    automatic_resource_predictions_profile = optional(object({
+      prediction_preference = string
+    }))
+  })
+  description = "(Optional) The stateless agent profile for the managed DevOps pool."
+  default     = {}
+  # default = {
+  #   manual_resource_predictions_profile = {
+  #     time_zone = "W. Europe Standard Time"
+  #     # all_week_schedule = 2
+  #     monday_schedule = {
+  #       "07:30:00" = 2,
+  #       "21:00:00" = 0
+  #     }
+  #     tuesday_schedule = {
+  #       "07:30:00" = 2,
+  #       "21:00:00" = 0
+  #     }
+  #     wednesday_schedule = {
+  #       "07:30:00" = 2,
+  #       "21:00:00" = 0
+  #     }
+  #     thursday_schedule = {
+  #       "07:30:00" = 2,
+  #       "21:00:00" = 0
+  #     }
+  #     friday_schedule = {
+  #       "07:30:00" = 2,
+  #       "21:00:00" = 0
+  #     }
+  #     saturday_schedule = {}
+  #     sunday_schedule   = {}
+  #   }
+  # }
+}
+
+variable "managed_devops_pool_vmss_fabric_profile" {
+  type = object({
+    sku_name = optional(string)
+    image = optional(list(object({
+      aliases               = list(string)
+      buffer                = string
+      well_known_image_name = string
+    })))
+    os_profile = optional(object({
+      logon_type = string
+    }))
+    storage_profile = optional(object({
+      os_disk_storage_account_type = string
+      data_disk = optional(list(object({
+        lun                  = number
+        disk_size_gb         = number
+        caching              = string
+        storage_account_type = string
+      })))
+    }))
+    }
+  )
+  description = "(Optional) The VMSS fabric profile for the managed DevOps pool."
+  default     = {}
+  # default = {
+  #   sku_name = "Standard_D2as_v5"
+  #   image = [
+  #     {
+  #       aliases               = ["ubuntu-24.04/latest"]
+  #       buffer                = "*"
+  #       well_known_image_name = "ubuntu-24.04/latest"
+  #     }
+  #   ]
+  #   os_profile = {
+  #     logon_type = "Service"
+  #   }
+  #   storage_profile = {
+  #     os_disk_storage_account_type = "StandardSSD"
+  #     data_disk                    = []
+  #   }
+  # }
 }

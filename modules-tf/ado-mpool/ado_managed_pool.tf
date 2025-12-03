@@ -1,61 +1,67 @@
 locals {
   managed_devops_pool_properties = {
-    maximumConcurrency = 2
+    maximumConcurrency = var.managed_devops_pool_maximum_concurrency
     agentProfile = {
       kind = "Stateless"
-      resourcePredictions = {
-        timeZone = "W. Europe Standard Time"
-        daysData = [
-          {},
+      resourcePredictions = try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile, null) != null && length(try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile, {})) > 0 ? {
+        timeZone = coalesce(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.time_zone, "UTC")
+        daysData = coalesce(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.all_week_schedule, 0) > 0 ? [
           {
-            "07:30:00" : 2,
-            "21:00:00" : 0
+            "00:00:00" : var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.all_week_schedule
+          }
+          ] : [
+          {
+            for t, v in try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.sunday_schedule, {}) : t => v
           },
           {
-            "07:30:00" : 2,
-            "21:00:00" : 0
+            for t, v in try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.monday_schedule, {}) : t => v
           },
           {
-            "07:30:00" : 2,
-            "21:00:00" : 0
+            for t, v in try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.tuesday_schedule, {}) : t => v
           },
           {
-            "07:30:00" : 2,
-            "21:00:00" : 0
+            for t, v in try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.wednesday_schedule, {}) : t => v
           },
           {
-            "07:30:00" : 2,
-            "21:00:00" : 0
+            for t, v in try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.thursday_schedule, {}) : t => v
           },
-          {}
+          {
+            for t, v in try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.friday_schedule, {}) : t => v
+          },
+          {
+            for t, v in try(var.managed_devops_pool_stateless_agent_profile.manual_resource_predictions_profile.saturday_schedule, {}) : t => v
+          }
         ]
-      },
+      } : null
       resourcePredictionsProfile = {
-        kind = "Manual"
+        kind                 = try(var.managed_devops_pool_stateless_agent_profile.automatic_resource_predictions_profile, null) != null && length(try(var.managed_devops_pool_stateless_agent_profile.automatic_resource_predictions_profile, {})) > 0 ? "Automatic" : "Manual"
+        predictionPreference = try(var.managed_devops_pool_stateless_agent_profile.automatic_resource_predictions_profile, null) != null && length(try(var.managed_devops_pool_stateless_agent_profile.automatic_resource_predictions_profile, {})) > 0 ? coalesce(var.managed_devops_pool_stateless_agent_profile.automatic_resource_predictions_profile.prediction_preference, "Balanced") : null
       }
     }
     fabricProfile = {
       sku = {
         # Default Managed_DevOps_Pool: "Standard_D2ds_v5"
         # AMD EPYC 9654 (Genoa)
-        name = "Standard_D2as_v5" # --> Standard_D*as_v6 is not compatible (v2 VM image only)
+        name = coalesce(var.managed_devops_pool_vmss_fabric_profile.sku_name, "Standard_D2as_v5") # --> Standard_D*as_v6 is not compatible (v2 VM image only)
       }
-      images = [
-        {
-          aliases = [
-            "ubuntu-24.04/latest"
-          ]
-          buffer             = "*"
-          wellKnownImageName = "ubuntu-24.04/latest"
+      images = [for img in try(var.managed_devops_pool_vmss_fabric_profile.image, {
+        aliases            = ["ubuntu-24.04/latest"]
+        buffer             = "*"
+        wellKnownImageName = "ubuntu-24.04/latest"
+        }) : {
+
+        aliases            = try(img.aliases, [img.well_known_image_name])
+        buffer             = coalesce(img.buffer, "*")
+        wellKnownImageName = img.well_known_image_name
         }
-      ],
+      ]
       osProfile = {
-        logonType = "Service"
-      },
+        logonType = coalesce(var.managed_devops_pool_vmss_fabric_profile.os_profile.logon_type, "Service")
+      }
       storageProfile = {
-        osDiskStorageAccountType = "StandardSSD", # "Standard" / "Premium"
-        dataDisks                = []
-      },
+        osDiskStorageAccountType = coalesce(var.managed_devops_pool_vmss_fabric_profile.storage_profile.os_disk_storage_account_type, "StandardSSD") # "Standard" / "Premium"
+        dataDisks                = try(var.managed_devops_pool_vmss_fabric_profile.storage_profile.data_disk, [])
+      }
       networkProfile = {
         # static ip address is only needed if pool is not subnet integrated
         staticIpAddressCount = length(var.subnet_artefact_names) == 0 ? 1 : 0
@@ -97,7 +103,7 @@ resource "azapi_resource" "managed_devops_pool" {
   body = {
     properties = {
       devCenterProjectResourceId = var.dev_center_project_resource_id
-      maximumConcurrency         = 2
+      maximumConcurrency         = local.managed_devops_pool_properties.maximumConcurrency
       organizationProfile = {
         kind = "AzureDevOps"
         organizations = [
@@ -106,7 +112,7 @@ resource "azapi_resource" "managed_devops_pool" {
             projects = [
               var.ecp_azure_devops_project_name
             ]
-            parallelism = 2
+            parallelism = local.managed_devops_pool_properties.maximumConcurrency
             openAccess  = false
           }
         ]
@@ -114,67 +120,33 @@ resource "azapi_resource" "managed_devops_pool" {
           kind = "CreatorOnly"
         }
       }
-
       agentProfile = {
-        kind = "Stateless"
-        resourcePredictions = {
-          timeZone = "W. Europe Standard Time",
-          daysData = [
-            {},
-            {
-              "07:30:00" = 2,
-              "21:00:00" = 0
-            },
-            {
-              "07:30:00" = 2,
-              "21:00:00" = 0
-            },
-            {
-              "07:30:00" = 2,
-              "21:00:00" = 0
-            },
-            {
-              "07:30:00" = 2,
-              "21:00:00" = 0
-            },
-            {
-              "07:30:00" = 2,
-              "21:00:00" = 0
-            },
-            {}
-          ]
-        },
-        resourcePredictionsProfile = {
+        kind                = local.managed_devops_pool_properties.agentProfile.kind
+        resourcePredictions = local.managed_devops_pool_properties.agentProfile.resourcePredictions
+        resourcePredictionsProfile = local.managed_devops_pool_properties.agentProfile.resourcePredictionsProfile.kind == "Automatic" ? {
+          kind                 = "Automatic" #local.managed_devops_pool_properties.agentProfile.resourcePredictionsProfile.kind
+          predictionPreference = local.managed_devops_pool_properties.agentProfile.resourcePredictionsProfile.predictionPreference
+          } : {
           kind = "Manual"
         }
       }
-
       fabricProfile = {
         sku = {
           name = try(local.managed_devops_pool_properties.fabricProfile.sku.name, "Standard_D2ds_v5")
         }
-        images = [
-          {
-            wellKnownImageName = "ubuntu-24.04/latest"
-            aliases = [
-              "ubuntu-24.04/latest"
-            ]
-            buffer     = "*"
-            resourceId = null
-          }
-        ]
+        images = local.managed_devops_pool_properties.fabricProfile.images
 
         networkProfile = {
-          # public IP address to allow outpund connections from the pool VMs in subnets without default outbound access
+          # public IP address to allow outbound connections from the pool VMs in subnets without default outbound access
           staticIpAddressCount = local.managed_devops_pool_properties.fabricProfile.networkProfile.staticIpAddressCount
           subnetId             = local.managed_devops_pool_properties.fabricProfile.networkProfile.subnetId
         }
         osProfile = {
-          logonType = "Service"
+          logonType = local.managed_devops_pool_properties.fabricProfile.osProfile.logonType
         }
         storageProfile = {
           osDiskStorageAccountType = local.managed_devops_pool_properties.fabricProfile.storageProfile.osDiskStorageAccountType
-          dataDisks                = []
+          dataDisks                = local.managed_devops_pool_properties.fabricProfile.storageProfile.dataDisks
         }
         kind = "Vmss"
       }
@@ -213,4 +185,3 @@ resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
     ignore_changes = all
   }
 }
-
