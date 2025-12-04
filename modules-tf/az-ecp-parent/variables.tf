@@ -26,3 +26,25 @@ variable "azure_tags" {
   type    = map(string)
   default = {}
 }
+
+variable "ecp_deployment_entraid_contributor_group_pim_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable or disable PIM for contributor roles (Entra ID groups) in the ECP deployment."
+}
+
+variable "ecp_deployment_entraid_contributor_group_protected" {
+  type        = bool
+  default     = true
+  description = "Enable or disable the Entra ID protected group feature for the ECP environment (groups are role-enabled and have additional security features applied)."
+}
+
+variable "ecp_deployment_contributor_workload_identity_object_id" {
+  type        = string
+  description = "Object ID of the workload identity (user or service principal) used to perform operations in the ECP deployment."
+}
+
+variable "ecp_deployment_contributor_reader_identity_object_id" {
+  type        = string
+  description = "Object ID of the workload identity (user or service principal) used to perform operations in the ECP deployment."
+}

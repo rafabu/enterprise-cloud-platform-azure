@@ -1,21 +1,12 @@
 # new Entra tenants will not have been enabled for using management groups
 #     TenantBackfill is required. See
 #     https://learn.microsoft.com/en-us/cli/azure/account/management-group/tenant-backfill?view=azure-cli-latest
-
-resource "terraform_data" "root_management_group_structure" {
-  triggers_replace = {
-    tenant_id  = data.azuread_client_config.this.tenant_id
-    ecp_parent = var.ecp_azure_root_parent_management_group_id
-  }
-
-  provisioner "local-exec" {
-    when        = create
-    interpreter = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-command"]
-    command     = <<-SCRIPT
-
+data "external" "ecp_parent_mg_check" {
+  program = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-command", <<-SCRIPT
+    
 $parent_management_group_id = "${var.ecp_azure_root_parent_management_group_id}"
 $parent_management_group_display_name = "ECP Root Management Group"
-$tenant_id = "${data.azuread_client_config.this.tenant_id}"
+$tenant_id = "${data.azurerm_client_config.this.tenant_id}"
 
 function Wait-TenantBackfill {
     param(
@@ -32,31 +23,28 @@ function Wait-TenantBackfill {
         $status = ($bfStatus | ConvertFrom-Json).status
         
         if ($status -ieq "Completed") {
-            Write-Output "INFO: TenantBackfill completed successfully"
             return @{ Success = $true; Status = $bfStatus }
         }
         elseif ($status -ine "Started") {
-            Write-Warning "WARNING: TenantBackfill status is '$status' - unexpected state"
             return @{ Success = $false; Status = $bfStatus }
         }
         
         $elapsed = [int]((Get-Date) - $startTime).TotalMinutes
-        Write-Output "INFO: TenantBackfill in progress... (elapsed: $elapsed min)"
     }
-    
-    Write-Warning "WARNING: TenantBackfill did not complete within $MaxWaitMinutes minutes"
     return @{ Success = $false; Status = $null }
 }
 
 # check if root management group already exists (backfill had happened in the past)
 $bfStatus = az rest --method POST --url "https://management.azure.com/providers/Microsoft.Management/tenantBackfillStatus?api-version=2020-05-01"
 if ($bfStatus -and ($bfStatus | ConvertFrom-Json).status -ieq "Completed") {
-    Write-Output "INFO: Root Management Group exists - TenantBackfill has already been completed for this tenant."
+    $tenantRootMgId = "/providers/Microsoft.Management/managementGroups/$tenant_id"
+    $tenantRootBackfillStatus = "Completed"
 }
 elseif ($bfStatus -and ($bfStatus | ConvertFrom-Json).status -ieq "Started") {
-    Write-Output "INFO: Root Management Group is being created - TenantBackfill is in progress for this tenant."
     $result = Wait-TenantBackfill -MaxWaitMinutes 10 -PollIntervalSeconds 15
     if ($result.Success) {
+        $tenantRootMgId = "/providers/Microsoft.Management/managementGroups/$tenant_id"
+        $tenantRootBackfillStatus = "Started"
     }
     else {
         exit 1
@@ -67,6 +55,8 @@ else {
     az rest --method POST --url "https://management.azure.com/providers/Microsoft.Management/startTenantBackfill?api-version=2020-05-01"
     $result = Wait-TenantBackfill -MaxWaitMinutes 10 -PollIntervalSeconds 15
     if ($result.Success) {
+        $tenantRootMgId = "/providers/Microsoft.Management/managementGroups/$tenant_id"
+        $tenantRootBackfillStatus = "Completed (this run)"
     }
     else {
         exit 1
@@ -74,18 +64,14 @@ else {
 }
 
 # Check if parent management group already exists
-Write-Output "INFO: Checking if ECP parent management group '$parent_management_group_id' exists..."
-$existingMgs = az rest --method GET --url "https://management.azure.com/providers/Microsoft.Management/managementGroups?api-version=2020-05-01" | ConvertFrom-Json
-$existingMg = $existingMgs.value | Where-Object { $_.name -ieq $parent_management_group_id } | Select-Object -First 1
-
+$existingMg = az rest --method GET --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" 2>$null | ConvertFrom-Json
 if ($existingMg) {
-    Write-Output "      Management group '$parent_management_group_id' already exists"
-    Write-Output "        Display Name: $($existingMg.properties.displayName)"
-    Write-Output "        ID: $($existingMg.id)"
-    exit 0
+    $parentMgName = $parent_management_group_id
+    $parentMgDisplayName = $($existingMg.properties.displayName)
+    $parentMgId = $($existingMg.id)
+    $parentMgStatus = "Existing"
 }
 else {
-    Write-Output "INFO: ECP parent management group '$parent_management_group_id' not found - creating..."
     $mgBody = @{
         properties = @{
             displayName = "$parent_management_group_display_name"
@@ -99,29 +85,41 @@ else {
     $mgBodyJson = ($mgBody | ConvertTo-Json -Depth 10 -Compress).Replace('"', '\"')
     $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body $mgBodyJson --headers 'Content-Type=application/json'
     if ($LASTEXITCODE -ieq 0) {
-        $created = $createResult | ConvertFrom-Json
-        Write-Output "      ECP parent management group created successfully"
-        Write-Output "        Name:         $($created.name)"
-        Write-Output "        Display Name: $parent_management_group_display_name"
-        Write-Output "        ID:           $($created.id)"
-        exit 0
+        $parentMgName = $parent_management_group_id
+        $parentMgDisplayName = $parent_management_group_display_name
+        $parentMgId = "/providers/Microsoft.Management/managementGroups/$parent_management_group_id"
+        $parentMgStatus = "Existing (this run)"
     }
     else {
-        Write-Error "ERROR: Failed to create management group '$parent_management_group_id'"
         exit 1
     }
 }
 
-SCRIPT
-  }
+# output for external data source
+@{
+    tenant_root_management_group_id      = $tenantRootMgId
+    tenant_root_backfill_status          = $tenantRootBackfillStatus
+    parent_management_group_name         = $parentMgName
+    parent_management_group_display_name = $parentMgDisplayName
+    parent_management_group_id           = $parentMgId
+    parent_management_group_status       = $parentMgStatus
+} | ConvertTo-Json
+
+  SCRIPT
+  ]
+}
+
+output "root_management_group_structure" {
+  value = data.external.ecp_parent_mg_check.result
 }
 
 resource "azurerm_management_group" "ecp_deployment_parent" {
+  provider = azurerm.launchpad
 
-  name         = "ECP-Deployment-${var.ecp_environment_name}"
+  name         = "ecp-deployment-${var.ecp_environment_name}"
   display_name = var.ecp_environment_name
 
-  parent_management_group_id = var.ecp_azure_root_parent_management_group_id
+  parent_management_group_id = "/providers/Microsoft.Management/managementGroups/${var.ecp_azure_root_parent_management_group_id}"
 
   subscription_ids = []
 
@@ -130,4 +128,12 @@ resource "azurerm_management_group" "ecp_deployment_parent" {
       subscription_ids
     ]
   }
+
+  depends_on = [
+    data.external.ecp_parent_mg_check
+  ]
+}
+
+output "zzz_ecp_deployment_parent_management_group" {
+  value       = azurerm_management_group.ecp_deployment_parent
 }
