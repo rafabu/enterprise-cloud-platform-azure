@@ -3,6 +3,11 @@ variable "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
 }
 
+variable "ecp_azure_root_parent_management_group_id" {
+  type        = string
+  description = "The management group ID of the root parent management group for the ECP environment"
+}
+
 variable "azure_location" {
   type = string
 }
