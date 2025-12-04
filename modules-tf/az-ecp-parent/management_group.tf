@@ -70,6 +70,7 @@ if ($existingMg) {
     $parentMgDisplayName = $($existingMg.properties.displayName)
     $parentMgId = $($existingMg.id)
     $parentMgStatus = "Existing"
+    $parentAction = "None"
 }
 else {
     $mgBody = @{
@@ -88,7 +89,8 @@ else {
         $parentMgName = $parent_management_group_id
         $parentMgDisplayName = $parent_management_group_display_name
         $parentMgId = "/providers/Microsoft.Management/managementGroups/$parent_management_group_id"
-        $parentMgStatus = "Existing (this run)"
+        $parentMgStatus = "Existing"
+        $parentAction = "Created"
     }
     else {
         exit 1
@@ -103,14 +105,15 @@ else {
     parent_management_group_display_name = $parentMgDisplayName
     parent_management_group_id           = $parentMgId
     parent_management_group_status       = $parentMgStatus
+    parent_management_group_action       = $parentAction
 } | ConvertTo-Json
 
   SCRIPT
   ]
 }
 
-output "root_management_group_structure" {
-  value = data.external.ecp_parent_mg_check.result
+resource "time_sleep" "ecp_parent_mg_check" {
+  create_duration = data.external.ecp_parent_mg_check.result.parent_management_group_action == "Created" ? "2m" : "1ms"
 }
 
 resource "azurerm_management_group" "ecp_deployment_parent" {
@@ -130,10 +133,19 @@ resource "azurerm_management_group" "ecp_deployment_parent" {
   }
 
   depends_on = [
-    data.external.ecp_parent_mg_check
+    data.external.ecp_parent_mg_check,
+    time_sleep.ecp_parent_mg_check
+  ]
+}
+
+resource "time_sleep" "ecp_deployment_parent" {
+  create_duration = "2m"
+
+  depends_on = [
+    azurerm_management_group.ecp_deployment_parent
   ]
 }
 
 output "zzz_ecp_deployment_parent_management_group" {
-  value       = azurerm_management_group.ecp_deployment_parent
+  value = azurerm_management_group.ecp_deployment_parent
 }
