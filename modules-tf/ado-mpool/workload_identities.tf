@@ -57,6 +57,10 @@ locals {
             {
               id   = "246dd0d5-5bd0-4def-940b-0421030a5b68", # Policy.Read.All
               type = "Role"
+            },
+             {
+              id   = "cd4161cb-f098-48f8-a884-1eda9a42434c", # PrivilegedAssignmentSchedule.Read.AzureADGroup
+              type = "Role"
             }
           ]
         }
@@ -134,7 +138,12 @@ locals {
             {
               id   = "1c6e93a6-28e2-4cbb-9f64-1a46a821124d", # Policy.ReadWrite.SecurityDefaults
               type = "Role"
+            },
+             {
+              id   = "41202f2c-f7ab-45be-b001-85c9728b9d69", # PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup
+              type = "Role"
             }
+
 
           ]
         }
