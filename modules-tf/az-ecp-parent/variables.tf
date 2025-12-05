@@ -27,13 +27,19 @@ variable "azure_tags" {
   default = {}
 }
 
+variable "ecp_deployment_entraid_contributor_group_member_principal_ids" {
+  type        = list(string)
+  default     = []
+  description = "Object IDs of members to be added to the contributor role group. If PIM-enabled, must only be users. Otherwise could be groups, service principals and users."
+}
+
 variable "ecp_deployment_entraid_contributor_group_pim_enabled" {
   type        = bool
   default     = true
   description = "Enable or disable PIM for contributor roles (Entra ID groups) in the ECP deployment."
 }
 
-variable "ecp_deployment_entraid_contributor_group_protected" {
+variable "ecp_deployment_entraid_contributor_groups_protected" {
   type        = bool
   default     = true
   description = "Enable or disable the Entra ID protected group feature for the ECP environment (groups are role-enabled and have additional security features applied)."
@@ -44,13 +50,19 @@ variable "ecp_deployment_contributor_workload_identity_object_id" {
   description = "Object ID of the workload identity (user or service principal) used to perform operations in the ECP deployment."
 }
 
+variable "ecp_deployment_entraid_reader_group_member_principal_ids" {
+  type        = list(string)
+  default     = []
+  description = "Object IDs of members to be added to the reader role group. If PIM-enabled, must only be users. Otherwise could be groups, service principals and users."
+}
+
 variable "ecp_deployment_entraid_reader_group_pim_enabled" {
   type        = bool
   default     = false
   description = "Enable or disable PIM for reader roles (Entra ID groups) in the ECP deployment."
 }
 
-variable "ecp_deployment_entraid_reader_group_protected" {
+variable "ecp_deployment_entraid_reader_groups_protected" {
   type        = bool
   default     = false
   description = "Enable or disable the Entra ID protected group feature for the ECP environment (groups are role-enabled and have additional security features applied)."
