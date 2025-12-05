@@ -139,7 +139,7 @@ resource "azurerm_management_group" "ecp_deployment_parent" {
 }
 
 resource "time_sleep" "ecp_deployment_parent" {
-  create_duration = "30s"
+  create_duration = "60s"
 
   depends_on = [
     azurerm_management_group.ecp_deployment_parent
