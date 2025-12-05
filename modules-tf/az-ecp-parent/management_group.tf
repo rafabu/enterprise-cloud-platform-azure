@@ -145,7 +145,3 @@ resource "time_sleep" "ecp_deployment_parent" {
     azurerm_management_group.ecp_deployment_parent
   ]
 }
-
-output "zzz_ecp_deployment_parent_management_group" {
-  value = azurerm_management_group.ecp_deployment_parent
-}
