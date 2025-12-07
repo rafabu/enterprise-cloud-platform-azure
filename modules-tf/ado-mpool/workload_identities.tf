@@ -5,13 +5,28 @@ locals {
     l0-read = {
       ecp_level = "l0"
       azure-roleAssignments = [
+        # {
+        #   scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+        #   roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
+        #   condition        = null
+        # },
         {
-          scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
-          roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
+          scope            = data.azurerm_subscription.id           # launchpad subscription
+          roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader
           condition        = null
         },
         {
           scope            = var.backend_storage_accounts["l0"].id,  # backend storage account
+          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
+          condition        = null
+        },
+        {
+          scope            = var.backend_storage_accounts["l1"].id,  # backend storage account
+          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
+          condition        = null
+        },
+        {
+          scope            = var.backend_storage_accounts["l2"].id,  # backend storage account
           roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
           condition        = null
         }
@@ -66,7 +81,15 @@ locals {
             #    PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup
             #    even just for reading (plan)
             {
-              id   = "41202f2c-f7ab-45be-b001-85c9728b9d69", # PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup
+              id   = "41202f2c-f7ab-45be-b001-85c9728b9d69" # PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup
+              type = "Role"
+            },
+            {
+              id   = "618b6020-bca8-4de6-99f6-ef445fa4d857" # PrivilegedEligibilitySchedule.ReadWrite.AzureADGroup
+              type = "Role"
+            },
+            {
+              id   = " 	2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
               type = "Role"
             }
           ]
@@ -83,14 +106,33 @@ locals {
     l0-contribute = {
       ecp_level = "l0"
       azure-roleAssignments = [
+        # {
+        #   scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+        #   # contributor
+        #   roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
+        #   condition        = null
+        # },
         {
-          scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+          scope = data.azurerm_subscription.id, # launchpad subscription
           # contributor
-          roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
+          roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c" # Contributor
+          condition        = null
+        },
+
+        {
+          scope = var.backend_storage_accounts["l0"].id, # backend storage account
+          # security reader
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe", # Storage Blob Data Contributor
           condition        = null
         },
         {
-          scope = var.backend_storage_accounts["l0"].id, # backend storage account
+          scope = var.backend_storage_accounts["l1"].id, # backend storage account
+          # security reader
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe", # Storage Blob Data Contributor
+          condition        = null
+        },
+        {
+          scope = var.backend_storage_accounts["l2"].id, # backend storage account
           # security reader
           roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe", # Storage Blob Data Contributor
           condition        = null
@@ -150,8 +192,15 @@ locals {
             {
               id   = "41202f2c-f7ab-45be-b001-85c9728b9d69", # PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup
               type = "Role"
+            },
+            {
+              id   = "618b6020-bca8-4de6-99f6-ef445fa4d857" # PrivilegedEligibilitySchedule.ReadWrite.AzureADGroup
+              type = "Role"
+            },
+            {
+              id   = " 	2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
+              type = "Role"
             }
-
           ]
         }
       ],
