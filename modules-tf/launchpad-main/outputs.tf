@@ -31,28 +31,3 @@ output "azuredevops_organization_name" {
   description = "name of Azure DevOps organization"
   value       = var.ecp_azure_devops_organization_name
 }
-
-
-variable "zzz_backend_config" {
-  description = "Map of backend configuration settings to be used by child modules"
-}
-
-output "zzz_backend_config" {
-  value       = var.zzz_backend_config
-}
-
-
-variable "zzz_backend_config_present" {
-}
-
-output "zzz_backend_config_present" {
-  value = var.zzz_backend_config_present
-}
-
-variable "zzz_ECP_TG_BACKEND_CONTAINER" {
-
-}
-
-output "zzz_ECP_TG_BACKEND_CONTAINER" {
-  value = var.zzz_ECP_TG_BACKEND_CONTAINER
-}
