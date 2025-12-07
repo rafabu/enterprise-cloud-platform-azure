@@ -49,10 +49,10 @@ output "zzz_backend_config_present" {
   value = var.zzz_backend_config_present
 }
 
-variable "zzz_ECP_TG_BACKEND_Container" {
+variable "zzz_ECP_TG_BACKEND_CONTAINER" {
 
 }
 
-output "zzz_ECP_TG_BACKEND_Container" {
-  value = var.zzz_ECP_TG_BACKEND_Container
+output "zzz_ECP_TG_BACKEND_CONTAINER" {
+  value = var.zzz_ECP_TG_BACKEND_CONTAINER
 }
