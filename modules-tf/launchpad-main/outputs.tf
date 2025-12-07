@@ -34,9 +34,7 @@ output "azuredevops_organization_name" {
 
 
 variable "zzz_backend_config" {
-  type = map(string)
   description = "Map of backend configuration settings to be used by child modules"
-  default = {}
 }
 
 output "zzz_backend_config" {
