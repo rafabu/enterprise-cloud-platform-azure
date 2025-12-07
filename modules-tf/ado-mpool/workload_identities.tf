@@ -89,7 +89,7 @@ locals {
               type = "Role"
             },
             {
-              id   = " 	2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
+              id   = "2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
               type = "Role"
             }
           ]
@@ -198,7 +198,7 @@ locals {
               type = "Role"
             },
             {
-              id   = " 	2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
+              id   = "2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
               type = "Role"
             }
           ]
