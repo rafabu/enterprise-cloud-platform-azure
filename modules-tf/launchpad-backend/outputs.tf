@@ -11,9 +11,11 @@ output "storage_accounts" {
   description = "Terraform backend storage accounts created for each ECP deployment level"
   value = {
     for key, val in azurerm_storage_account.backend : key => {
-      id       = val.id
-      name     = val.name
-      location = val.location
+      subscription_id     = data.azurerm_client_config.this.subscription_id
+      resource_group_name = val.resource_group_name
+      id                  = val.id
+      name                = val.name
+      location            = val.location
       # include information required for private endpoint access without DNS
       private_endpoint_blob = {
         fqdn               = azurerm_private_endpoint.backend_blob[key].custom_dns_configs[0].fqdn
@@ -23,6 +25,7 @@ output "storage_accounts" {
       }
       ecp_level            = key
       tf_backend_container = azapi_resource.tfstate_container[key].name
+
     }
   }
 }
