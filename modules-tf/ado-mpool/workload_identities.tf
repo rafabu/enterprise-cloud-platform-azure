@@ -5,11 +5,11 @@ locals {
     l0-read = {
       ecp_level = "l0"
       azure-roleAssignments = [
-        # {
-        #   scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
-        #   roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
-        #   condition        = null
-        # },
+        {
+          scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+          roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
+          condition        = null
+        },
         {
           scope            = data.azurerm_subscription.launchpad.id           # launchpad subscription
           roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader
@@ -106,12 +106,12 @@ locals {
     l0-contribute = {
       ecp_level = "l0"
       azure-roleAssignments = [
-        # {
-        #   scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
-        #   # contributor
-        #   roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
-        #   condition        = null
-        # },
+        {
+          scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+          # contributor
+          roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
+          condition        = null
+        },
         {
           scope = data.azurerm_subscription.launchpad.id, # launchpad subscription
           # contributor
