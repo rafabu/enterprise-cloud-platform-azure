@@ -67,6 +67,8 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
           private_ip_address   = try(variable.value.private_endpoint_blob.private_ip_address, null)
           ecp_level            = variable.value.ecp_level
           tf_backend_container = try(variable.value.tf_backend_container, "tfstate")
+          subscription_id      = variable.value.subscription_id
+          resource_group_name  = variable.value.resource_group_name
         }
       )
     }
