@@ -11,7 +11,7 @@ locals {
         #   condition        = null
         # },
         {
-          scope            = data.azurerm_subscription.id           # launchpad subscription
+          scope            = data.azurerm_subscription.launchpad.id           # launchpad subscription
           roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader
           condition        = null
         },
@@ -113,7 +113,7 @@ locals {
         #   condition        = null
         # },
         {
-          scope = data.azurerm_subscription.id, # launchpad subscription
+          scope = data.azurerm_subscription.launchpad.id, # launchpad subscription
           # contributor
           roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c" # Contributor
           condition        = null
