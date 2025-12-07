@@ -43,7 +43,6 @@ output "zzz_backend_config" {
 
 
 variable "zzz_backend_config_present" {
-  type = bool
 }
 
 output "zzz_backend_config_present" {
