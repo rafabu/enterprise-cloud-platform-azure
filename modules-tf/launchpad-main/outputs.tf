@@ -48,3 +48,11 @@ variable "zzz_backend_config_present" {
 output "zzz_backend_config_present" {
   value = var.zzz_backend_config_present
 }
+
+variable "zzz_ECP_TG_BACKEND_SUBSCRIPTION_ID" {
+
+}
+
+output "zzz_ECP_TG_BACKEND_SUBSCRIPTION_ID" {
+  value = var.zzz_ECP_TG_BACKEND_SUBSCRIPTION_ID
+}
