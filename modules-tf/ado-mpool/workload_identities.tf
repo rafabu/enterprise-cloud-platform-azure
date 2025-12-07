@@ -373,6 +373,7 @@ locals {
       display_name = v.name
       object_id    = v.principal_id
       type         = "ManagedIdentity"
+      tenant_id    = data.azurerm_client_config.this.tenant_id
       }
     },
     { for k, v in azuread_service_principal.mpool : k => {
@@ -381,6 +382,7 @@ locals {
       display_name = v.display_name
       object_id    = v.object_id
       type         = "ServicePrincipal"
+      tenant_id    = data.azurerm_client_config.this.tenant_id
       }
     }
   )

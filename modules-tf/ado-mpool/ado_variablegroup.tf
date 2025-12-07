@@ -49,6 +49,21 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
       value = azuredevops_serviceendpoint_azurerm.mpool[variable.key].service_endpoint_name
     }
   }
+  dynamic "variable" {
+    for_each = local.ado_wid_permission_objects
+    content {
+      name = "ecp_ado_service_connection_azure_${variable.key}_serviceprincipal"
+      value = jsonencode(
+        {
+          object_id    = local.workload_identity_objects[variable.key].object_id
+          tenant_id    = local.workload_identity_objects[variable.key].tenant_id
+          client_id    = local.workload_identity_objects[variable.key].client_id
+          display_name = local.workload_identity_objects[variable.key].display_name
+          type         = local.workload_identity_objects[variable.key].type
+        }
+      )
+    }
+  }
   variable {
     name = "ecp_tf_backend_levels"
     value = join(", ", [
