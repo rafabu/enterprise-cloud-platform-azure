@@ -2,6 +2,7 @@ locals {
   # Azure Roles to be assigned to the permission groups at the management group scope
   roles_contributors_management_group = [
     "Contributor",
+    "Resource Policy Contributor",
     "Key Vault Administrator",
     "Storage Account Contributor",
     "Storage Blob Data Owner",
