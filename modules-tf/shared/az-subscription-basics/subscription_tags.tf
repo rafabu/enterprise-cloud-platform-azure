@@ -81,7 +81,7 @@ resource "azapi_resource" "subscription_tag_modify_policy_assignment" {
     identity = {
       type = "SystemAssigned"
     }
-    location = var.region
+    location = lower(var.region)
   }
 
   response_export_values = ["*"]
