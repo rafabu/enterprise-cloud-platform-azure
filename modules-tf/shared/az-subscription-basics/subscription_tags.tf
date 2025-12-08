@@ -1,7 +1,7 @@
 locals {
-    read_only_tag_object = {
+  read_only_tag_object = {
     for key, val in var.tags : key => val
-    if contains(var.read_only_tags, val.tag_name)
+    if contains(var.read_only_tags, key)
   }
 }
 
@@ -55,26 +55,26 @@ resource "azapi_resource" "subscription_tag_modify_policy_assignment" {
   for_each = local.read_only_tag_object
 
   type      = "Microsoft.Authorization/policyAssignments@2022-06-01"
-  name      = "MDF_Sb_Tg_${each.value.tag_name}"
+  name      = "MDF_Sb_Tg_${each.key}"
   parent_id = "/subscriptions/${var.subscription_id}"
 
   body = {
     properties = {
-      displayName        = "${data.azapi_resource.subscription_tag_modify_policy_definition.output.properties.displayName} - ${each.value.tag_name}"
-      description        = "${data.azapi_resource.subscription_tag_modify_policy_definition.output.properties.description} - tag '${each.value.tag_name}': '${each.value.tag_value}'"
+      displayName        = "${data.azapi_resource.subscription_tag_modify_policy_definition.output.properties.displayName} - ${each.key}"
+      description        = "${data.azapi_resource.subscription_tag_modify_policy_definition.output.properties.description} - tag '${each.key}': '${each.value}'"
       policyDefinitionId = data.azapi_resource.subscription_tag_modify_policy_definition.id
       enforcementMode    = "Default"
       parameters = {
         tagName = {
-          value = each.value.tag_name
+          value = each.key
         }
         tagValue = {
-          value = each.value.tag_value
+          value = each.value
         }
       }
       nonComplianceMessages = [
         {
-          message = "Subscription tag '${each.value.tag_name}' must have value '${each.value.tag_value}'"
+          message = "Subscription tag '${each.key}' must have value '${each.value}'"
         }
       ]
     }
@@ -102,7 +102,7 @@ resource "azapi_resource" "subscription_tag_modify_policy_role_assignment" {
   for_each = local.read_only_tag_object
 
   type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
-  name      = uuidv5("oid", "${var.subscription_id}-${each.value.tag_name}-${plantimestamp()}")
+  name      = uuidv5("oid", "${var.subscription_id}-${each.key}-${plantimestamp()}")
   parent_id = azapi_resource.subscription_tag_modify_policy_assignment[each.key].parent_id
   body = {
     properties = {
