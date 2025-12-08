@@ -7,7 +7,8 @@ locals {
       azure-roleAssignments = [
         {
           scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
-          roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
+          # roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
+          roleDefinitionId = "ac63b705-f282-497d-ac71-919bf39d939d" , # Management Group Reader Role
           condition        = null
         },
         {
@@ -109,7 +110,8 @@ locals {
         {
           scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
           # contributor
-          roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
+          # roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
+          roleDefinitionId = "5d58bcaf-24a5-4b20-bdb6-eed9f69fbe4c" # Management Group Contributor Role
           condition        = null
         },
         {
