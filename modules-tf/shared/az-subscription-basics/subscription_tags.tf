@@ -82,18 +82,15 @@ resource "azapi_resource" "subscription_tag_modify_policy_assignment" {
       type = "SystemAssigned"
     }
     location = var.region
-
-    lifecycle = {
-      ignore_changes = [
-        # location has irregularities around case - can't be changed without forcing re-create anyway
-        location
-      ]
-    }
   }
 
   response_export_values = ["*"]
 
   lifecycle {
+    ignore_changes = [
+      # location has irregularities around case - can't be changed without forcing re-create anyway
+      body["location"]
+    ]
     replace_triggered_by = [
       # if tags change, remove (to allow updating) and then re-apply
       azapi_resource_action.subscription_tags
