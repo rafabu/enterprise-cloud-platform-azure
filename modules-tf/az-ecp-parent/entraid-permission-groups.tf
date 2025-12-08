@@ -3,6 +3,7 @@ locals {
   roles_contributors_management_group = [
     "Contributor",
     "Resource Policy Contributor",
+    "User Access Administrator",
     "Key Vault Administrator",
     "Storage Account Contributor",
     "Storage Blob Data Owner",
