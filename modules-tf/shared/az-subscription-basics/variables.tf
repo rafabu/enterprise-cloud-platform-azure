@@ -24,3 +24,9 @@ variable "read_only_tags" {
   default     = []
   description = "Tag names which will be read-only and protected by policy(cannot be modified or deleted) after initial creation."
 }
+
+variable "region" {
+  type        = string
+  default     = "eastus"
+  description = "Default region for resources deployed into this subscription."
+}

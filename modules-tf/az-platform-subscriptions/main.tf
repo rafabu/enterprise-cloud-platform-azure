@@ -8,4 +8,5 @@ module "launchpad_subscription" {
     "businessUnit",
     "workloadName"
   ]
+  region = "switzerlandnorth"
 }
