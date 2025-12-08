@@ -71,3 +71,6 @@ terragrunt-debug.tfvars.json
 # Ignore all local history of files
 .history
 .ionide
+
+# Azure Landing Zones provider
+.alzlib
