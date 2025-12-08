@@ -145,3 +145,37 @@ resource "time_sleep" "ecp_deployment_parent" {
     azurerm_management_group.ecp_deployment_parent
   ]
 }
+
+# move ECP platform subscriptions into the ECP deployment parent management group
+#     note: this is only happening upon first deployment of the management group 
+#           alz deployment will then create the structure and place the subscriptions correctly
+locals {
+  ecp_platform_subscription_ids = [
+    for sub_id in [
+      var.ecp_launchpad_subscription_id,
+      var.ecp_management_subscription_id,
+      var.ecp_network_subscription_id,
+      var.ecp_identity_subscription_id,
+      var.ecp_security_subscription_id
+    ] : sub_id if sub_id != "00000000-0000-0000-0000-000000000000"
+  ]
+}
+
+resource "azapi_resource_action" "ecp_deployment_parent_subscriptions_move" {
+  for_each = toset(local.ecp_platform_subscription_ids)
+
+  type        = "Microsoft.Management/managementGroups@2021-04-01"
+  resource_id = azurerm_management_group.ecp_deployment_parent.id
+  action      = "subscriptions/${each.key}"
+  method      = "PUT"
+
+  depends_on = [
+    time_sleep.ecp_deployment_parent
+  ]
+
+  lifecycle {
+    replace_triggered_by = [
+      azurerm_management_group.ecp_deployment_parent.id
+    ]
+  }
+}

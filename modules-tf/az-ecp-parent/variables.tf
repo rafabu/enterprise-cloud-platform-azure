@@ -72,3 +72,53 @@ variable "ecp_deployment_reader_workload_identity_object_id" {
   type        = string
   description = "Object ID of the workload identity (user or service principal) used to perform operations in the ECP deployment."
 }
+
+variable "ecp_launchpad_subscription_id" {
+  type        = string
+  description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
+  default = "00000000-0000-0000-0000-000000000000"
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_launchpad_subscription_id))
+    error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
+  }
+}
+
+variable "ecp_management_subscription_id" {
+  type        = string
+  description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
+  default = "00000000-0000-0000-0000-000000000000"
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_management_subscription_id))
+    error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
+  }
+}
+
+variable "ecp_network_subscription_id" {
+  type        = string
+  description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
+  default = "00000000-0000-0000-0000-000000000000"
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_network_subscription_id))
+    error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
+  }
+}
+
+variable "ecp_identity_subscription_id" {
+  type        = string
+  description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
+  default = "00000000-0000-0000-0000-000000000000"
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_identity_subscription_id))
+    error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
+  }
+}
+
+variable "ecp_security_subscription_id" {
+  type        = string
+  description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
+  default = "00000000-0000-0000-0000-000000000000"
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_security_subscription_id))
+    error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
+  }
+}
