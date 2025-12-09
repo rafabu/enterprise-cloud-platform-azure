@@ -5,7 +5,7 @@ data "external" "ecp_parent_mg_check" {
   program = ["pwsh", "-NoLogo", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-command", <<-SCRIPT
     
 $parent_management_group_id = "${var.ecp_azure_root_parent_management_group_id}"
-$parent_management_group_display_name = "ECP Root Management Group"
+$parent_management_group_display_name = "ECP Root"
 $tenant_id = "${data.azurerm_client_config.this.tenant_id}"
 
 function Wait-TenantBackfill {
@@ -120,7 +120,7 @@ resource "azurerm_management_group" "ecp_deployment_parent" {
   provider = azurerm.launchpad
 
   name         = "ecp-deployment-${var.ecp_environment_name}"
-  display_name = var.ecp_environment_name
+  display_name = "ECP Deployment ${var.ecp_environment_name}"
 
   parent_management_group_id = "/providers/Microsoft.Management/managementGroups/${var.ecp_azure_root_parent_management_group_id}"
 
