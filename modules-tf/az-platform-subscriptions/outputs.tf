@@ -8,9 +8,9 @@ output "management_subscription" {
   value       = var.ecp_management_subscription_id != "00000000-0000-0000-0000-000000000000" ? module.management_subscription["this"].subscription : null
 }
 
-output "network_subscription" {
+output "connectivity_subscription" {
   description = "Subscription details including tags and metadata"
-  value       = var.ecp_network_subscription_id != "00000000-0000-0000-0000-000000000000" ? module.network_subscription["this"].subscription : null
+  value       = var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? module.connectivity_subscription["this"].subscription : null
 }
 
 output "identity_subscription" {

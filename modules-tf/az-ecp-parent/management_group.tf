@@ -154,7 +154,7 @@ locals {
     for sub_id in [
       var.ecp_launchpad_subscription_id,
       var.ecp_management_subscription_id,
-      var.ecp_network_subscription_id,
+      var.ecp_connectivity_subscription_id,
       var.ecp_identity_subscription_id,
       var.ecp_security_subscription_id
     ] : sub_id if sub_id != "00000000-0000-0000-0000-000000000000"

@@ -42,16 +42,16 @@ module "management_subscription" {
   region = var.azure_location
 }
 
-module "network_subscription" {
-  for_each = toset(var.ecp_network_subscription_id != "00000000-0000-0000-0000-000000000000" ? ["this"] : [])
+module "connectivity_subscription" {
+  for_each = toset(var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? ["this"] : [])
 
   source = "../shared/az-subscription-basics"
 
-  subscription_id   = var.ecp_network_subscription_id
-  subscription_name = "${replace(data.azurecaf_name.rg.result, "-rg-", "-sub-")}-network"
+  subscription_id   = var.ecp_connectivity_subscription_id
+  subscription_name = "${replace(data.azurecaf_name.rg.result, "-rg-", "-sub-")}-connectivity"
   tags              = merge(
     var.azure_tags,
-    var.network_azure_tags
+    var.connectivity_azure_tags
   )
   read_only_tags = [
     "businessUnit",

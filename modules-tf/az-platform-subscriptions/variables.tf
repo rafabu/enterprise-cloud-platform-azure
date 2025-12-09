@@ -16,11 +16,11 @@ variable "ecp_management_subscription_id" {
   }
 }
 
-variable "ecp_network_subscription_id" {
+variable "ecp_connectivity_subscription_id" {
   type        = string
   description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
   validation {
-    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_network_subscription_id))
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_connectivity_subscription_id))
     error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
   }
 }
@@ -68,7 +68,7 @@ variable "management_azure_tags" {
   default = {}
 }
 
-variable "network_azure_tags" {
+variable "connectivity_azure_tags" {
   type    = map(string)
   default = {}
 }
