@@ -9,10 +9,14 @@ variable "ecp_environment_name" {
 }
 
 variable "ecp_azure_root_parent_management_group_id" {
-  type        = string
-  description = "The management group ID of the root parent management group for the ECP environment"
+    type        = string
+    description = "The management group ID of the parent management group for the ECP environment"
 }
 
+variable "alz_parent_management_group_resource_id" {
+  type        = string
+  description = "The management group resource ID of the management group of this ECP environment"
+}
 
 variable "ecp_launchpad_subscription_id" {
   type        = string

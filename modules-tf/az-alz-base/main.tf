@@ -24,13 +24,13 @@ module "alz" {
       }
     },
     var.ecp_launchpad_subscription_id != "00000000-0000-0000-0000-000000000000" ? {
-      management = {
+      launchpad = {
         subscription_id       = var.ecp_launchpad_subscription_id
         management_group_name = "ecp-deployment-${var.ecp_environment_name}-platform-launchpad"
       }
     } : {},
     var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? {
-      management = {
+      connectivity = {
         subscription_id       = var.ecp_connectivity_subscription_id
         management_group_name = "ecp-deployment-${var.ecp_environment_name}-platform-connectivity"
       }
