@@ -29,8 +29,6 @@ function Wait-TenantBackfill {
         elseif ($status -ine "Started") {
             return @{ Success = $false; Status = $bfStatus }
         }
-        
-        $elapsed = [int]((Get-Date) - $startTime).TotalMinutes
     }
     return @{ Success = $false; Status = $null }
 }
@@ -84,8 +82,19 @@ else {
             }
         }
     }
-    $mgBodyJson = ($mgBody | ConvertTo-Json -Depth 10 -Compress).Replace('"', '\"')
-    $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body $mgBodyJson --headers 'Content-Type=application/json'
+    if ($isWindows) {
+        $mgBodyJson = ($mgBody | ConvertTo-Json -Depth 10 -Compress).Replace('"', '\"')
+    }
+    else {
+        $mgBodyJson = $mgBody | ConvertTo-Json -Depth 10 -Compress
+    }
+
+    # $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body $mgBodyJson
+    $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" `
+     --headers "Content-Type=application/json" `
+     --body @"
+$mgBodyJson
+"@
     if ($LASTEXITCODE -ieq 0) {
         $parentMgName = $parent_management_group_id
         $parentMgDisplayName = $parent_management_group_display_name
