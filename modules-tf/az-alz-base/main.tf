@@ -1,11 +1,3 @@
-
-# re-use the pre-created ECP parent management group
-#     note: id must match ecp-deployment-${deployment-code}
-import {
-  to = module.alz.azapi_resource.management_groups_level_0["ecp-deployment-rabu-d7"]  # Must be YOUR resource
-  id = "${var.alz_parent_management_group_resource_id}"
-}
-
 module "alz" {
   source  = "Azure/avm-ptn-alz/azurerm"
   version = "0.15.0"
@@ -48,11 +40,11 @@ module "alz" {
       }
     } : {}
   )
-#   management_group_hierarchy_settings = {
-#     default_management_group_name            = "sandbox"
-#     require_authorisation_for_group_creation = true
-#     update_existing                          = true
-#   }
+  #   management_group_hierarchy_settings = {
+  #     default_management_group_name            = "sandbox"
+  #     require_authorisation_for_group_creation = true
+  #     update_existing                          = true
+  #   }
 
   enable_telemetry                     = false
   role_assignment_name_use_random_uuid = true
@@ -65,4 +57,8 @@ module "alz" {
     #     ]
     #   }
   }
+
+  depends_on = [
+    data.external.alz_library_artefact_templating
+  ]
 }

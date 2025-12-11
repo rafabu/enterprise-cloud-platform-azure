@@ -119,8 +119,8 @@ resource "time_sleep" "ecp_parent_mg_check" {
 resource "azurerm_management_group" "ecp_deployment_parent" {
   provider = azurerm.launchpad
 
-  name         = "ecp-deployment-${var.ecp_environment_name}"
-  display_name = "ECP Deployment ${var.ecp_environment_name}"
+  name         = "${var.ecp_environment_name}-mg-ecpa-deployment"
+  display_name = "Deployment ${var.ecp_environment_name}"
 
   parent_management_group_id = "/providers/Microsoft.Management/managementGroups/${var.ecp_azure_root_parent_management_group_id}"
 

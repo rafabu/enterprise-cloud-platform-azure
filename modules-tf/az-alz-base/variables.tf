@@ -74,3 +74,31 @@ variable "ecp_alz_architecture_name" {
     default     = "ecp-alz-v1"
     description = "The architecture name for the ALZ deployment."
 }
+
+variable "alz_library_path_shared" {
+    type        = string
+    description = "Path to the shared ALZ library artefacts."
+}
+
+variable "alz_library_path_unit" {
+    type        = string
+    description = "Path to the unit's ALZ library artefacts."
+}
+
+variable "alz_library_path_shared_rendered" {
+    type = string
+    description = "Path to the rendered shared ALZ library artefacts."
+    default = "./not-set"
+}
+
+variable "alz_library_terraform_template_file_name" {
+    type        = object({
+        match_pattern       = string
+        name_remove_string  = string
+    })
+    default = {
+      match_pattern = "**.tftemplate.json"
+      name_remove_string = ".tftemplate"
+    }
+    description = "Pattern to match Terraform template files in the unit's ALZ library artefacts."
+}
