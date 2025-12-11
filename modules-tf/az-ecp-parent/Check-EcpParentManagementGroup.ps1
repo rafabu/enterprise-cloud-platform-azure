@@ -87,18 +87,30 @@ else {
             }
         }
     }
-    $mgBodyJson = ($mgBody | ConvertTo-Json -Depth 10 -Compress).Replace('"', '\"')
-    $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body $mgBodyJson 2>&1
-    if ($LASTEXITCODE -ieq 0) {
-        $parentMgName = $parent_management_group_id
-        $parentMgDisplayName = $parent_management_group_display_name
-        $parentMgId = "/providers/Microsoft.Management/managementGroups/$parent_management_group_id"
-        $parentMgStatus = "Existing"
-        $parentAction = "Created"
+    
+    # Write body to temp file to avoid PowerShell string escaping issues
+    $tempFile = [System.IO.Path]::GetTempFileName()
+    try {
+        $mgBody | ConvertTo-Json -Depth 10 -Compress | Out-File -FilePath $tempFile -Encoding utf8 -NoNewline
+        
+        $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body "@$tempFile" 2>&1
+        
+        if ($LASTEXITCODE -ieq 0) {
+            $parentMgName = $parent_management_group_id
+            $parentMgDisplayName = $parent_management_group_display_name
+            $parentMgId = "/providers/Microsoft.Management/managementGroups/$parent_management_group_id"
+            $parentMgStatus = "Existing"
+            $parentAction = "Created"
+        }
+        else {
+            Write-Error "Failed to create parent management group: $createResult"
+            exit 1
+        }
     }
-    else {
-        Write-Error "Failed to create parent management group: $createResult"
-        exit 1
+    finally {
+        if (Test-Path $tempFile) {
+            Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
