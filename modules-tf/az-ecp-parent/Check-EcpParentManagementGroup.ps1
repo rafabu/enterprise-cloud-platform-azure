@@ -1,7 +1,6 @@
 #!/usr/bin/env pwsh
 # External data source script for Terraform
 # Reads JSON from stdin, outputs JSON to stdout
-
 $ErrorActionPreference = 'Stop'
 
 # Read input from Terraform
@@ -49,20 +48,18 @@ elseif ($bfStatus -and ($bfStatus | ConvertFrom-Json).status -ieq "Started") {
         $tenantRootBackfillStatus = "Started"
     }
     else {
-        Write-Error "Tenant backfill failed or timed out"
         exit 1
     }
 }
 else {
-    Write-Host "INFO: Root Management Group does not exist yet - starting TenantBackfill for this tenant." -ForegroundColor Yellow
-    az rest --method POST --url "https://management.azure.com/providers/Microsoft.Management/startTenantBackfill?api-version=2020-05-01" | Out-Null
+    Write-Output "INFO: Root Management Group does not exist yet - starting TenantBackfill for this tenant."
+    az rest --method POST --url "https://management.azure.com/providers/Microsoft.Management/startTenantBackfill?api-version=2020-05-01"
     $result = Wait-TenantBackfill -MaxWaitMinutes 10 -PollIntervalSeconds 15
     if ($result.Success) {
         $tenantRootMgId = "/providers/Microsoft.Management/managementGroups/$tenant_id"
         $tenantRootBackfillStatus = "Completed (this run)"
     }
     else {
-        Write-Error "Tenant backfill failed or timed out"
         exit 1
     }
 }
@@ -87,34 +84,21 @@ else {
             }
         }
     }
-    
-    # Write body to temp file to avoid PowerShell string escaping issues
-    $tempFile = [System.IO.Path]::GetTempFileName()
-    try {
-        $mgBody | ConvertTo-Json -Depth 10 -Compress | Out-File -FilePath $tempFile -Encoding utf8 -NoNewline
-        
-        $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body "@$tempFile" 2>&1
-        
-        if ($LASTEXITCODE -ieq 0) {
-            $parentMgName = $parent_management_group_id
-            $parentMgDisplayName = $parent_management_group_display_name
-            $parentMgId = "/providers/Microsoft.Management/managementGroups/$parent_management_group_id"
-            $parentMgStatus = "Existing"
-            $parentAction = "Created"
-        }
-        else {
-            Write-Error "Failed to create parent management group: $createResult"
-            exit 1
-        }
+    $mgBodyJson = ($mgBody | ConvertTo-Json -Depth 10 -Compress).Replace('"', '\"')
+    $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body $mgBodyJson --headers 'Content-Type=application/json'
+    if ($LASTEXITCODE -ieq 0) {
+        $parentMgName = $parent_management_group_id
+        $parentMgDisplayName = $parent_management_group_display_name
+        $parentMgId = "/providers/Microsoft.Management/managementGroups/$parent_management_group_id"
+        $parentMgStatus = "Existing"
+        $parentAction = "Created"
     }
-    finally {
-        if (Test-Path $tempFile) {
-            Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-        }
+    else {
+        exit 1
     }
 }
 
-# output for external data source (must be valid JSON to stdout)
+# output for external data source
 @{
     tenant_root_management_group_id      = $tenantRootMgId
     tenant_root_backfill_status          = $tenantRootBackfillStatus
@@ -123,4 +107,4 @@ else {
     parent_management_group_id           = $parentMgId
     parent_management_group_status       = $parentMgStatus
     parent_management_group_action       = $parentAction
-} | ConvertTo-Json -Compress
+} | ConvertTo-Json
