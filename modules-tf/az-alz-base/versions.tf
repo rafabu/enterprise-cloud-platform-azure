@@ -1,7 +1,6 @@
 terraform {
   required_version = ">= 1.14"
   required_providers {
-    required_providers {
     alz = {
       source  = "azure/alz"
       version = "~> 0.20"
