@@ -18,26 +18,26 @@ locals {
   } : {}
 }
 
-output "zzz_alz_library_path_shared" {
-  value = var.alz_library_path_shared
-}
-output "zzz_alz_library_folder_exists" {
-  value = local.alz_library_folder_exists
-}
+# output "zzz_alz_library_path_shared" {
+#   value = var.alz_library_path_shared
+# }
+# output "zzz_alz_library_folder_exists" {
+#   value = local.alz_library_folder_exists
+# }
 
 output "zzz_alz_library_path_shared_rendered" {
   description = "Debug output - list of ALZ library template files processed"
   value       = var.alz_library_path_shared_rendered
 }
 
-output "zzz_alz_library_path_shared_rendered_exists" {
-  value = provider::local::direxists(var.alz_library_path_shared_rendered)
-}
+# output "zzz_alz_library_path_shared_rendered_exists" {
+#   value = provider::local::direxists(var.alz_library_path_shared_rendered)
+# }
 
-output "zzz_alz_library_path_shared_rendered_fileset" {
-  description = "Debug output - list of ALZ library template files processed"
-  value       = fileset("${var.alz_library_path_shared_rendered}", "**/*")
-}
+# output "zzz_alz_library_path_shared_rendered_fileset" {
+#   description = "Debug output - list of ALZ library template files processed"
+#   value       = fileset("${var.alz_library_path_shared_rendered}", "**/*")
+# }
 
 output "zzz_alz_library_template_files" {
   description = "Debug output - list of ALZ library template files processed"
@@ -66,8 +66,8 @@ resource "terraform_data" "alz_library_artefact_templating" {
   input = {
     files_written = data.external.alz_library_artefact_templating[each.key].result.files_written
     status        = data.external.alz_library_artefact_templating[each.key].result.status
-    folder_exists = provider::local::direxists(var.alz_library_path_shared_rendered)
-    files         = jsonencode(fileset("${var.alz_library_path_shared_rendered}", "**/*"))
+    # folder_exists = provider::local::direxists(var.alz_library_path_shared_rendered)
+    # files         = jsonencode(fileset("${var.alz_library_path_shared_rendered}", "**/*"))
   }
 
   depends_on = [
