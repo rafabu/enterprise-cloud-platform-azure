@@ -30,6 +30,11 @@ output "zzz_alz_library_path_shared_rendered" {
   value       = var.alz_library_path_shared_rendered
 }
 
+output "zzz_alz_library_path_shared_rendered_fileset" {
+  description = "Debug output - list of ALZ library template files processed"
+  value       = fileset("${var.alz_library_path_shared_rendered}", "**/*")
+}
+
 output "zzz_alz_library_template_files" {
   description = "Debug output - list of ALZ library template files processed"
   value       = local.alz_library_template_files
