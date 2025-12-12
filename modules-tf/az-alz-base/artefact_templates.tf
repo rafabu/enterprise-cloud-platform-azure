@@ -18,32 +18,6 @@ locals {
   } : {}
 }
 
-# output "zzz_alz_library_path_shared" {
-#   value = var.alz_library_path_shared
-# }
-# output "zzz_alz_library_folder_exists" {
-#   value = local.alz_library_folder_exists
-# }
-
-output "zzz_alz_library_path_shared_rendered" {
-  description = "Debug output - list of ALZ library template files processed"
-  value       = var.alz_library_path_shared_rendered
-}
-
-# output "zzz_alz_library_path_shared_rendered_exists" {
-#   value = provider::local::direxists(var.alz_library_path_shared_rendered)
-# }
-
-# output "zzz_alz_library_path_shared_rendered_fileset" {
-#   description = "Debug output - list of ALZ library template files processed"
-#   value       = fileset("${var.alz_library_path_shared_rendered}", "**/*")
-# }
-
-output "zzz_alz_library_template_files" {
-  description = "Debug output - list of ALZ library template files processed"
-  value       = local.alz_library_template_files
-}
-
 data "external" "alz_library_artefact_templating" {
   for_each = toset(local.alz_library_folder_exists ? [var.alz_library_path_shared] : [])
 
@@ -58,24 +32,4 @@ data "external" "alz_library_artefact_templating" {
       ), "UTF-16LE"
     ) # UTF-16LE --> PowerShell compatible
   }
-}
-
-resource "terraform_data" "alz_library_artefact_templating" {
-  for_each = toset(local.alz_library_folder_exists ? [var.alz_library_path_shared] : [])
-
-  input = {
-    files_written = data.external.alz_library_artefact_templating[each.key].result.files_written
-    status        = data.external.alz_library_artefact_templating[each.key].result.status
-    # folder_exists = provider::local::direxists(var.alz_library_path_shared_rendered)
-    # files         = jsonencode(fileset("${var.alz_library_path_shared_rendered}", "**/*"))
-  }
-
-  depends_on = [
-    data.external.alz_library_artefact_templating
-  ]
-}
-
-output "zzz_alz_library_artefact_templating" {
-  description = "Debug output - ALZ library artefact templating results"
-  value       = terraform_data.alz_library_artefact_templating
 }
