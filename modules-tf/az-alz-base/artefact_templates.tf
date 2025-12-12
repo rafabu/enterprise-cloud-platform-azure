@@ -8,7 +8,7 @@ locals {
       "${var.alz_library_path_shared}", "**/${var.alz_library_terraform_template_file_name.match_pattern}"
       ) : path => {
       template_file_path    = path
-      destination_file_path = "${var.alz_library_path_shared_rendered}/${replace(path, var.alz_library_terraform_template_file_name.name_remove_string, "")}"
+      destination_file_path = "${trimsuffix(var.alz_library_path_shared_rendered, "/")}/${replace(path, var.alz_library_terraform_template_file_name.name_remove_string, "")}"
       rendered_file_content = templatefile(
         "${var.alz_library_path_shared}/${path}", {
           ecp_environment_name = var.ecp_environment_name
