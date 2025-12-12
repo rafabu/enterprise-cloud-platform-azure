@@ -18,6 +18,23 @@ locals {
   } : {}
 }
 
+output "zzz_alz_library_path_shared" {
+  value = var.alz_library_path_shared
+}
+output "zzz_alz_library_folder_exists" {
+  value = local.alz_library_folder_exists
+}
+
+output "zzz_alz_library_path_shared_rendered" {
+  description = "Debug output - list of ALZ library template files processed"
+  value       = var.alz_library_path_shared_rendered
+}
+
+output "zzz_alz_library_template_files" {
+  description = "Debug output - list of ALZ library template files processed"
+  value       = local.alz_library_template_files
+}
+
 data "external" "alz_library_artefact_templating" {
   for_each = toset(local.alz_library_folder_exists ? [var.alz_library_path_shared] : [])
 
