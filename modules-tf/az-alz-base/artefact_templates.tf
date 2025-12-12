@@ -30,6 +30,10 @@ output "zzz_alz_library_path_shared_rendered" {
   value       = var.alz_library_path_shared_rendered
 }
 
+output "zzz_alz_library_path_shared_rendered_exists" {
+  value = provider::local::direxists(var.alz_library_path_shared_rendered)
+}
+
 output "zzz_alz_library_path_shared_rendered_fileset" {
   description = "Debug output - list of ALZ library template files processed"
   value       = fileset("${var.alz_library_path_shared_rendered}", "**/*")
