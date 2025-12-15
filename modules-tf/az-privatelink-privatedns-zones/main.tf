@@ -45,36 +45,36 @@ locals {
 
 
 module "private_dns_zones" {
-  providers = {
-  }
 
   source  = "Azure/avm-ptn-network-private-link-private-dns-zones/azurerm"
   version = "0.22.2"
 
-  location  = var.azure_location
-  parent_id = module.alz_network.network_management_group_id
+  # location here is "just" to find the correct replacement for the zone's location parts
+  #     it uses data "azapi_resource_action" "locations"
+  #     Microsoft.Resources/subscriptions@2023-07-01 --> action locations
+  location  = lower(var.azure_location)
+  parent_id = azurerm_resource_group.private_dns_zones.id
 
   private_link_excluded_zones = []
   # private_link_private_dns_zones <<== leave default values
   # private_link_private_dns_zones = {}
   private_link_private_dns_zones_additional = {
     for key, val in local.additional_private_dns_zones : key => {
-      zone_name                              = val
+      zone_name                              = val.zone_name
       private_dns_zone_supports_private_link = true
     }
   }
 
   resource_group_role_assignments = null
 
-  virtual_network_link_default_virtual_networks = [
-    for vnetid in var.virtual_network_link_id_list : {
+  virtual_network_link_default_virtual_networks = {
+    for vnetid in var.virtual_network_link_id_list : basename(vnetid) => {
       virtual_network_resource_id = vnetid
     }
-  ]
-
+  }
   virtual_network_link_resolution_policy_default = "NxDomainRedirect"
 
   enable_telemetry = false
 
-  tags = module.private_dns_zones_rg[0].resource.tags
+  tags = var.azure_tags
 }
