@@ -1,15 +1,13 @@
 locals {
-  resource_group_name = data.azurecaf_name.rg.result
-
   # connectivity (Private DNS Zones)
-  # subscription_id_connectivity     = var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? var.ecp_connectivity_subscription_id : var.ecp_management_subscription_id
+  subscription_id_connectivity = var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? var.ecp_connectivity_subscription_id : var.ecp_management_subscription_id
 }
 
-resource "azurerm_resource_group" "private_dns_zones" {
-  provider = azurerm.connectivity
-
-  name     = "${data.azurecaf_name.rg.result}-privatelink-dnszones"
-  location = var.azure_location
+resource "azapi_resource" "resource_group" {
+  type      = "Microsoft.Resources/resourceGroups@2025-04-01"
+  name      = "${data.azurecaf_name.rg.result}-privatelink-dnszones"
+  parent_id = "/subscriptions/${local.subscription_id_connectivity}"
+  location  = var.azure_location
 
   tags = var.azure_tags
 }
@@ -45,15 +43,16 @@ locals {
 
 
 module "private_dns_zones" {
-
   source  = "Azure/avm-ptn-network-private-link-private-dns-zones/azurerm"
   version = "0.22.2"
+
+  parent_id = azapi_resource.resource_group.id
 
   # location here is "just" to find the correct replacement for the zone's location parts
   #     it uses data "azapi_resource_action" "locations"
   #     Microsoft.Resources/subscriptions@2023-07-01 --> action locations
-  location  = lower(var.azure_location)
-  parent_id = azurerm_resource_group.private_dns_zones.id
+  location = lower(var.azure_location)
+
 
   private_link_excluded_zones = []
   # private_link_private_dns_zones <<== leave default values
