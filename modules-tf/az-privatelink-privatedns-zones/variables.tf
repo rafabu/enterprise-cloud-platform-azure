@@ -52,8 +52,6 @@ variable "ecp_connectivity_subscription_id" {
 
 variable "virtual_network_link_id_list" {
   type        = list(string)
-  default     = [
-    "/subscriptions/e1b3be0d-0df0-4e0a-a585-ffc97f60bd42/resourceGroups/rabu-d7-rg-ecpalp-main/providers/Microsoft.Network/virtualNetworks/rabu-d7-vnet-ecpalp-main"
-  ]
+  default     = []
   description = "vNet IDs to be linked to Private DNS Zones deployed with this module."
 }
