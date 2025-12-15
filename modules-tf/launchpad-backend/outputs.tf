@@ -19,9 +19,9 @@ output "storage_accounts" {
       # include information required for private endpoint access without DNS
       private_endpoint_blob = {
         # fall back to default if custom DNS config is not present
-        fqdn               = try(azurerm_private_endpoint.backend_blob[key].custom_dns_configs[0].fqdn, "${val.name}.blob.core.windows.net")
-        private_ip_address = azurerm_private_endpoint.backend_blob[key].private_service_connection[0].private_ip_address
-        subresource_names  = azurerm_private_endpoint.backend_blob[key].private_service_connection[0].subresource_names
+        fqdn               = try(azurerm_private_endpoint.backend_blob[key].custom_dns_configs[0].fqdn, val.primary_blob_host)
+        private_ip_address = try(azurerm_private_endpoint.backend_blob[key].private_service_connection[0].private_ip_address, "")
+        subresource_names  = try(azurerm_private_endpoint.backend_blob[key].private_service_connection[0].subresource_names, ["blob"])
         subnet_id          = azurerm_private_endpoint.backend_blob[key].subnet_id
       }
       ecp_level            = key
