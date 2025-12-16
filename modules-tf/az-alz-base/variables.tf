@@ -3,6 +3,21 @@ variable "azure_location" {
   description = "Default region for resources deployed into this subscription."
 }
 
+variable "azure_resource_name_elements" {
+  type = object({
+    prefixes      = optional(list(string))
+    suffixes      = optional(list(string))
+    name          = optional(string)
+    random_length = optional(number)
+  })
+  description = "Object containing naming components to be used by the azurecaf_name data source to generate resource names."
+}
+
+variable "azure_tags" {
+  type    = map(string)
+  default = {}
+}
+
 variable "ecp_environment_name" {
   type        = string
   description = "Name of the ECP environment (used for naming resources)"
@@ -101,4 +116,10 @@ variable "alz_library_terraform_template_file_name" {
       name_remove_string = ".tftemplate"
     }
     description = "Pattern to match Terraform template files in the unit's ALZ library artefacts."
+}
+
+variable "private_dns_zone_configuration" {
+  type        = map(string)
+  default     = {}
+  description = "Objects mapping private DNS zone key to resource Id,"
 }
