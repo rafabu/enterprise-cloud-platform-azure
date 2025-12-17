@@ -192,18 +192,6 @@ module "alz" {
     # extension to Deploy-Private-DNS-Zones assignment (see alz_policy_default_values.json in extension library)
     local.policy_default_values_private_dns_zones
   )
-  # private_dns_zone_id_azure_storage_blob = jsonencode(
-  # {
-  #   value = provider::azapi::resource_group_resource_id(
-  #     local.subscription_id_connectivity,
-  #     local.resource_group_name_connectivity,
-  #     "Microsoft.Network/privateDnsZones",
-  #     [
-  #       "privatelink.blob.core.windows.net"
-  #     ]
-  #   )
-  # }
-
 
   enable_telemetry                     = false
   role_assignment_name_use_random_uuid = true
@@ -215,7 +203,5 @@ module "alz" {
   #   ]
   # }
 
-  depends_on = [
-    data.external.alz_library_artefact_templating
-  ]
+  depends_on = []
 }
