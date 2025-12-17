@@ -58,8 +58,18 @@ locals {
     )
     if contains(local.policy_private_dns_zones_not_in_alz, key) == false
   }
+
+    policy_default_values_private_dns_zones_not_in_alz = {
+    for key, val in var.private_dns_zone_configuration :
+    "private_dns_zone_id_${key}" => jsonencode(
+      {
+        value = "${val}"
+      }
+    )
+    if contains(local.policy_private_dns_zones_not_in_alz, key) == true
+  }
 }
 
-output "zzz_policy_default_values_private_dns_zones" {
-  value = local.policy_default_values_private_dns_zones
+output "policy_default_values_private_dns_zones_not_in_alz" {
+  value = local.policy_default_values_private_dns_zones_not_in_alz
 }
