@@ -43,9 +43,6 @@ foreach ($fileEntry in $renderedFiles.PSObject.Properties) {
     $filesWritten++
 }
 
-# short delay to ensure all file handles are released
-Start-Sleep -Seconds 10 | Out-Null
-
 # Return result to Terraform (external data source protocol requires JSON output)
 @{
     destination_paths = $destinationFolders -join ";"
