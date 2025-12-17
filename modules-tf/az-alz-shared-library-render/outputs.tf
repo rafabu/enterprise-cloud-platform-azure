@@ -1,3 +1,3 @@
 output "alz_library_artefact_templating_result" {
-  value = toset(local.alz_library_folder_exists ? [var.alz_library_path_shared] : []) ? data.external.alz_library_artefact_templating.result : {}
+  value = local.alz_library_folder_exists ? data.external.alz_library_artefact_templating[var.alz_library_path_shared].result : {}
 }
