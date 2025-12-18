@@ -3,8 +3,7 @@ locals {
   policy_private_dns_zones_not_in_alz = [
     # DNS zones not (yet) implemented in ALZ 'Deploy-Private-DNS-Zones' policy initiative
     #     as of version 2.4.0
-    "azure_aks_mgmt",
-    "azure_api_management",
+    "azure_aks_mgmt", # AKS private networking does not work with private endpoints but vnet integration
     "azure_attestation",
     "azure_avd_global",
     "azure_bot_svc_token",
