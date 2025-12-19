@@ -105,43 +105,48 @@ module "alz" {
   #   }
 
   policy_default_values = merge(
-    {
-      ama_user_assigned_managed_identity_id = try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_id), 0) > 0 ? jsonencode(
+    try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_id), 0) > 0 ? {
+      ama_user_assigned_managed_identity_id = jsonencode(
         {
           value = var.alz_management_resource_ids.ama_user_assigned_managed_identity_id
         }
-      ) : null
-      ama_user_assigned_managed_identity_name = try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name), 0) > 0 ? jsonencode(
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name), 0) > 0 ? {
+      ama_user_assigned_managed_identity_name = jsonencode(
         {
           value = var.alz_management_resource_ids.ama_user_assigned_managed_identity_name
         }
-      ) : null
-      ama_vm_insights_data_collection_rule_id = try(length(var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id), 0) > 0 ? jsonencode(
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id), 0) > 0 ? {
+      ama_vm_insights_data_collection_rule_id = jsonencode(
         {
           value = var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id
         }
-      ) : null
-      ama_mdfc_sql_data_collection_rule_id = try(length(var.alz_management_resource_ids.ama_defender_sqls_data_collection_rule_id), 0) > 0 ? jsonencode(
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_defender_sqls_data_collection_rule_id), 0) > 0 ? {
+      ama_mdfc_sql_data_collection_rule_id = jsonencode(
         {
           value = var.alz_management_resource_ids.ama_defender_sqls_data_collection_rule_id
         }
-      ) : null
-      ama_change_tracking_data_collection_rule_id = try(length(var.alz_management_resource_ids.ama_change_tracking_data_collection_rule_id), 0) > 0 ? jsonencode(
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_change_tracking_data_collection_rule_id), 0) > 0 ? {
+      ama_change_tracking_data_collection_rule_id = jsonencode(
         {
           value = var.alz_management_resource_ids.ama_change_tracking_data_collection_rule_id
         }
-      ) : null
-      ddos_protection_plan_id = try(length(var.alz_management_resource_ids.ddos_protection_plan_id), 0) > 0 ? jsonencode(
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ddos_protection_plan_id), 0) > 0 ? {
+      ddos_protection_plan_id = jsonencode(
         {
           value = var.alz_management_resource_ids.ddos_protection_plan_id
         }
-      ) : null
-      log_analytics_workspace_id = try(length(var.alz_management_resource_ids.log_analytics_workspace_id), 0) > 0 ? jsonencode(
+    ) } : {},
+    try(length(var.alz_management_resource_ids.log_analytics_workspace_id), 0) > 0 ? {
+      log_analytics_workspace_id = jsonencode(
         {
           value = var.alz_management_resource_ids.log_analytics_workspace_id
         }
-      ) : null
-    },
+    ) } : {},
     # extension to Deploy-Private-DNS-Zones assignment (see alz_policy_default_values.json in extension library)
     local.policy_default_values_private_dns_zones
   )
