@@ -3,20 +3,20 @@ variable "azure_location" {
   description = "Default region for resources deployed into this subscription."
 }
 
-variable "azure_resource_name_elements" {
-  type = object({
-    prefixes      = optional(list(string))
-    suffixes      = optional(list(string))
-    name          = optional(string)
-    random_length = optional(number)
-  })
-  description = "Object containing naming components to be used by the azurecaf_name data source to generate resource names."
-}
+# variable "azure_resource_name_elements" {
+#   type = object({
+#     prefixes      = optional(list(string))
+#     suffixes      = optional(list(string))
+#     name          = optional(string)
+#     random_length = optional(number)
+#   })
+#   description = "Object containing naming components to be used by the azurecaf_name data source to generate resource names."
+# }
 
-variable "azure_tags" {
-  type    = map(string)
-  default = {}
-}
+# variable "azure_tags" {
+#   type    = map(string)
+#   default = {}
+# }
 
 variable "ecp_environment_name" {
   type        = string
@@ -28,10 +28,10 @@ variable "ecp_azure_root_parent_management_group_id" {
     description = "The management group ID of the parent management group for the ECP environment"
 }
 
-variable "alz_parent_management_group_resource_id" {
-  type        = string
-  description = "The management group resource ID of the management group of this ECP environment"
-}
+# variable "alz_parent_management_group_resource_id" {
+#   type        = string
+#   description = "The management group resource ID of the management group of this ECP environment"
+# }
 
 variable "ecp_launchpad_subscription_id" {
   type        = string
@@ -78,11 +78,11 @@ variable "ecp_security_subscription_id" {
   }
 }
 
-variable "ecp_alz_avm_version" {
-    type = string
-    default = "0.15.0"
-    description = "Version of the AVM PTN ALZ module 'avm-ptn-alz' to use. See https://github.com/Azure/terraform-azurerm-avm-ptn-alz/releases for available versions."
-}
+# variable "ecp_alz_avm_version" {
+#     type = string
+#     default = "0.15.0"
+#     description = "Version of the AVM PTN ALZ module 'avm-ptn-alz' to use. See https://github.com/Azure/terraform-azurerm-avm-ptn-alz/releases for available versions."
+# }
 
 variable "ecp_alz_architecture_name" {
     type        = string
@@ -94,6 +94,19 @@ variable "alz_library_path_shared_rendered" {
     type = string
     description = "Path to the rendered shared ALZ library artefacts. Used to configure the ALZ provider."
     default = "./not-set"
+}
+
+variable "alz_management_resource_ids" {
+  type        = map(object({
+    log_analytics_workspace_id = optional(string)
+    ama_change_tracking_data_collection_rule_id = optional(string)
+    ama_vm_insights_data_collection_rule_id = optional(string)
+    ama_defender_sqls_data_collection_rule_id = optional(string)
+    ama_user_assigned_managed_identity_id = optional(string)
+    ddos_protection_plan_id = optional(string)
+  }))
+  default     = {}
+  description = "Objects mapping management resource key to resource Id,"
 }
 
 variable "private_dns_zone_configuration" {

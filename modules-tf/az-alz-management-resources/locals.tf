@@ -9,7 +9,9 @@ locals {
   resource_group_id = provider::azapi::subscription_resource_id(
     local.subscription_id_management,
     "Microsoft.Resources/resourceGroups",
-    local.resource_group_name
+    [
+      local.resource_group_name
+    ]
   )
 
   automation_account_id = provider::azapi::resource_group_resource_id(

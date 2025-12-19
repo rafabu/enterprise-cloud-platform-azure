@@ -2,6 +2,10 @@ module "alz_management" {
   source  = "Azure/avm-ptn-alz-management/azurerm"
   version = "0.9.0"
 
+  providers = {
+    azurerm = azurerm.management
+  }
+
   location = var.azure_location
 
   # === Resource Group ===
