@@ -160,3 +160,52 @@ module "alz" {
   #   ]
   # }
 }
+
+
+
+output "zzzz_management_group_resource_ids" {
+    value = merge(
+    try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_id), 0) > 0 ? {
+      ama_user_assigned_managed_identity_id = jsonencode(
+        {
+          value = var.alz_management_resource_ids.ama_user_assigned_managed_identity_id
+        }
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name), 0) > 0 ? {
+      ama_user_assigned_managed_identity_name = jsonencode(
+        {
+          value = basename(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name)
+        }
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id), 0) > 0 ? {
+      ama_vm_insights_data_collection_rule_id = jsonencode(
+        {
+          value = var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id
+        }
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_defender_sqls_data_collection_rule_id), 0) > 0 ? {
+      ama_mdfc_sql_data_collection_rule_id = jsonencode(
+        {
+          value = var.alz_management_resource_ids.ama_defender_sqls_data_collection_rule_id
+        }
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ama_change_tracking_data_collection_rule_id), 0) > 0 ? {
+      ama_change_tracking_data_collection_rule_id = jsonencode(
+        {
+          value = var.alz_management_resource_ids.ama_change_tracking_data_collection_rule_id
+        }
+    ) } : {},
+    try(length(var.alz_management_resource_ids.ddos_protection_plan_id), 0) > 0 ? {
+      ddos_protection_plan_id = jsonencode(
+        {
+          value = var.alz_management_resource_ids.ddos_protection_plan_id
+        }
+    ) } : {},
+    try(length(var.alz_management_resource_ids.log_analytics_workspace_id), 0) > 0 ? {
+      log_analytics_workspace_id = jsonencode(
+        {
+          value = var.alz_management_resource_ids.log_analytics_workspace_id
+        }
+    ) } : {}
+  )
+}
