@@ -1,61 +1,3 @@
-locals {
-  # subscription_id     = var.ecp_management_subscription_id
-  # resource_group_name = data.azurecaf_name.rg.result
-
-  # # connectivity (Private DNS Zones)
-  # subscription_id_connectivity     = var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? var.ecp_connectivity_subscription_id : var.ecp_management_subscription_id
-  # resource_group_name_connectivity = replace(local.resource_group_name, "-mgmt", "-conn")
-
-  # log_analytics_workspace_id = provider::azapi::resource_group_resource_id(
-  #   local.subscription_id,
-  #   local.resource_group_name,
-  #   "Microsoft.OperationalInsights/workspaces",
-  #   [
-  #     data.azurecaf_name.log.result
-  #   ]
-  # )
-
-  # ama_change_tracking_data_collection_rule_name = format("%s-%s", replace(data.azurecaf_name.rg.result, "-rg-", "-dcr-"), "change-tracking")
-  # ama_change_tracking_data_collection_rule_id = provider::azapi::resource_group_resource_id(
-  #   local.subscription_id,
-  #   local.resource_group_name,
-  #   "Microsoft.Insights/dataCollectionRules",
-  #   [
-  #     local.ama_change_tracking_data_collection_rule_name
-  #   ]
-  # )
-
-  # ama_vm_insights_data_collection_rule_name = format("%s-%s", replace(data.azurecaf_name.rg.result, "-rg-", "-dcr-"), "vm-insights")
-  # ama_vm_insights_data_collection_rule_id = provider::azapi::resource_group_resource_id(
-  #   local.subscription_id,
-  #   local.resource_group_name,
-  #   "Microsoft.Insights/dataCollectionRules",
-  #   [
-  #     local.ama_vm_insights_data_collection_rule_name
-  #   ]
-  # )
-
-  # ama_defender_sqls_data_collection_rule_name = format("%s-%s", replace(data.azurecaf_name.rg.result, "-rg-", "-dcr-"), "defender-sql")
-  # ama_defender_sqls_data_collection_rule_id = provider::azapi::resource_group_resource_id(
-  #   local.subscription_id,
-  #   local.resource_group_name,
-  #   "Microsoft.Insights/dataCollectionRules",
-  #   [
-  #     local.ama_defender_sqls_data_collection_rule_name
-  #   ]
-  # )
-
-  # ama_user_assigned_managed_identity_name = data.azurecaf_name.rg.result != null ? format("%s-%s", replace(data.azurecaf_name.rg.result, "-rg-", "-id-"), "ama") : null
-  # ama_user_assigned_managed_identity_id = provider::azapi::resource_group_resource_id(
-  #   local.subscription_id,
-  #   local.resource_group_name,
-  #   "Microsoft.ManagedIdentity/userAssignedIdentities",
-  #   [
-  #     local.ama_user_assigned_managed_identity_name
-  #   ]
-  # )
-}
-
 module "alz" {
   source  = "Azure/avm-ptn-alz/azurerm"
   version = "0.15.0"
@@ -98,6 +40,7 @@ module "alz" {
       }
     } : {}
   )
+
   #   management_group_hierarchy_settings = {
   #     default_management_group_name            = "sandbox"
   #     require_authorisation_for_group_creation = true
@@ -114,7 +57,7 @@ module "alz" {
     try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name), 0) > 0 ? {
       ama_user_assigned_managed_identity_name = jsonencode(
         {
-          value = var.alz_management_resource_ids.ama_user_assigned_managed_identity_name
+          value = basename(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name)
         }
     ) } : {},
     try(length(var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id), 0) > 0 ? {
@@ -159,53 +102,4 @@ module "alz" {
   #   policy_role_assignments = [
   #   ]
   # }
-}
-
-
-
-output "zzzz_management_group_resource_ids" {
-    value = merge(
-    try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_id), 0) > 0 ? {
-      ama_user_assigned_managed_identity_id = jsonencode(
-        {
-          value = var.alz_management_resource_ids.ama_user_assigned_managed_identity_id
-        }
-    ) } : {},
-    try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name), 0) > 0 ? {
-      ama_user_assigned_managed_identity_name = jsonencode(
-        {
-          value = basename(var.alz_management_resource_ids.ama_user_assigned_managed_identity_name)
-        }
-    ) } : {},
-    try(length(var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id), 0) > 0 ? {
-      ama_vm_insights_data_collection_rule_id = jsonencode(
-        {
-          value = var.alz_management_resource_ids.ama_vm_insights_data_collection_rule_id
-        }
-    ) } : {},
-    try(length(var.alz_management_resource_ids.ama_defender_sqls_data_collection_rule_id), 0) > 0 ? {
-      ama_mdfc_sql_data_collection_rule_id = jsonencode(
-        {
-          value = var.alz_management_resource_ids.ama_defender_sqls_data_collection_rule_id
-        }
-    ) } : {},
-    try(length(var.alz_management_resource_ids.ama_change_tracking_data_collection_rule_id), 0) > 0 ? {
-      ama_change_tracking_data_collection_rule_id = jsonencode(
-        {
-          value = var.alz_management_resource_ids.ama_change_tracking_data_collection_rule_id
-        }
-    ) } : {},
-    try(length(var.alz_management_resource_ids.ddos_protection_plan_id), 0) > 0 ? {
-      ddos_protection_plan_id = jsonencode(
-        {
-          value = var.alz_management_resource_ids.ddos_protection_plan_id
-        }
-    ) } : {},
-    try(length(var.alz_management_resource_ids.log_analytics_workspace_id), 0) > 0 ? {
-      log_analytics_workspace_id = jsonencode(
-        {
-          value = var.alz_management_resource_ids.log_analytics_workspace_id
-        }
-    ) } : {}
-  )
 }

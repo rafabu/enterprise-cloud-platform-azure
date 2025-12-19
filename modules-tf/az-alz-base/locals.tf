@@ -1,9 +1,12 @@
 locals {
 
+  policy_private_dns_zones_not_supported = [
+    "azure_aks_mgmt", # AKS private networking does not work with private endpoints but vnet integration
+  ]
   policy_private_dns_zones_not_in_alz = [
     # DNS zones not (yet) implemented in ALZ 'Deploy-Private-DNS-Zones' policy initiative
+    #     or the custom ECP policy initiative 'ECP-Deploy-Private-DNS-Z'
     #     as of version 2.4.0
-    "azure_aks_mgmt", # AKS private networking does not work with private endpoints but vnet integration
     "azure_attestation",
     "azure_avd_global",
     "azure_bot_svc_token",
@@ -42,6 +45,11 @@ locals {
     "azure_synapse"
   ]
 
+  policy_private_dns_zones_to_skip = compact(distinct(concat(
+    local.policy_private_dns_zones_not_in_alz,
+    local.policy_private_dns_zones_not_supported
+  )))
+
   policy_default_values_private_dns_zones = {
     for key, val in var.private_dns_zone_configuration :
     "private_dns_zone_id_${key}" => jsonencode(
@@ -49,10 +57,11 @@ locals {
         value = "${val}"
       }
     )
-    if contains(local.policy_private_dns_zones_not_in_alz, key) == false
+    if contains(local.policy_private_dns_zones_to_skip, key) == false
   }
 
-    policy_default_values_private_dns_zones_not_in_alz = {
+  # this is for output only
+  policy_default_values_private_dns_zones_not_in_alz = {
     for key, val in var.private_dns_zone_configuration :
     "private_dns_zone_id_${key}" => jsonencode(
       {
