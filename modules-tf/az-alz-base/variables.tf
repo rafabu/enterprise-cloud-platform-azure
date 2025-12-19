@@ -24,8 +24,8 @@ variable "ecp_environment_name" {
 }
 
 variable "ecp_azure_root_parent_management_group_id" {
-    type        = string
-    description = "The management group ID of the parent management group for the ECP environment"
+  type        = string
+  description = "The management group ID of the parent management group for the ECP environment"
 }
 
 variable "alz_parent_management_group_resource_id" {
@@ -85,27 +85,34 @@ variable "ecp_security_subscription_id" {
 # }
 
 variable "ecp_alz_architecture_name" {
-    type        = string
-    default     = "ecp-alz-v1"
-    description = "The architecture name for the ALZ deployment."
+  type        = string
+  default     = "ecp-alz-v1"
+  description = "The architecture name for the ALZ deployment."
 }
 
 variable "alz_library_path_shared_rendered" {
-    type = string
-    description = "Path to the rendered shared ALZ library artefacts. Used to configure the ALZ provider."
-    default = "./not-set"
+  type        = string
+  description = "Path to the rendered shared ALZ library artefacts. Used to configure the ALZ provider."
+  default     = "./not-set"
 }
 
 variable "alz_management_resource_ids" {
-  type        = map(object({
-    log_analytics_workspace_id = optional(string)
+  type = object({
+    log_analytics_workspace_id                  = optional(string)
     ama_change_tracking_data_collection_rule_id = optional(string)
-    ama_vm_insights_data_collection_rule_id = optional(string)
-    ama_defender_sqls_data_collection_rule_id = optional(string)
-    ama_user_assigned_managed_identity_id = optional(string)
-    ddos_protection_plan_id = optional(string)
-  }))
-  default     = {}
+    ama_vm_insights_data_collection_rule_id     = optional(string)
+    ama_defender_sqls_data_collection_rule_id   = optional(string)
+    ama_user_assigned_managed_identity_id       = optional(string)
+    ddos_protection_plan_id                     = optional(string)
+  })
+  default = {
+    # ama_change_tracking_data_collection_rule_id = "/subscriptions/5c838b6a-9149-423a-9de4-ff1682f70388/resourceGroups/rabu-d7-rg-ecpa-mgmt/providers/Microsoft.Insights/dataCollectionRules/rabu-d7-dcr-ecpa-mgmt-change-tracking"
+    # ama_defender_sqls_data_collection_rule_id   = "/subscriptions/5c838b6a-9149-423a-9de4-ff1682f70388/resourceGroups/rabu-d7-rg-ecpa-mgmt/providers/Microsoft.Insights/dataCollectionRules/rabu-d7-dcr-ecpa-mgmt-defender-sql"
+    # ama_user_assigned_identity_id               = "/subscriptions/5c838b6a-9149-423a-9de4-ff1682f70388/resourceGroups/rabu-d7-rg-ecpa-mgmt/providers/Microsoft.ManagedIdentity/userAssignedIdentities/rabu-d7-id-ecpa-mgmt-ama"
+    # ama_vm_insights_data_collection_rule_id     = "/subscriptions/5c838b6a-9149-423a-9de4-ff1682f70388/resourceGroups/rabu-d7-rg-ecpa-mgmt/providers/Microsoft.Insights/dataCollectionRules/rabu-d7-dcr-ecpa-mgmt-vm-insights"
+    # log_analytics_workspace_id                  = "/subscriptions/5c838b6a-9149-423a-9de4-ff1682f70388/resourceGroups/rabu-d7-rg-ecpa-mgmt/providers/Microsoft.OperationalInsights/workspaces/rabu-d7-log-ecpa-mgmt"
+    # ddos_protection_plan_id                     = null
+  }
   description = "Objects mapping management resource key to resource Id,"
 }
 
