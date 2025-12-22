@@ -306,7 +306,7 @@ try {
     # Check if running in Azure DevOps pipeline with service principal
     $isAzureDevOpsPipeline = $env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI -and $env:SYSTEM_ACCESSTOKEN
     $hasServicePrincipal = $env:servicePrincipalId -and $env:servicePrincipalKey
-    $hasAzureDevOpsPat = $env:AZURE_DEVOPS_EXT_PAT
+    $hasAzureDevOpsPat = $env:AZDO_PERSONAL_ACCESS_TOKEN
     
     if ($isAzureDevOpsPipeline) {
         Write-Host "INFO: Detected Azure DevOps pipeline environment"
@@ -343,9 +343,9 @@ try {
             Write-Warning "INFO: Service principal token method failed, trying PAT fallback..."
             
             if ($hasAzureDevOpsPat) {
-                Write-Host "INFO: Using AZURE_DEVOPS_EXT_PAT for authentication"
+                Write-Host "INFO: Using AZDO_PERSONAL_ACCESS_TOKEN for authentication"
                 git config --global credential."https://dev.azure.com".helper ""
-                git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZURE_DEVOPS_EXT_PAT; }; f"
+                git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZDO_PERSONAL_ACCESS_TOKEN; }; f"
             }
             else {
                 throw "Error: No valid authentication method available"
@@ -353,9 +353,9 @@ try {
         }
     }
     elseif ($hasAzureDevOpsPat) {
-        Write-Host "INFO: Using AZURE_DEVOPS_EXT_PAT for authentication"
+        Write-Host "INFO: Using AZDO_PERSONAL_ACCESS_TOKEN for authentication"
         git config --global credential."https://dev.azure.com".helper ""
-        git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZURE_DEVOPS_EXT_PAT; }; f"
+        git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZDO_PERSONAL_ACCESS_TOKEN; }; f"
     }
     else {
         Write-Host "INFO: Using existing Azure CLI authentication context"
@@ -374,7 +374,7 @@ try {
             }
         }
         catch {
-            Write-Warning "INFO: Could not use Azure CLI authentication. Please ensure 'az login' was run or use AZURE_DEVOPS_EXT_PAT"
+            Write-Warning "INFO: Could not use Azure CLI authentication. Please ensure 'az login' was run or use AZDO_PERSONAL_ACCESS_TOKEN"
             Write-Warning "INFO: Proceeding without explicit git credential configuration - git may prompt for credentials"
         }
     }
@@ -386,7 +386,7 @@ try {
     if ($LASTEXITCODE -ne 0) {
         Write-Error "ERROR: Azure DevOps authentication failed. Please ensure:"
         Write-Error "ERROR:   1. You've run 'az login' or have valid service principal credentials"
-        Write-Error "ERROR:   2. AZURE_DEVOPS_EXT_PAT is set (if using PAT)"
+        Write-Error "ERROR:   2. AZDO_PERSONAL_ACCESS_TOKEN is set (if using PAT)"
         Write-Error "ERROR:   3. System.AccessToken is available (if in Azure DevOps pipeline)"
         Write-Error "ERROR:   4. You have access to organization '$AdoOrg' and project '$AdoProject'"
         exit 1
