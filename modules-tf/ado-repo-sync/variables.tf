@@ -20,6 +20,12 @@ variable "ecp_azure_devops_target_branch" {
   default     = "main"
 }
 
+variable "ecp_configuration_repo_deployment_root_path" {
+  type        = string
+  description = "Root path in configuration repository for deployments"
+  default     = ""
+}
+
 variable "local_git_submodule_path" {
   type        = string
   description = "Path to local submodule directory relative to module root"
