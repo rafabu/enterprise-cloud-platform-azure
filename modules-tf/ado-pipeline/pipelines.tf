@@ -7,15 +7,19 @@ locals {
       replace(
         replace(
           replace(
-            yamlencode(var.ado_yaml_pipeline_definitions[a]),
-            "/${local.matchpattern_terraform_variable_ecp_environment_name}/",
-            var.ecp_environment_name
+            replace(
+              yamlencode(var.ado_yaml_pipeline_definitions[a]),
+              "/${local.matchpattern_terraform_variable_ecp_environment_name}/",
+              var.ecp_environment_name
+            ),
+            "/${local.matchpattern_terraform_variable_ecp_azure_devops_project_name}/",
+            var.ecp_azure_devops_project_name
           ),
-          "/${local.matchpattern_terraform_variable_ecp_azure_devops_project_name}/",
-          var.ecp_azure_devops_project_name
+          "/${local.matchpattern_terraform_variable_ecp_azure_devops_repository_name}/",
+          var.ecp_azure_devops_repository_name
         ),
-        "/${local.matchpattern_terraform_variable_ecp_azure_devops_repository_name}/",
-        var.ecp_azure_devops_repository_name
+        "/${local.matchpattern_terraform_variable_ecp_azure_devops_pool_name}/",
+        var.ecp_azure_devops_pool_name
       )
     )
   }
@@ -61,7 +65,7 @@ resource "azuredevops_build_definition" "pipelines" {
     report_build_status = try(local.ado_yaml_pipeline_definitions_normalized[each.key].repository.properties.reportBuildStatus, true)
   }
 
-  variable_groups =  local.ado_yaml_pipeline_definitions_normalized[each.key].variableGroups != null ? [
+  variable_groups = local.ado_yaml_pipeline_definitions_normalized[each.key].variableGroups != null ? [
     for vg in try(local.ado_yaml_pipeline_definitions_normalized[each.key].variableGroups, []) : vg.id
   ] : null
 

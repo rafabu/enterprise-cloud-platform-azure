@@ -18,6 +18,11 @@ variable "ecp_azure_devops_repository_name" {
   description = "Name of Azure DevOps repository for ECP"
 }
 
+variable "ecp_azure_devops_pool_name" {
+  type        = string
+  description = "Name of Azure DevOps pool for ECP"
+}
+
 variable "ado_yaml_pipeline_definitions" {
   # https://learn.microsoft.com/en-us/rest/api/azure/devops/build/definitions/create?view=azure-devops-rest-7.1
   type = map(object({
