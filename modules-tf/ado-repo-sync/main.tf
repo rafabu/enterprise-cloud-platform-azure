@@ -45,7 +45,7 @@ resource "terraform_data" "ado_repo_sync" {
     -TargetBranch '${var.ecp_azure_devops_target_branch}' `
     -ForceSync ([bool]$${var.force_sync}) `
     -TemplateReplacements $templateObj `
-    -IncludeSubfolders @("${var.ecp_configuration_repo_deployment_root_path}")
+    ${var.filter_git_subfolders ? "-IncludeSubfolders @(\"${var.ecp_configuration_repo_deployment_root_path}\")" : ""}
 EOT
 
     environment = {}

@@ -31,6 +31,12 @@ variable "local_git_submodule_path" {
   description = "Path to local submodule directory relative to module root"
 }
 
+variable "filter_git_subfolders" {
+  type        = bool
+  description = "Whether to filter subfolder paths within the git submodule to include in the sync"
+  default     = false
+}
+
 variable "template_replacements" {
   type = map(object({
     file_patterns        = optional(list(string), []) # Glob patterns for files to process
