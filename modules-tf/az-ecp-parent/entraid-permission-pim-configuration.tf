@@ -286,7 +286,7 @@ resource "azuread_privileged_access_group_assignment_schedule" "reader_member_wo
   for_each = toset(var.ecp_deployment_entraid_reader_group_pim_enabled ? ["this"] : [])
 
   group_id        = azuread_group_without_members.reader_permission.object_id
-  principal_id    = var.ecp_deployment_contributor_workload_identity_object_id
+  principal_id    = var.ecp_deployment_reader_workload_identity_object_id
   assignment_type = "member"
 
   justification        = "Grant permanent assignment to privileged group '${azuread_group_without_members.reader_permission.display_name}'"
@@ -302,7 +302,7 @@ resource "azuread_privileged_access_group_assignment_schedule" "reader_owner_wor
   for_each = toset(var.ecp_deployment_entraid_reader_group_pim_enabled ? ["this"] : [])
 
   group_id        = azuread_group_without_members.reader_permission.object_id
-  principal_id    = var.ecp_deployment_contributor_workload_identity_object_id
+  principal_id    = var.ecp_deployment_contributor_workload_identity_object_id # owner must be the CONTRIBUTOR
   assignment_type = "owner"
 
   justification        = "Grant permanent ownership of privileged group '${azuread_group_without_members.reader_permission.display_name}'"

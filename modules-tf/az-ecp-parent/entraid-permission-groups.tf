@@ -98,13 +98,13 @@ resource "azuread_group_member" "reader_permission_reader_role" {
   member_object_id = azuread_group_without_members.reader_role.object_id
 }
 
-# resource "azuread_group_member" "reader_permission_workload_identity_assignment" {
-#   # with PIM, azuread_privileged_access_group_assignment_schedule resource handles membership
-#   for_each = toset(var.ecp_deployment_entraid_reader_group_pim_enabled ? [] : ["this"])
+resource "azuread_group_member" "reader_permission_workload_identity_assignment" {
+  # with PIM, azuread_privileged_access_group_assignment_schedule resource handles membership
+  for_each = toset(var.ecp_deployment_entraid_reader_group_pim_enabled ? [] : ["this"])
 
-#   group_object_id  = azuread_group_without_members.reader_permission.object_id
-#   member_object_id = var.ecp_deployment_contributor_workload_identity_object_id
-# }
+  group_object_id  = azuread_group_without_members.reader_permission.object_id
+  member_object_id = var.ecp_deployment_reader_workload_identity_object_id
+}
 
 resource "azurerm_role_assignment" "reader_permission" {
   for_each = toset(local.roles_readers_management_group)
