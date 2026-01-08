@@ -74,8 +74,8 @@ resource "azuredevops_build_definition" "pipelines" {
     content {
       name           = variable.key
       value          = variable.value.value
-      is_secret      = try(variable.value.is_secret, false)
-      allow_override = try(variable.value.allow_override, true)
+      is_secret      = try(variable.value.isSecret, false)
+      allow_override = try(variable.value.allowOverride, true)
     }
   }
 
