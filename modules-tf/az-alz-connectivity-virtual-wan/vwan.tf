@@ -8,8 +8,8 @@ module "alz-connectivity-virtual-wan" {
 
   ### Naming resources
   default_naming_convention = {
-    virtual_wan_name = "${data.azurecaf_name.vwan.name}-$${location}-$${sequence}"
-    virtual_hub_name = "${replace(data.azurecaf_name.vwan.name, "-vwan-", "-vhub-")}-$${location}-$${sequence}"
+    virtual_wan_name = "${data.azurecaf_name.vwan.result}-vwan-$${location}-$${sequence}"
+    virtual_hub_name = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-vwan-$${location}-$${sequence}"
     # sidecar_virtual_network_name               = "vnet-sidecar-$${location}-$${sequence}"
     # firewall_name                              = "fw-hub-$${location}-$${sequence}"
     # firewall_policy_name                       = "fwp-hub-$${location}-$${sequence}"
@@ -31,8 +31,8 @@ module "alz-connectivity-virtual-wan" {
     }
     virtual_wan = {
       # name                              = optional(string)
-      location                          = var.azure_location
-      resource_group_name               = "${data.azurecaf_name.rg.result}-vwan"
+      location                          = lower(var.azure_location)
+      resource_group_name               = "${data.azurecaf_name.rg.result}-vwan-${lower(var.azure_location)}"
       type                              = "Basic" # "Standard"
       allow_branch_to_branch_traffic    = true
       disable_vpn_encryption            = false
@@ -56,8 +56,6 @@ module "alz-connectivity-virtual-wan" {
         sidecar_virtual_network               = false
       }
 
-      # default_hub_address_space = local.virtual_network_address_prefixes[""].addressPrefixes
-      # default_parent_id         = ""
       location = vhub_value.location
 
       hub = {
@@ -69,50 +67,50 @@ module "alz-connectivity-virtual-wan" {
         tags                                   = vhub_value.tags
       }
 
-      virtual_network_connections = [
-        # {
-        #   name                      = string
-        #   remote_virtual_network_id = string
-        #   internet_security_enabled = optional(bool)
-        #   routing = {
-        #     associated_route_table_id  = optional(string)
-        #     associated_route_table_key = optional(string)
-        #     propagated_route_table = {
-        #       route_table_ids  = optional(list(string))
-        #       route_table_keys = optional(list(string))
-        #       labels           = optional(list(string))
-        #     }
-        #     inbound_route_map_id  = optional(string)
-        #     outbound_route_map_id = optional(string)
-        #   }
-        # }
-      ]
+      # virtual_network_connections = [
+      #   # {
+      #   #   name                      = string
+      #   #   remote_virtual_network_id = string
+      #   #   internet_security_enabled = optional(bool)
+      #   #   routing = {
+      #   #     associated_route_table_id  = optional(string)
+      #   #     associated_route_table_key = optional(string)
+      #   #     propagated_route_table = {
+      #   #       route_table_ids  = optional(list(string))
+      #   #       route_table_keys = optional(list(string))
+      #   #       labels           = optional(list(string))
+      #   #     }
+      #   #     inbound_route_map_id  = optional(string)
+      #   #     outbound_route_map_id = optional(string)
+      #   #   }
+      #   # }
+      # ]
 
-      express_route_circuit_connections = []
+      # express_route_circuit_connections = []
 
-      p2s_gateway_vpn_server_configurations = []
+      # p2s_gateway_vpn_server_configurations = []
 
-      p2s_gateways = []
+      # p2s_gateways = []
 
-      routing_intents = {}
+      # routing_intents = {}
 
-      vpn_site_connections = []
+      # vpn_site_connections = {}
 
-      vpn_sites = []
+      # vpn_sites = {}
 
-      sidecar_virtual_network = {}
+      # sidecar_virtual_network = {}
 
-      firewall = {}
+      # firewall = {}
 
-      firewall_policy = {}
+      # firewall_policy = {}
 
-      bastion = {}
+      # bastion = {}
 
-      virtual_network_gateways = {}
+      # virtual_network_gateways = {}
 
-      private_dns_zones = {}
+      # private_dns_zones = {}
 
-      private_dns_resolver = {}
+      # private_dns_resolver = {}
     }
 
   }
@@ -120,4 +118,9 @@ module "alz-connectivity-virtual-wan" {
   tags = {}
 
   enable_telemetry = false
+
+  depends_on = [
+    azapi_resource.resource_group_vwan,
+    azapi_resource.resource_group_vwan_hub
+  ]
 }
