@@ -56,8 +56,7 @@ variable "ecp_network_main_ipv4_address_space" {
 variable "virtual_wan_hubs" {
   type = map(object({
     location                     = optional(string, null)
-    address_prefix_artefact_name = "....artefact link...."
-
+    address_prefix_artefact_name = string
 
     sku                                    = optional(string, null)
     hub_routing_preference                 = optional(string, "ExpressRoute")
