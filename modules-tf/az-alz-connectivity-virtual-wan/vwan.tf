@@ -8,8 +8,8 @@ module "alz-connectivity-virtual-wan" {
 
   ### Naming resources
   default_naming_convention = {
-    virtual_wan_name = "${data.azurecaf_name.vwan.result}-vwan-$${location}-$${sequence}"
-    virtual_hub_name = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-vwan-$${location}-$${sequence}"
+    virtual_wan_name = "${data.azurecaf_name.vwan.result}-$${location}-$${sequence}"
+    virtual_hub_name = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-$${location}-$${sequence}"
     # sidecar_virtual_network_name               = "vnet-sidecar-$${location}-$${sequence}"
     # firewall_name                              = "fw-hub-$${location}-$${sequence}"
     # firewall_policy_name                       = "fwp-hub-$${location}-$${sequence}"
