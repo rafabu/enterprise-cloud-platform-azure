@@ -23,7 +23,17 @@ locals {
       sku                                    = virtual_hub_value.sku
       hub_routing_preference                 = virtual_hub_value.hub_routing_preference
       virtual_router_auto_scale_min_capacity = virtual_hub_value.virtual_router_auto_scale_min_capacity
-      tags                                   = coalesce(virtual_hub_value.tags, var.azure_tags, {})
+
+      virtual_network_connections = {
+        for vnc_key, vnc_value in virtual_hub_value.virtual_network_connections : vnc_key => merge(
+          {
+            name = "vnet-conn-${vnc_key}"
+          },
+          vnc_value
+        )
+      }
+
+      tags = coalesce(virtual_hub_value.tags, var.azure_tags, {})
     }
   }
 }

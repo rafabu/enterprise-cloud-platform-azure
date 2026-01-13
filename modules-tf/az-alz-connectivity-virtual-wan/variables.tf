@@ -62,6 +62,24 @@ variable "virtual_wan_hubs" {
     hub_routing_preference                 = optional(string, "ExpressRoute")
     virtual_router_auto_scale_min_capacity = optional(number, 2)
     tags                                   = optional(map(string))
+
+    virtual_network_connections = optional(map(object({
+      # name                      = string
+      remote_virtual_network_id = string
+      internet_security_enabled = optional(bool)
+      routing = optional(object({
+        associated_route_table_id  = optional(string)
+        associated_route_table_key = optional(string)
+        propagated_route_table = optional(object({
+          route_table_ids  = optional(list(string))
+          route_table_keys = optional(list(string))
+          labels           = optional(list(string))
+        }))
+        inbound_route_map_id  = optional(string)
+        outbound_route_map_id = optional(string)
+      }))
+    })), {})
+
   }))
   description = "A map of Virtual WAN hubs to create."
   default     = {}

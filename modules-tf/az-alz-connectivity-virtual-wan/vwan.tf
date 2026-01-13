@@ -1,6 +1,6 @@
 module "alz-connectivity-virtual-wan" {
   source  = "Azure/avm-ptn-alz-connectivity-virtual-wan/azurerm"
-  version = "0.13.4"
+  version = "0.13.5"
 
   providers = {
     azurerm = azurerm.connectivity
@@ -67,24 +67,7 @@ module "alz-connectivity-virtual-wan" {
         tags                                   = vhub_value.tags
       }
 
-      # virtual_network_connections = [
-      #   # {
-      #   #   name                      = string
-      #   #   remote_virtual_network_id = string
-      #   #   internet_security_enabled = optional(bool)
-      #   #   routing = {
-      #   #     associated_route_table_id  = optional(string)
-      #   #     associated_route_table_key = optional(string)
-      #   #     propagated_route_table = {
-      #   #       route_table_ids  = optional(list(string))
-      #   #       route_table_keys = optional(list(string))
-      #   #       labels           = optional(list(string))
-      #   #     }
-      #   #     inbound_route_map_id  = optional(string)
-      #   #     outbound_route_map_id = optional(string)
-      #   #   }
-      #   # }
-      # ]
+      virtual_network_connections = length(vhub_value.virtual_network_connections) > 0 ? vhub_value.virtual_network_connections : null
 
       # express_route_circuit_connections = []
 
