@@ -13,8 +13,8 @@ module "alz-connectivity-virtual-wan" {
     # sidecar_virtual_network_name               = "vnet-sidecar-$${location}-$${sequence}"
     # firewall_name                              = "fw-hub-$${location}-$${sequence}"
     # firewall_policy_name                       = "fwp-hub-$${location}-$${sequence}"
-    # virtual_network_gateway_express_route_name = "vgw-hub-er-$${location}-$${sequence}"
-    # virtual_network_gateway_vpn_name           = "vgw-hub-vpn-$${location}-$${sequence}"
+    virtual_network_gateway_express_route_name = "${data.azurecaf_name.vgw.result}-er-$${location}-$${sequence}"
+    virtual_network_gateway_vpn_name           = "${data.azurecaf_name.vgw.result}-vpn-$${location}-$${sequence}"
     # private_dns_resolver_name                  = "pdr-hub-$${location}-$${sequence}"
     # bastion_host_name                          = "bas-hub-$${location}-$${sequence}"
     # bastion_host_public_ip_name                = "pip-bas-hub-$${location}-$${sequence}"
@@ -45,16 +45,7 @@ module "alz-connectivity-virtual-wan" {
   virtual_hubs = {
     for vhub_key, vhub_value in local.virtual_wan_hubs : vhub_key => {
 
-      enabled_resources = {
-        firewall                              = false
-        firewall_policy                       = false
-        bastion                               = false
-        virtual_network_gateway_express_route = false
-        virtual_network_gateway_vpn           = false
-        private_dns_zones                     = false
-        private_dns_resolver                  = false
-        sidecar_virtual_network               = false
-      }
+      enabled_resources = vhub_value.enabled_resources
 
       location = vhub_value.location
 
@@ -77,9 +68,9 @@ module "alz-connectivity-virtual-wan" {
 
       # routing_intents = {}
 
-      # vpn_site_connections = {}
+      vpn_site_connections = length(vhub_value.vpn_site_connections) > 0 ? vhub_value.vpn_site_connections : null
 
-      # vpn_sites = {}
+      vpn_sites = length(vhub_value.vpn_sites) > 0 ? vhub_value.vpn_sites : null
 
       # sidecar_virtual_network = {}
 
@@ -89,7 +80,7 @@ module "alz-connectivity-virtual-wan" {
 
       # bastion = {}
 
-      # virtual_network_gateways = {}
+      virtual_network_gateways = length(vhub_value.virtual_network_gateways) > 0 ? vhub_value.virtual_network_gateways : null
 
       # private_dns_zones = {}
 
