@@ -30,13 +30,12 @@ module "alz-connectivity-virtual-wan" {
       ddos_protection_plan = false
     }
     virtual_wan = {
-      # name                              = optional(string)
       location                          = lower(var.azure_location)
       resource_group_name               = "${data.azurecaf_name.rg.result}-vwan-${lower(var.azure_location)}"
       type                              = "Basic" # "Standard"
       allow_branch_to_branch_traffic    = true
       disable_vpn_encryption            = false
-      office365_local_breakout_category = "None"
+      office365_local_breakout_category = "Optimize"
     }
     ddos_protection_plan = {}
   }
@@ -56,7 +55,7 @@ module "alz-connectivity-virtual-wan" {
         virtual_router_auto_scale_min_capacity = vhub_value.virtual_router_auto_scale_min_capacity
       }
 
-      virtual_network_connections = length(vhub_value.virtual_network_connections) > 0 ? vhub_value.virtual_network_connections : null
+      virtual_network_connections = try(vhub_value.virtual_network_connections, {})
 
       # express_route_circuit_connections = []
 
@@ -66,9 +65,9 @@ module "alz-connectivity-virtual-wan" {
 
       # routing_intents = {}
 
-      vpn_site_connections = length(vhub_value.vpn_site_connections) > 0 ? vhub_value.vpn_site_connections : null
+      vpn_site_connections = try(vhub_value.vpn_site_connections, {})
 
-      vpn_sites = length(vhub_value.vpn_sites) > 0 ? vhub_value.vpn_sites : null
+      vpn_sites = try(vhub_value.vpn_sites, {})
 
       # sidecar_virtual_network = {}
 
@@ -81,7 +80,7 @@ module "alz-connectivity-virtual-wan" {
       # vnet gateways are deployed based on enabled_resources.virtual_network_gateway_vpn / enabled_resources.virtual_network_gateway_express_route
       #     this object does configure properties that are non-default
       #     hence: null --> default settings
-      virtual_network_gateways = length(vhub_value.virtual_network_gateways) > 0 ? vhub_value.virtual_network_gateways : null
+      virtual_network_gateways = try(vhub_value.virtual_network_gateways, {})
 
       # private_dns_zones = {}
 

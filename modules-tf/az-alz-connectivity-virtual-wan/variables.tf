@@ -294,9 +294,9 @@ variable "vpn_site_artefacts" {
 
       location = optional(string, null)
 
-      addressSpace = object({
+      addressSpace = optional(object({
         addressPrefixes = list(string)
-      })
+      }), null)
       deviceProperties = optional(object({
         deviceModel  = optional(string, null)
         deviceVendor = optional(string, null)
@@ -328,17 +328,45 @@ variable "vpn_site_artefacts" {
   description = "merged vpnSite artefacts sourced from library"
 }
 
-output "zzz_vpn_site_artefacts" {
-  value       = var.vpn_site_artefacts
-  description = "Debug output of the parsed_vpn_site_artefacts local."
+variable "vpn_connection_artefacts" {
+  type = map(object({
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+      # name         = string
+
+      # location = optional(string, null)
+
+      # addressSpace = optional(object({
+      #   addressPrefixes = list(string)
+      # }), null)
+      # deviceProperties = optional(object({
+      #   deviceModel  = optional(string, null)
+      #   deviceVendor = optional(string, null)
+      # }), null)
+      # o365Policy = optional(object({
+      #   breakOutCategories = object({
+      #     allow    = optional(bool, null)
+      #     default  = optional(bool, null)
+      #     optimize = optional(bool, null)
+      #   })
+      # }), null)
+      # vpnSiteLinks = list(object({
+      #   name = string
+      #   properties = object({
+      #     bgpProperties = optional(object({
+      #       asn               = number
+      #       bgpPeeringAddress = string
+      #     }), null)
+      #     fqdn      = optional(string)
+      #     ipAddress = optional(string)
+      #     linkProperties = optional(object({
+      #       linkProviderName = optional(string, null)
+      #       linkSpeedInMbps  = optional(number, null)
+      #     }), null)
+      #   })
+      # }))
+    }))
+  }))
+  description = "merged vpnSite artefacts sourced from library"
 }
-
-# output "zzz_vpn_gateway_locations" {
-#   value       = local.vpn_gateway_location_info
-#   description = "Debug output of the vpn_gateway_locations local."
-# }
-
-# output "zzz_vpn_gateway_objects_hub_resolved" {
-#   value       = local.vpn_gateway_objects_hub_resolved
-#   description = "Debug output of the vpn_gateway_objects_hub_resolved local."
-# }
