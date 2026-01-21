@@ -10,8 +10,8 @@ resource "azapi_resource" "resource_group_vwan" {
 # resource groups for hubs in other regions
 resource "azapi_resource" "resource_group_vwan_hub" {
   for_each = toset(distinct([
-    for virtual_hub_key, virtual_hub_value in var.virtual_wan_hubs : virtual_hub_value.location
-    if coalesce(virtual_hub_value.location, var.azure_location) != var.azure_location
+    for virtual_hub_key, virtual_wan_hub_locations in local.virtual_wan_hub_locations : virtual_wan_hub_locations.location
+    if coalesce(virtual_wan_hub_locations.location, var.azure_location) != var.azure_location
   ]))
 
   type      = "Microsoft.Resources/resourceGroups@2025-04-01"

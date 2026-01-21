@@ -37,7 +37,6 @@ module "alz-connectivity-virtual-wan" {
       allow_branch_to_branch_traffic    = true
       disable_vpn_encryption            = false
       office365_local_breakout_category = "None"
-      tags                              = var.azure_tags
     }
     ddos_protection_plan = {}
   }
@@ -55,7 +54,6 @@ module "alz-connectivity-virtual-wan" {
         sku                                    = vhub_value.sku
         hub_routing_preference                 = vhub_value.hub_routing_preference
         virtual_router_auto_scale_min_capacity = vhub_value.virtual_router_auto_scale_min_capacity
-        tags                                   = vhub_value.tags
       }
 
       virtual_network_connections = length(vhub_value.virtual_network_connections) > 0 ? vhub_value.virtual_network_connections : null
@@ -80,6 +78,9 @@ module "alz-connectivity-virtual-wan" {
 
       # bastion = {}
 
+      # vnet gateways are deployed based on enabled_resources.virtual_network_gateway_vpn / enabled_resources.virtual_network_gateway_express_route
+      #     this object does configure properties that are non-default
+      #     hence: null --> default settings
       virtual_network_gateways = length(vhub_value.virtual_network_gateways) > 0 ? vhub_value.virtual_network_gateways : null
 
       # private_dns_zones = {}
@@ -89,7 +90,12 @@ module "alz-connectivity-virtual-wan" {
 
   }
 
-  tags = {}
+  timeouts = {
+    # initial creation of vWAN components can take well over an hour
+    create = "90m"
+  }
+
+  tags = var.azure_tags
 
   enable_telemetry = false
 

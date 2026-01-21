@@ -55,24 +55,14 @@ variable "ecp_network_main_ipv4_address_space" {
 # vWan hubs
 variable "virtual_wan_hubs" {
   type = map(object({
-    enabled_resources = optional(object({
-      firewall                              = optional(bool, false)
-      firewall_policy                       = optional(bool, false)
-      bastion                               = optional(bool, false)
-      virtual_network_gateway_express_route = optional(bool, false)
-      virtual_network_gateway_vpn           = optional(bool, false)
-      private_dns_zones                     = optional(bool, false)
-      private_dns_resolver                  = optional(bool, false)
-      sidecar_virtual_network               = optional(bool, false)
-    }), {})
 
-    location                     = optional(string, null)
-    address_prefix_artefact_name = string
+    # location                     = optional(string, null)
+    # address_prefix_artefact_name = string
 
-    sku                                    = optional(string, null)
-    hub_routing_preference                 = optional(string, "ExpressRoute")
-    virtual_router_auto_scale_min_capacity = optional(number, 2)
-    tags                                   = optional(map(string))
+    #sku                                    = optional(string, null)
+    # hub_routing_preference                 = optional(string, "ExpressRoute")
+    # virtual_router_auto_scale_min_capacity = optional(number, 2)
+    # tags                                   = optional(map(string))
 
     ### Virtual Network Connections ###
     virtual_network_connections = optional(map(object({
@@ -215,33 +205,140 @@ variable "virtual_wan_hubs" {
   }
 }
 
-
-variable "virtual_network_definitions" {
-  # https://learn.microsoft.com/en-us/graph/api/resources/countrynamedlocation?view=graph-rest-1.0
+variable "virtual_network_artefacts" {
   type = map(object({
-    artefactName = string
-    nameElement  = optional(string)
-    addressSpace = object({
-      addressPrefixes = optional(list(string))
-      baseAddressOffsets = optional(list(object({
-        netnum  = number
-        newbits = number
-      })))
-    })
-    dhcpOptions = optional(object({
-      dnsServers = optional(list(string))
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+      nameElement  = optional(string)
+      addressSpace = object({
+        addressPrefixes = optional(list(string))
+        baseAddressOffsets = optional(list(object({
+          netnum  = number
+          newbits = number
+        })))
+      })
+      dhcpOptions = optional(object({
+        dnsServers = optional(list(string))
+      }))
+      encryption = optional(object({
+        enabled     = bool
+        enforcement = string
+      }))
+      privateEndpointVNetPolicies = optional(string)
     }))
-    encryption = optional(object({
-      enabled     = bool
-      enforcement = string
-    }))
-    privateEndpointVNetPolicies = optional(string)
   }))
-  description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
+  description = "merged virtualNetwork artefacts sourced from library"
 }
 
-variable "virtual_network_artefact_names" {
-  type        = list(string)
-  default     = []
-  description = "List of virtualNetwork artefacts that are created"
+variable "virtual_hub_artefacts" {
+  type = map(object({
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+      nameElement  = optional(string)
+
+      location = optional(string)
+
+      addressPrefix        = optional(string)
+      hubRoutingPreference = optional(string)
+      sku                  = optional(string)
+      virtualRouterAutoScaleConfiguration = optional(object({
+        minCapacity = number
+      }))
+      virtualWan = optional(object({
+        id = string
+      }))
+    }))
+  }))
+  description = "merged virtualHub artefacts sourced from library"
 }
+
+variable "vpn_gateway_artefacts" {
+  type = map(object({
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+      nameElement  = optional(string)
+
+      location = optional(string)
+
+      bgpSettings = optional(object({
+        asn = optional(number, 65515)
+        bgpPeeringAddresses = optional(list(object({
+          customBgpIpAddresses = list(string)
+          ipconfigurationId    = string
+        })))
+        peerWeight = optional(number, 0)
+      }))
+      enableBgpRouteTranslationForNat = optional(bool, false)
+      isRoutingPreferenceInternet     = optional(bool, false)
+      sku                             = optional(string)
+      natRules                        = optional(list(any))
+      virtualHub = optional(object({
+        id = string
+      }))
+      vpnGatewayScaleUnit = optional(number, 1)
+    }))
+  }))
+
+  description = "merged vpnGateway artefacts sourced from library"
+}
+
+variable "vpn_site_artefacts" {
+  type = map(object({
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+      name         = string
+
+      location = optional(string, null)
+
+      addressSpace = object({
+        addressPrefixes = list(string)
+      })
+      deviceProperties = optional(object({
+        deviceModel  = optional(string, null)
+        deviceVendor = optional(string, null)
+      }), null)
+      o365Policy = optional(object({
+        breakOutCategories = object({
+          allow    = optional(bool, null)
+          default  = optional(bool, null)
+          optimize = optional(bool, null)
+        })
+      }), null)
+      vpnSiteLinks = list(object({
+        name = string
+        properties = object({
+          bgpProperties = optional(object({
+            asn               = number
+            bgpPeeringAddress = string
+          }), null)
+          fqdn      = optional(string)
+          ipAddress = optional(string)
+          linkProperties = optional(object({
+            linkProviderName = optional(string, null)
+            linkSpeedInMbps  = optional(number, null)
+          }), null)
+        })
+      }))
+    }))
+  }))
+  description = "merged vpnSite artefacts sourced from library"
+}
+
+output "zzz_vpn_site_artefacts" {
+  value       = var.vpn_site_artefacts
+  description = "Debug output of the parsed_vpn_site_artefacts local."
+}
+
+# output "zzz_vpn_gateway_locations" {
+#   value       = local.vpn_gateway_location_info
+#   description = "Debug output of the vpn_gateway_locations local."
+# }
+
+# output "zzz_vpn_gateway_objects_hub_resolved" {
+#   value       = local.vpn_gateway_objects_hub_resolved
+#   description = "Debug output of the vpn_gateway_objects_hub_resolved local."
+# }
