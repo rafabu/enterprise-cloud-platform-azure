@@ -78,7 +78,7 @@ module "alz-connectivity-virtual-wan" {
       # bastion = {}
 
       # vnet gateways are deployed based on enabled_resources.virtual_network_gateway_vpn / enabled_resources.virtual_network_gateway_express_route
-      #     this object does configure properties that are non-default
+      #     this object allows configuring properties that are non-default
       #     hence: null --> default settings
       virtual_network_gateways = try(vhub_value.virtual_network_gateways, {})
 

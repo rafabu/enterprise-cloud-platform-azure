@@ -333,39 +333,6 @@ variable "vpn_connection_artefacts" {
     filePath = string
     artefact = optional(object({
       artefactName = string
-      # name         = string
-
-      # location = optional(string, null)
-
-      # addressSpace = optional(object({
-      #   addressPrefixes = list(string)
-      # }), null)
-      # deviceProperties = optional(object({
-      #   deviceModel  = optional(string, null)
-      #   deviceVendor = optional(string, null)
-      # }), null)
-      # o365Policy = optional(object({
-      #   breakOutCategories = object({
-      #     allow    = optional(bool, null)
-      #     default  = optional(bool, null)
-      #     optimize = optional(bool, null)
-      #   })
-      # }), null)
-      # vpnSiteLinks = list(object({
-      #   name = string
-      #   properties = object({
-      #     bgpProperties = optional(object({
-      #       asn               = number
-      #       bgpPeeringAddress = string
-      #     }), null)
-      #     fqdn      = optional(string)
-      #     ipAddress = optional(string)
-      #     linkProperties = optional(object({
-      #       linkProviderName = optional(string, null)
-      #       linkSpeedInMbps  = optional(number, null)
-      #     }), null)
-      #   })
-      # }))
     }))
   }))
   description = "merged vpnSite artefacts sourced from library"
