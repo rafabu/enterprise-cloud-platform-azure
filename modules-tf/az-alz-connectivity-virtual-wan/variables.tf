@@ -56,14 +56,6 @@ variable "ecp_network_main_ipv4_address_space" {
 variable "virtual_wan_hubs" {
   type = map(object({
 
-    # location                     = optional(string, null)
-    # address_prefix_artefact_name = string
-
-    #sku                                    = optional(string, null)
-    # hub_routing_preference                 = optional(string, "ExpressRoute")
-    # virtual_router_auto_scale_min_capacity = optional(number, 2)
-    # tags                                   = optional(map(string))
-
     ### Virtual Network Connections ###
     virtual_network_connections = optional(map(object({
       # name                      = string
@@ -144,7 +136,6 @@ variable "virtual_wan_hubs" {
       tags = optional(map(string))
     })), {})
 
-
     ### VPN Site Connections ###
     vpn_site_connections = optional(map(object({
       name         = optional(string)
@@ -193,16 +184,9 @@ variable "virtual_wan_hubs" {
         remote_address_ranges = list(string)
       }))
     })), {})
-
-
   }))
-  description = "A map of Virtual WAN hubs to create."
+  description = "A map resources to create along with a Virtual WAN hubs. Key must match a hub artefactName."
   default     = {}
-
-  validation {
-    condition     = alltrue([for hub in var.virtual_wan_hubs : !try(hub.enabled_resources.virtual_network_gateway_express_route, false)])
-    error_message = "vWAN has Type 'Basic' which does not support ExpressRouteGateway. To use enabled_resources.virtual_network_gateway_express_route set the virtual_wan.type to 'Standard'."
-  }
 }
 
 variable "virtual_network_artefacts" {
@@ -336,4 +320,60 @@ variable "vpn_connection_artefacts" {
     }))
   }))
   description = "merged vpnSite artefacts sourced from library"
+}
+
+variable "virtual_wan_artefacts" {
+  type = map(object({
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+
+      location = optional(string)
+
+      type                           = optional(string, "Standard")
+      allowBranchToBranchTraffic     = optional(bool, true)
+      disableVpnEncryption           = optional(bool, false)
+      office365LocalBreakoutCategory = optional(string, "Optimize")
+    }))
+  }))
+  description = "merged virtualWan artefacts sourced from library"
+}
+
+variable "ecp_archetype_definitions" {
+  type = object({
+    name           = string
+    virtual_wan    = optional(list(string), [])
+    virtual_hub    = optional(list(string), [])
+    vpn_gateway    = optional(list(string), [])
+    vpn_site       = optional(list(string), [])
+    vpn_connection = optional(list(string), [])
+    er_gateway     = optional(list(string), [])
+    er_connection  = optional(list(string), [])
+  })
+  default = {
+    name = "ecp-vwan"
+    virtual_wan = [
+      "l2-connectivity-vwan-standard-sku"
+    ]
+    virtual_hub = [
+      "l2-connectivity-default-vwan-hub"
+    ]
+    vpn_gateway    = []
+    vpn_site       = []
+    vpn_connection = []
+    er_gateway     = []
+    er_connection  = []
+  }
+  description = "The ECP archetype definitions by 'archetypeName' which are valid for this deployment."
+}
+
+
+output "zzz_virtual_wan_artefacts" {
+  description = "The merged virtualWan artefacts sourced from library."
+  value       = var.virtual_wan_artefacts
+}
+
+output "zzz_parsed_wan_artefacts" {
+  description = "The parsed virtualWan artefacts sourced from library."
+  value       = local.parsed_wan_artefacts
 }

@@ -17,3 +17,21 @@ output "azure_virtual_wan_hub_resource_names" {
   value       = module.alz-connectivity-virtual-wan.virtual_hub_resource_names
   description = "The names of the virtual hubs associated with the virtual WAN."
 }
+
+output "azure_virtual_wan_hub_resource_details" {
+  value = {
+    for k, v in data.azapi_resource.virtual_wan_hub_details : k => {
+      name     = v.name
+      id       = v.id
+      location = v.location
+
+      ecp_artefactName = k == "ecpa_${lower(v.location)}" ? local.vwan_hub_artefact_default : k
+
+      address_prefix             = v.output.properties["addressPrefix"]
+      network_virtual_appliances = v.output.properties["networkVirtualAppliances"]
+      virtual_router_asn         = v.output.properties["virtualRouterAsn"]
+      virtual_router_ips         = v.output.properties["virtualRouterIps"]
+    }
+  }
+  description = "The detailed properties of the virtual hubs associated with the virtual WAN."
+}
