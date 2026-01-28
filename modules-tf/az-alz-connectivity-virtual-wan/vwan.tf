@@ -8,17 +8,17 @@ module "alz-connectivity-virtual-wan" {
 
   ### Naming resources
   default_naming_convention = {
-    virtual_wan_name = "${data.azurecaf_name.vwan.result}-$${location}-$${sequence}"
-    virtual_hub_name = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-$${location}-$${sequence}"
-    # sidecar_virtual_network_name               = "vnet-sidecar-$${location}-$${sequence}"
-    # firewall_name                              = "fw-hub-$${location}-$${sequence}"
-    # firewall_policy_name                       = "fwp-hub-$${location}-$${sequence}"
-    virtual_network_gateway_express_route_name = "${data.azurecaf_name.vgw.result}-er-$${location}-$${sequence}"
-    virtual_network_gateway_vpn_name           = "${data.azurecaf_name.vgw.result}-vpn-$${location}-$${sequence}"
-    # private_dns_resolver_name                  = "pdr-hub-$${location}-$${sequence}"
-    # bastion_host_name                          = "bas-hub-$${location}-$${sequence}"
-    # bastion_host_public_ip_name                = "pip-bas-hub-$${location}-$${sequence}"
-    # ddos_protection_plan_name                  = "ddos-hub-$${location}-$${sequence}"
+    virtual_wan_name                           = "${data.azurecaf_name.vwan.result}-$${location}-$${sequence}"
+    virtual_hub_name                           = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-$${location}-$${sequence}"
+    sidecar_virtual_network_name               = "${data.azurecaf_name.vnet.result}-$${location}-$${sequence}"
+    firewall_name                              = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-afw-")}-$${location}-$${sequence}"
+    firewall_policy_name                       = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-afwp-")}-$${location}-$${sequence}"
+    virtual_network_gateway_express_route_name = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-erc-")}-$${location}-$${sequence}"
+    virtual_network_gateway_vpn_name           = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vpng-")}-$${location}-$${sequence}"
+    private_dns_resolver_name                  = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-dnspr-")}-$${location}-$${sequence}"
+    bastion_host_name                          = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-bas-")}-$${location}-$${sequence}"
+    bastion_host_public_ip_name                = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-pip-")}-$${location}-$${sequence}"
+    ddos_protection_plan_name                  = "${data.azurecaf_name.ddospp.result}-$${location}-$${sequence}"
   }
   default_naming_convention_sequence = {
     padding_format  = "%02d"
@@ -119,5 +119,8 @@ data "azapi_resource" "virtual_wan_hub_details" {
     "properties.vpnGateway.id"
   ]
 
-  depends_on = []
+  depends_on = [
+    azapi_resource.resource_group_vwan,
+    azapi_resource.resource_group_vwan_hub
+  ]
 }

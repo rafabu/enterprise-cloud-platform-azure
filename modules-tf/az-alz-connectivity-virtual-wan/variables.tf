@@ -353,10 +353,10 @@ variable "ecp_archetype_definitions" {
   default = {
     name = "ecp-vwan"
     virtual_wan = [
-      "l2-connectivity-vwan-standard-sku"
+      "l2-connectivity-wan-standard-sku"
     ]
     virtual_hub = [
-      "l2-connectivity-default-vwan-hub"
+      "l2-connectivity-default-wan-hub"
     ]
     vpn_gateway    = []
     vpn_site       = []

@@ -51,7 +51,7 @@ locals {
   virtual_wan_object_processed = {
     for k, v in local.parsed_wan_artefacts : k => {
       location                          = local.virtual_wan_locations[k].location
-      resource_group_name               = "${data.azurecaf_name.rg.result}-vwan-${lower(local.virtual_wan_locations[k].location)}"
+      resource_group_name               = "${data.azurecaf_name.rg.result}-wan-${lower(local.virtual_wan_locations[k].location)}"
       type                              = try(v.type, "Standard")
       allow_branch_to_branch_traffic    = try(v.allowBranchToBranchTraffic, true)
       disable_vpn_encryption            = try(v.disableVpnEncryption, false)
@@ -299,10 +299,18 @@ locals {
 
               ratelimit_enabled = try(vl.properties.enableRateLimiting, false)
               route_weight      = try(vl.properties.routingWeight, 0)
-              # shared key: TODO: random or KV integration
               #     BUG: AVM module (rsp. underlying azurerm resource) will constantly try to change the shared key if set here
               #          --> always leave 'null'
-              shared_key                            = null
+              shared_key = null
+              shared_key_object = {
+                # value will be set later from random_password resource
+                value                       = try(vl.properties.preSharedKey.value, null)
+                value_random                = try(vl.properties.preSharedKey.valueRandom, true)
+                value_random_version        = try(vl.properties.preSharedKey.valueRandomVersion, 0)
+                value_key_vault_retrievable = try(vl.properties.preSharedKey.valueKeyVaultRetrievable, true)
+                value_key_vault_read        = try(vl.properties.preSharedKey.valueKeyVaultRead, false)
+
+              }
               local_azure_ip_address_enabled        = try(vl.properties.useLocalAzureIpAddress, false)
               policy_based_traffic_selector_enabled = try(vl.properties.usePolicyBasedTrafficSelectors, false)
               custom_bgp_addresses = [
@@ -328,7 +336,7 @@ locals {
 
   ### vWAN Hub definition for AVM module ###
   virtual_wan_hubs = {
-    # normalize key as "ecpa_location" if artefact is "l2-connectivity-default-vwan-hub" (the default)
+    # normalize key as "ecpa_location" if artefact is "l2-connectivity-default-wan-hub" (the default)
     for virtual_hub_key, virtual_hub_value in local.parsed_hub_artefacts : virtual_hub_key == local.vwan_hub_artefact_default ? "ecpa_${lower(local.virtual_wan_hub_locations[virtual_hub_key].location)}" : virtual_hub_key => {
 
       enabled_resources = {
@@ -351,7 +359,7 @@ locals {
         var.ecp_connectivity_subscription_id,
         "Microsoft.Resources/resourceGroups",
         [
-          "${data.azurecaf_name.rg.result}-vwan-${lower(local.virtual_wan_hub_locations[virtual_hub_key].location)}"
+          "${data.azurecaf_name.rg.result}-wan-${lower(local.virtual_wan_hub_locations[virtual_hub_key].location)}"
         ]
       )}"
 

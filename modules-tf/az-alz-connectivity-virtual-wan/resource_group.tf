@@ -1,6 +1,6 @@
 resource "azapi_resource" "resource_group_vwan" {
   type      = "Microsoft.Resources/resourceGroups@2025-04-01"
-  name      = "${data.azurecaf_name.rg.result}-vwan-${lower(var.azure_location)}"
+  name      = "${data.azurecaf_name.rg.result}-wan-${lower(var.azure_location)}"
   parent_id = "/subscriptions/${var.ecp_connectivity_subscription_id}"
   location  = var.azure_location
 
@@ -15,7 +15,7 @@ resource "azapi_resource" "resource_group_vwan_hub" {
   ]))
 
   type      = "Microsoft.Resources/resourceGroups@2025-04-01"
-  name      = "${data.azurecaf_name.rg.result}-vwan-${lower(each.key)}"
+  name      = "${data.azurecaf_name.rg.result}-wan-${lower(each.key)}"
   parent_id = "/subscriptions/${var.ecp_connectivity_subscription_id}"
   location  = each.key
 
