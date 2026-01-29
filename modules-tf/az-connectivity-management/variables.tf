@@ -105,18 +105,30 @@ variable "virtual_network_subnet_artefacts" {
 
 variable "ecp_archetype_definitions" {
   type = object({
-    name           = string
-    virtual_network    = optional(list(string), [])
-    virtual_network_subnet    = optional(list(string), [])
+    name                   = string
+    virtual_network        = optional(string, null)
+    virtual_network_subnet = optional(list(string), [])
   })
   default = {
-    name = "ecp-con"
-    virtual_network = [
-      "l2-connectivity-management-vnet"
-    ]
+    name            = "ecp-con"
+    virtual_network = "l2-connectivity-management-vnet"
     virtual_network_subnet = [
       "l2-connectivity-management-subnet-default"
     ]
   }
   description = "The ECP archetype definitions by 'archetypeName' which are valid for this deployment."
+}
+
+variable "enabled_resources" {
+  type = object({
+    key_vault = optional(bool, true)
+  })
+  default = {
+    key_vault = true
+  }
+}
+
+variable "private_dns_zone_ids" {
+  type    = list(string)
+  default = []
 }

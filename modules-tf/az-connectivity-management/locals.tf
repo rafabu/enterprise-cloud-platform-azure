@@ -3,21 +3,36 @@ locals {
   # ECP ARTEFACT DEFAULTS
   parsed_network_artefacts = {
     for k, v in var.virtual_network_artefacts : k => jsondecode(file(v.filePath))
-    # we need all here, as the wan hub artefact contains the filter statement
+    if lower(var.ecp_archetype_definitions.virtual_network) == lower(k)
   }
   parsed_network_subnet_artefacts = {
     for k, v in var.virtual_network_subnet_artefacts : k => jsondecode(file(v.filePath))
-    # we need all here, as the wan hub artefact contains the filter statement
+    if contains(var.ecp_archetype_definitions.virtual_network_subnet, k)
   }
-  
 
-  
+
+  virtual_network_address_prefixes = {
+    for k, v in local.parsed_network_artefacts : k => {
+      address_prefixes = (
+        distinct(concat(
+          try([
+            for offset in v.addressSpace.baseAddressOffsets :
+            cidrsubnet(var.ecp_network_main_ipv4_address_space, offset.newbits, offset.netnum)
+          ], [])
+        ))
+      )
+    }
+  }
+  virtual_network_subnet_address_prefixes = {
+    for k, v in local.parsed_network_subnet_artefacts : k => {
+      address_prefixes = (
+        distinct(concat(
+          try([
+            for offset in v.baseAddressOffsets :
+            cidrsubnet(var.ecp_network_main_ipv4_address_space, offset.newbits, offset.netnum)
+          ], [])
+        ))
+      )
+    }
+  }
 }
-
-output "zzz_parsed_network_artefacts" {
-  value = local.parsed_network_artefacts
-}
-
-output "zzz_parsed_network_subnet_artefacts" {
-  value = local.parsed_network_subnet_artefacts
-} 
