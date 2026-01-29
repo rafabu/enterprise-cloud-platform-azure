@@ -367,13 +367,8 @@ variable "ecp_archetype_definitions" {
   description = "The ECP archetype definitions by 'archetypeName' which are valid for this deployment."
 }
 
-
-output "zzz_virtual_wan_artefacts" {
-  description = "The merged virtualWan artefacts sourced from library."
-  value       = var.virtual_wan_artefacts
-}
-
-output "zzz_parsed_wan_artefacts" {
-  description = "The parsed virtualWan artefacts sourced from library."
-  value       = local.parsed_wan_artefacts
+variable "key_vault_id" {
+  type    = string
+  default = null
+  description = "The ID of an existing Key Vault to use for storing secrets."
 }

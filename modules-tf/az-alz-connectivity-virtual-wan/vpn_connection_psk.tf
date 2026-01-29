@@ -1,6 +1,7 @@
 # vpn link PSK secrets
 locals {
   # construct VPN link connection IDs
+  #     and details on shared key
   vpn_link_connection_helper = flatten([
     for k, v in local.vpn_connection_hub_resolved : [
       for sc_key, sc_value in v.vpn_site_connections : {
@@ -45,6 +46,17 @@ locals {
             value_key_vault_retrievable = length(try(link.shared_key_object.value, "")) > 0 ? false : try(link.shared_key_object.value_random, true) ? try(link.shared_key_object.value_key_vault_retrievable, true) : false
             # read secret from key vault and use it as preshared key
             value_key_vault_read = length(try(link.shared_key_object.value, "")) > 0 ? false : try(link.shared_key_object.value_random, true) ? try(link.shared_key_object.value_key_vault_read, true) : false
+            value_key_vault_secret_name = lower(format(
+              # azurerm_key_vault_secret's name to be 1 to 127 chars.
+              "psk_%s_%s_%s", # "psk_<location>_<remote site name>_<link connection name>" Example: "psk_switzerlandnorth_ecp-example-static-routing_link1-connection"
+              # location
+              lower(local.virtual_wan_hub_locations[k].location),
+              # remote site name
+              local.vpn_site_objects_hub_resolved[k].vpn_sites[replace(link.vpn_site_key, "${k == local.vwan_hub_artefact_default ? "ecpa_${lower(local.virtual_wan_hub_locations[k].location)}" : k}-", "")].name,
+              # link connection name
+              link.name
+            ))
+            value_key_vault_secret_content_type = "S2S-VPN-PSK"
           }
         }
       }
@@ -78,11 +90,13 @@ ephemeral "random_password" "link_connection_shared_key" {
 
 
 resource "terraform_data" "link_connection_shared_key_version" {
-  for_each = local.vpn_link_connection_helper_object
+  for_each = {
+    for k, v in local.vpn_link_connection_helper_object : k => v
+    if v.shared_key_object.value_key_vault_read == false
+  }
 
   input = {
     key_version = each.value.shared_key_object.value_random_version
-    value       = each.value.shared_key_object.value
   }
 
   triggers_replace = []
@@ -104,37 +118,18 @@ resource "terraform_data" "link_connection_shared_key_version" {
 }
 
 
-############################
-########### NOT (YET) SUPPORTED IN AZAPI PROVIDER ############
-### see https://github.com/Azure/terraform-provider-azapi/issues/1039
-# action "azapi_resource_action" "vpn_connection_link_preshared_key_put" {
-#   for_each = local.vpn_link_connection_helper_object
-
-#   config {
-#     type        = "Microsoft.Network/vpnGateways/vpnConnections/vpnLinkConnections/sharedKeys@2025-05-01"
-#     resource_id = "${each.value["id"]}/sharedKeys/default"
-#     method      = "PUT"
-
-#     body = {
-#       properties = {
-#       }
-#     }
-#     # Bummer: An argument named "sensitive_body" is not expected here
-#     sensitive_body = {
-#       properties = {
-#         sharedKey =   length(each.value.shared_key_object.value) > 0 ?  each.value.shared_key_object.value : each.value.shared_key_object.value_random ? ephemeral.random_password.link_connection_shared_key[each.key].result : "read_from_kv""
-#       }
-#     }
-#   }
-# }
-
-resource "azapi_resource" "key_vault_secret_link_connection_shared_key" {
-  for_each = { for k, v in local.vpn_link_connection_helper_object : k => v if v.shared_key_object.value_key_vault_retrievable == true }
+###### WRITE SHARED KEYS TO KEY VAULT IF REQUIRED ######
+resource "azapi_resource" "key_vault_secret_link_connection_shared_key_export" {
+  for_each = {
+    for k, v in local.vpn_link_connection_helper_object : k => v
+    if v.shared_key_object.value_key_vault_retrievable == true &&
+    try(length(var.key_vault_id), 0) > 0
+  }
 
   type = "Microsoft.KeyVault/vaults/secrets@2025-05-01"
 
-  parent_id = azapi_resource.kv.id
-  name      = each.key
+  parent_id = var.key_vault_id
+  name      = each.value.shared_key_object.value_key_vault_secret_name
 
   body = {
     properties = {
@@ -143,7 +138,7 @@ resource "azapi_resource" "key_vault_secret_link_connection_shared_key" {
         exp     = provider::time::rfc3339_parse(timeadd(plantimestamp(), "8760h")).unix # 1 year
         nbf     = provider::time::rfc3339_parse(plantimestamp()).unix
       }
-      contentType = "site-to-site VPN connection shared key"
+      contentType = each.value.shared_key_object.value_key_vault_secret_content_type
     }
   }
   sensitive_body = {
@@ -158,9 +153,55 @@ resource "azapi_resource" "key_vault_secret_link_connection_shared_key" {
   ignore_null_property = true
 }
 
+###### READ SHARED KEYS FROM KEY VAULT IF REQUIRED ######
+ephemeral "azapi_resource_action" "key_vault_secret_link_connection_shared_key_retrieve" {
+  for_each = {
+    for k, v in local.vpn_link_connection_helper_object : k => v
+    if v.shared_key_object.value_key_vault_read == true &&
+    length(var.key_vault_id) > 0
+  }
+
+  type        = "Microsoft.KeyVault/vaults/secrets@2025-05-01"
+  resource_id = "${var.key_vault_id}/secrets/${each.value.shared_key_object.value_key_vault_secret_name}/latest"
+  method      = "GET"
+
+  action = ""
+
+  response_export_values = [
+    "*"
+  ]
+}
+
+############################
+########### NOT (YET) SUPPORTED IN AZAPI PROVIDER ############
+### see https://github.com/Azure/terraform-provider-azapi/issues/1039
+
+# action "azapi_resource_action" "vpn_connection_link_preshared_key_put" {
+#   for_each = {
+#     for k, v in local.vpn_link_connection_helper_object : k => v
+#   }
+
+#   config {
+#     type        = "Microsoft.Network/vpnGateways/vpnConnections/vpnLinkConnections/sharedKeys@2025-05-01"
+#     resource_id = "${each.value["id"]}/sharedKeys/default"
+#     method      = "PUT"
+
+#     body = {
+#       properties = {
+#       }
+#     }
+#     # Bummer: An argument named "sensitive_body" is not expected here
+#     sensitive_body = {
+#       properties = {
+#         sharedKey = length(each.value.shared_key_object.value) > 0 ? each.value.shared_key_object.value : each.value.shared_key_object.value_random ? ephemeral.random_password.link_connection_shared_key[each.key].result : ephemeral.azapi_resource_action.key_vault_secret_link_connection_shared_key_retrieve[each.key].response["properties.value"]
+#       }
+#     }
+#   }
+# }
+
 # DANGER ZONE: This does update on EVERY apply!!!!
 #     currently no way to fix this
-
+# DO NOT ACTIVATE THIS UNLESS YOU ABSOLUTELY HAVE TO FOR DEBUGGING PURPOSES ONLY!!!!
 # ephemeral "azapi_resource_action" "vpn_connection_link_preshared_key_put" {
 #   for_each = local.vpn_link_connection_helper_object
 
@@ -170,7 +211,7 @@ resource "azapi_resource" "key_vault_secret_link_connection_shared_key" {
 
 #   body = {
 #     properties = {
-#       sharedKey = ephemeral.random_password.link_connection_shared_key[each.key].result
+#       sharedKey = length(each.value.shared_key_object.value) > 0 ?  each.value.shared_key_object.value : each.value.shared_key_object.value_random ? ephemeral.random_password.link_connection_shared_key[each.key].result : ephemeral.azapi_resource_action.key_vault_secret_link_connection_shared_key_retrieve[each.key].response["properties.value"]
 #     }
 #   }
 
