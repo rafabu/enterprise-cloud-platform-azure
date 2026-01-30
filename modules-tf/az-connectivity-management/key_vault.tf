@@ -13,8 +13,11 @@ resource "azurerm_key_vault" "mgm" {
   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
 
   resource_group_name = azurerm_resource_group.mgm.name
-  name                = "${data.azurecaf_name.kv.result}-mgmt"
-  location            = azurerm_resource_group.mgm.location
+  name = join("-", compact([
+    data.azurecaf_name.kv.result,
+    local.location_code[lower(local.hub_locations["main"].azure_location)]
+  ]))
+  location = local.hub_locations["main"].azure_location
 
   sku_name  = "standard"
   tenant_id = data.azurerm_client_config.con.tenant_id
@@ -49,19 +52,20 @@ resource "azurerm_key_vault" "mgm" {
   }
 }
 
+
 resource "azurerm_private_endpoint" "mgm_vault" {
   provider = azurerm.connectivity
 
   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
 
-  location            = azurerm_resource_group.mgm.location
+  location            = azurerm_key_vault.mgm[each.key].location
   name                = "${azurerm_key_vault.mgm[each.key].name}-pep"
-  resource_group_name = azurerm_resource_group.mgm.name
+  resource_group_name = azurerm_key_vault.mgm[each.key].resource_group_name
   subnet_id = provider::azapi::resource_group_resource_id(
     var.ecp_connectivity_subscription_id, azurerm_resource_group.mgm.name,
     "Microsoft.Network/virtualNetworks/subnets",
     [
-      azurerm_virtual_network.mgm[var.ecp_archetype_definitions.virtual_network].name,
+      azurerm_virtual_network.mgm["main_${var.ecp_archetype_definitions.virtual_network}"].name,
       "default"
     ]
   )

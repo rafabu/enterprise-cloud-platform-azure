@@ -3,7 +3,7 @@ resource "azurerm_resource_group" "mgm" {
 
 
   name     = "${data.azurecaf_name.rg.result}-mgmt"
-  location = var.azure_location
+  location = local.hub_locations["main"].azure_location
 
   tags = var.azure_tags
 

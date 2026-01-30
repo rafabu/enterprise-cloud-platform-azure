@@ -52,6 +52,16 @@ variable "ecp_network_main_ipv4_address_space" {
   description = "The main IPv4 address space for the ECP network"
 }
 
+variable "ecp_hub_locations" {
+  type = map(object({
+    azure_location                      = string
+    ecp_network_main_ipv4_address_space = string
+    is_main_location                    = optional(bool, false)
+  }))
+  default    = {}
+  description = "Regions to deploy ecp hub components to that need geographical dispersion. Note: Setting var.azure_location and var.ecp_network_main_ipv4_address_space overrides a default."
+}
+
 variable "virtual_network_artefacts" {
   type = map(object({
     filePath = string

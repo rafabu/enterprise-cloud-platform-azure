@@ -1,13 +1,13 @@
-output "virtual_network" {
-  value = try([
-    for key, val in local.parsed_network_artefacts : {
-      id             = azurerm_virtual_network.mgm[key].id
-      name           = azurerm_virtual_network.mgm[key].name
-      resource_group = azurerm_virtual_network.mgm[key].resource_group_name
-      location       = azurerm_virtual_network.mgm[key].location
-      address_space  = azurerm_virtual_network.mgm[key].address_space
+output "virtual_networks" {
+  value = {
+    for key, val in azurerm_virtual_network.mgm : key => {
+      id             = val.id
+      name           = val.name
+      resource_group = val.resource_group_name
+      location       = val.location
+      address_space  = val.address_space
     }
-  ][0], null)
+  }
 }
 
 output "virtual_network_subnets" {
