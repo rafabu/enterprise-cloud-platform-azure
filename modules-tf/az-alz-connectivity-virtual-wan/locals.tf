@@ -1,4 +1,32 @@
 locals {
+  location_code = {
+    for k, v in module.azure-region-info.regions_by_name : k => coalesce(v.geo_code, v.short_name)
+  }
+
+  hub_locations = merge(
+    var.azure_location != "" && var.ecp_network_main_ipv4_address_space != "" ? {
+      "main" = {
+        azure_location                      = var.azure_location
+        ecp_network_main_ipv4_address_space = var.ecp_network_main_ipv4_address_space
+        is_main_location                    = true
+      }
+      } : {
+      for k, v in var.ecp_hub_locations : "main" => {
+        azure_location                      = v.azure_location
+        ecp_network_main_ipv4_address_space = v.ecp_network_main_ipv4_address_space
+        is_main_location                    = coalesce(v.is_main_location, false)
+      }
+      if coalesce(v.is_main_location, false) == true
+    },
+    {
+      for k, v in var.ecp_hub_locations : k => {
+        azure_location                      = v.azure_location
+        ecp_network_main_ipv4_address_space = v.ecp_network_main_ipv4_address_space
+        is_main_location                    = coalesce(v.is_main_location, false)
+      }
+      if coalesce(v.is_main_location, false) == false
+    }
+  )
 
   # ECP ARTEFACT DEFAULTS
   network_artefact_default  = "l2-connectivity-vwan-hub"
@@ -51,7 +79,7 @@ locals {
   virtual_wan_object_processed = {
     for k, v in local.parsed_wan_artefacts : k => {
       location                          = local.virtual_wan_locations[k].location
-      resource_group_name               = "${data.azurecaf_name.rg.result}-wan-${lower(local.virtual_wan_locations[k].location)}"
+      resource_group_name               = "${data.azurecaf_name.rg.result}-wan-${lower(local.location_code[local.virtual_wan_locations[k].location])}"
       type                              = try(v.type, "Standard")
       allow_branch_to_branch_traffic    = try(v.allowBranchToBranchTraffic, true)
       disable_vpn_encryption            = try(v.disableVpnEncryption, false)
@@ -359,7 +387,7 @@ locals {
         var.ecp_connectivity_subscription_id,
         "Microsoft.Resources/resourceGroups",
         [
-          "${data.azurecaf_name.rg.result}-wan-${lower(local.virtual_wan_hub_locations[virtual_hub_key].location)}"
+          "${data.azurecaf_name.rg.result}-wan-${lower(local.location_code[local.virtual_wan_hub_locations[virtual_hub_key].location])}"
         ]
       )}"
 

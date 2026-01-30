@@ -46,10 +46,19 @@ variable "ecp_connectivity_subscription_id" {
   }
 }
 
-
 variable "ecp_network_main_ipv4_address_space" {
   type        = string
   description = "The main IPv4 address space for the ECP network"
+}
+
+variable "ecp_hub_locations" {
+  type = map(object({
+    azure_location                      = string
+    ecp_network_main_ipv4_address_space = string
+    is_main_location                    = optional(bool, false)
+  }))
+  default     = {}
+  description = "Regions to deploy ecp hub components to that need geographical dispersion. Note: Setting var.azure_location and var.ecp_network_main_ipv4_address_space overrides a default."
 }
 
 # vWan hubs
@@ -368,7 +377,7 @@ variable "ecp_archetype_definitions" {
 }
 
 variable "key_vault_id" {
-  type    = string
-  default = null
+  type        = string
+  default     = null
   description = "The ID of an existing Key Vault to use for storing secrets."
 }
