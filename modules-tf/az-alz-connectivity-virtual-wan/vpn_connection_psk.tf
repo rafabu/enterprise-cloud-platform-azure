@@ -68,11 +68,6 @@ locals {
   )
 }
 
-output "zzz_zzz_vpn_link_connection_helper_object" {
-  value = local.vpn_link_connection_helper_object
-}
-
-
 ephemeral "random_password" "link_connection_shared_key" {
   for_each = { for k, v in local.vpn_link_connection_helper_object : k => v if v.shared_key_object.value_random == true }
 

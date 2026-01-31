@@ -142,31 +142,97 @@ locals {
       }
     }
   ]
-    vpn_gateway_objects_hub_resolved_map = zipmap(
+  vpn_gateway_objects_hub_resolved_map = zipmap(
     flatten([for entry, attr in local.vpn_gateway_objects_hub_resolved_list : keys(attr)]),
     flatten([for entry, attr in local.vpn_gateway_objects_hub_resolved_list : values(attr)])
+  )
+
+  vpn_site_location_list = [
+    for k, v in local.parsed_vpn_site_artefacts : {
+      for l_k, l_v in local.hub_locations : "${l_k}_${k}" => {
+        location = coalesce(
+          try(
+            lower(v.location) == "default" ? null : v.location,
+            null
+          ),
+          l_v.azure_location
+        )
+      }
+    }
+  ]
+  vpn_site_location_map = zipmap(
+    flatten([for entry, attr in local.vpn_site_location_list : keys(attr)]),
+    flatten([for entry, attr in local.vpn_site_location_list : values(attr)])
+  )
+
+  vpn_site_objects_hub_resolved_list = [
+    for k, v in var.virtual_hub_artefacts : {
+      for l_k, l_v in local.hub_locations : "${l_k}_${k}" => {
+        # can be multiple vpn sites per hub
+        vpn_sites = {
+          for s_k, s_v in local.parsed_vpn_site_artefacts : s_k => {
+
+            site_location = local.vpn_site_location_map["${l_k}_${s_k}"].location
+
+
+            name = coalesce(try(s_v.name, null), s_k)
+            links = [
+              for link in s_v.vpnSiteLinks :
+              {
+                name = try(link.name, "link${index(s_v.vpnSiteLinks, link) + 1}")
+                bgp = {
+                  asn             = try(link.properties.bgpProperties.asn, null)
+                  peering_address = try(link.properties.bgpProperties.bgpPeeringAddress, null)
+                }
+                fqdn          = try(link.properties.fqdn, null)
+                ip_address    = try(link.properties.ipAddress, null)
+                provider_name = try(link.properties.linkProperties.linkProviderName, null)
+                speed_in_mbps = try(link.properties.linkProperties.linkSpeedInMbps, 0)
+
+              }
+            ]
+            address_cidrs = try(s_v.addressSpace.addressPrefixes, [])
+            device_model  = try(s_v.deviceProperties.deviceModel, null)
+            device_vendor = try(s_v.deviceProperties.deviceVendor, null)
+            o365_policy = {
+              traffic_category = {
+                allow_endpoint_enabled    = try(s_v.o365Policy.breakOutCategories.allow, false)
+                default_endpoint_enabled  = try(s_v.o365Policy.breakOutCategories.default, false)
+                optimize_endpoint_enabled = try(s_v.o365Policy.breakOutCategories.optimize, false)
+              }
+            }
+          }
+          # add only when location matches hub
+          if try(local.vpn_site_location_map["${l_k}_${s_k}"].location, "") == local.virtual_wan_hub_location_map["${l_k}_${k}"].location
+        }
+      }
+    }
+  ]
+  vpn_site_objects_hub_resolved_map = zipmap(
+    flatten([for entry, attr in local.vpn_site_objects_hub_resolved_list : keys(attr)]),
+    flatten([for entry, attr in local.vpn_site_objects_hub_resolved_list : values(attr)])
   )
 
 }
 
 
-output "zzz_virtual_wan_location_map" {
-  value = local.virtual_wan_location_map
+# output "zzz_virtual_wan_location_map" {
+#   value = local.virtual_wan_location_map
+# }
+
+
+# output "zzz_virtual_hub_address_prefix_map" {
+#   value = local.virtual_hub_address_prefix_map
+# }
+
+# output "zzz_virtual_wan_hub_location_map" {
+#   value = local.virtual_wan_hub_location_map
+# }
+
+output "zzz_parsed_vpn_site_artefacts" {
+  value = local.parsed_vpn_site_artefacts
 }
 
-
-output "zzz_virtual_hub_address_prefix_map" {
-  value = local.virtual_hub_address_prefix_map
-}
-
-output "zzz_virtual_wan_hub_location_map" {
-  value = local.virtual_wan_hub_location_map
-}
-
-output "zzz_vpn_gateway_location_map" {
-  value = local.vpn_gateway_location_map
-}
-
-output "zzz_vpn_gateway_objects_hub_resolved_map" {
-  value = local.vpn_gateway_objects_hub_resolved_map
+output "zzz_vpn_site_objects_hub_resolved_map" {
+  value = local.vpn_site_objects_hub_resolved_map
 }
