@@ -213,6 +213,118 @@ locals {
     flatten([for entry, attr in local.vpn_site_objects_hub_resolved_list : values(attr)])
   )
 
+
+  vpn_connection_location_list = [
+    for k, v in local.parsed_vpn_connection_artefacts : {
+      for l_k, l_v in local.hub_locations : "${l_k}_${k}" => {
+        location = coalesce(
+          try(
+            lower(v.location) == "default" ? null : v.location,
+            null
+          ),
+          l_v.azure_location
+        )
+      }
+    }
+  ]
+  vpn_connection_location_map = zipmap(
+    flatten([for entry, attr in local.vpn_connection_location_list : keys(attr)]),
+    flatten([for entry, attr in local.vpn_connection_location_list : values(attr)])
+  )
+
+  vpn_connection_objects_hub_resolved_list = [
+    for k, v in var.virtual_hub_artefacts : {
+      for l_k, l_v in local.hub_locations : "${l_k}_${k}" => {
+        vpn_site_connections = {
+          for c_k, c_v in local.parsed_vpn_connection_artefacts : c_k => {
+            name = coalesce(try(c_v.name, null), c_k)
+
+            # remote_vpn_site_key --> hub artefactName - remote site artefactName
+            remote_vpn_site_key = format(
+              "%s-%s",
+              k == local.vwan_hub_artefact_default ? "ecpa_${lower(local.vpn_connection_location_info[c_k].location)}" : k,
+              local.vpn_connection_dependency_info[c_k].site_is_artefact_ref ? local.vpn_connection_vhub_artefact[c_k].site_artefact_name : local.vpn_connection_dependency_info[c_k].site_id_raw
+            )
+
+            internet_security_enabled = null # TODO
+            routing                   = null # TODO
+            traffic_selector_policy   = null # TODO
+
+            vpn_links = [
+              for vl in c_v.vpnLinkConnections :
+              {
+                name                 = try(vl.name, "link${index(c_v.vpnLinkConnections, vl) + 1}-connection")
+                vpn_site_link_number = index(c_v.vpnLinkConnections, vl)
+                vpn_site_key = format(
+                  "%s-%s",
+                  k == local.vwan_hub_artefact_default ? "ecpa_${lower(local.vpn_connection_location_info[c_k].location)}" : k,
+                  local.vpn_connection_dependency_info[c_k].site_is_artefact_ref ? local.vpn_connection_vhub_artefact[c_k].site_artefact_name : local.vpn_connection_dependency_info[c_k].site_id_raw
+                )
+
+                egress_nat_rule_ids  = null # TODO
+                ingress_nat_rule_ids = null # TODO
+
+                bandwidth_mbps  = try(vl.properties.connectionBandwidth, 0)
+                bgp_enabled     = try(vl.properties.enableBgp, false)
+                connection_mode = try(vl.properties.vpnLinkConnectionMode, "Default")
+
+                protocol = try(vl.properties.vpnConnectionProtocolType, "IKEv2")
+
+                ipsec_policy = try(length(vl.properties.ipsecPolicies), 0) == 0 ? null : {
+                  dh_group                 = try(vl.properties.ipsecPolicies[0].dhGroup, "DHGroup24")
+                  ike_encryption_algorithm = try(vl.properties.ipsecPolicies[0].ikeEncryption, "AES256")
+                  ike_integrity_algorithm  = try(vl.properties.ipsecPolicies[0].ikeIntegrity, "SHA256")
+                  encryption_algorithm     = try(vl.properties.ipsecPolicies[0].ipsecEncryption, "GCMAES256")
+                  integrity_algorithm      = try(vl.properties.ipsecPolicies[0].ipsecIntegrity, "GCMAES256")
+                  pfs_group                = try(vl.properties.ipsecPolicies[0].pfsGroup, "PFS24")
+                  sa_data_size_kb          = try(vl.properties.ipsecPolicies[0].saDataSizeKilobytes, 102400000)
+                  sa_lifetime_sec          = try(vl.properties.ipsecPolicies[0].saLifeTimeSeconds, 27000)
+                }
+
+                ratelimit_enabled = try(vl.properties.enableRateLimiting, false)
+                route_weight      = try(vl.properties.routingWeight, 0)
+                #     BUG: AVM module (rsp. underlying azurerm resource) will constantly try to change the shared key if set here
+                #          --> always leave 'null'
+                shared_key = null
+                shared_key_object = {
+                  # value will be set later from random_password resource
+                  value                       = try(vl.properties.preSharedKey.value, null)
+                  value_random                = try(vl.properties.preSharedKey.valueRandom, true)
+                  value_random_version        = try(vl.properties.preSharedKey.valueRandomVersion, 0)
+                  value_key_vault_retrievable = try(vl.properties.preSharedKey.valueKeyVaultRetrievable, true)
+                  value_key_vault_read        = try(vl.properties.preSharedKey.valueKeyVaultRead, false)
+
+                }
+                local_azure_ip_address_enabled        = try(vl.properties.useLocalAzureIpAddress, false)
+                policy_based_traffic_selector_enabled = try(vl.properties.usePolicyBasedTrafficSelectors, false)
+                custom_bgp_addresses = [
+                  for cbgp in try(vl.properties.customBgpIpAddresses, []) : {
+                    ip_address = cbgp.customBgpIpAddress
+                    instance   = cbgp.ipConfigurationId
+                  }
+                ]
+              }
+            ]
+          }
+          # add only when location of hub matches
+          if local.vpn_connection_location_map["${l_k}_${c_k}"].location == local.virtual_wan_hub_location_map["${l_k}_${k}"].location &&
+          # if no GW reference is given, attach to default hub's gateway
+          (
+            local.vpn_connection_dependency_info[c_k].gw_id_raw == "" ||
+            try(local.vpn_gateway_objects_hub_resolved_map["${l_k}_${k}"].virtual_network_gateways.gateway_key, "") == local.vpn_connection_dependency_info[c_k].gw_id_raw ||
+            try(local.vpn_gateway_objects_hub_resolved_map["${l_k}_${k}"].virtual_network_gateways.gateway_key, "") == local.vpn_connection_vhub_artefact[c_k].gw_artefact_name
+          )
+        }
+      }
+    }
+  ]
+
+
+  vpn_connection_objects_hub_resolved_map = zipmap(
+    flatten([for entry, attr in local.vpn_connection_objects_hub_resolved_list : keys(attr)]),
+    flatten([for entry, attr in local.vpn_connection_objects_hub_resolved_list : values(attr)])
+  )
+
 }
 
 
@@ -233,6 +345,6 @@ output "zzz_parsed_vpn_site_artefacts" {
   value = local.parsed_vpn_site_artefacts
 }
 
-output "zzz_vpn_site_objects_hub_resolved_map" {
-  value = local.vpn_site_objects_hub_resolved_map
+output "zzz_vpn_connection_objects_hub_resolved_map" {
+  value = local.vpn_connection_objects_hub_resolved_map
 }
