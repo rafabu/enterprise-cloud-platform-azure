@@ -1,8 +1,8 @@
 resource "azapi_resource" "resource_group_vwan" {
   type      = "Microsoft.Resources/resourceGroups@2025-04-01"
-  name      = "${data.azurecaf_name.rg.result}-wan-${lower(local.location_code[var.azure_location])}"
+  name      = "${data.azurecaf_name.rg.result}-wan-${lower(local.location_code[local.hub_locations["main"].azure_location])}"
   parent_id = "/subscriptions/${var.ecp_connectivity_subscription_id}"
-  location  = var.azure_location
+  location  = local.hub_locations["main"].azure_location
 
   tags = var.azure_tags
 }
@@ -10,8 +10,8 @@ resource "azapi_resource" "resource_group_vwan" {
 # resource groups for hubs in other regions
 resource "azapi_resource" "resource_group_vwan_hub" {
   for_each = toset(distinct([
-    for virtual_hub_key, virtual_wan_hub_locations in local.virtual_wan_hub_locations : virtual_wan_hub_locations.location
-    if coalesce(virtual_wan_hub_locations.location, var.azure_location) != var.azure_location
+    for k, v in local.virtual_wan_hub_location_map : v.location
+    if coalesce(var.azure_location, local.hub_locations["main"].azure_location) != v.location
   ]))
 
   type      = "Microsoft.Resources/resourceGroups@2025-04-01"

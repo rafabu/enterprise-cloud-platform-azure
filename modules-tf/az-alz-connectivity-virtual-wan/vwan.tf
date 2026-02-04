@@ -32,19 +32,21 @@ module "alz-connectivity-virtual-wan" {
     ddos_protection_plan = {}
 
     # consider the 1st virtual_wan object
-    virtual_wan = values(local.virtual_wan_object_processed)[0]
+    virtual_wan = local.virtual_wan_object
   }
 
   # if no hubs are defined, the AVM module will not deploy any vWAN resources (not even the vWAN itself)
   #     so if no WAN artefact is defined, deactivate the hubs as well, otherwise a default WAN would be created.
-  virtual_hubs = length(values(local.virtual_wan_object_processed)[0]) > 0 ? {
-    for vhub_key, vhub_value in local.virtual_wan_hubs : vhub_key => {
+  virtual_hubs = length(values(local.virtual_hub_map)[0]) > 0 ? {
+    for vhub_key, vhub_value in local.virtual_hub_map : vhub_key => {
 
       enabled_resources = vhub_value.enabled_resources
 
       location = vhub_value.location
 
       hub = {
+        # add vwan/hub location index to name if non-default hub key
+        name                                   = vhub_key == "ecpa_${lower(vhub_value.location)}_${vhub_value.address_prefix}" ? "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-${lower(local.location_code[vhub_value.location])}-01" : "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-${lower(local.location_code[vhub_value.location])}-${format("%02d", random_integer.virtual_hub_id[vhub_key].result)}"
         address_prefix                         = vhub_value.address_prefix
         parent_id                              = vhub_value.resource_group_id
         sku                                    = vhub_value.sku
@@ -103,7 +105,7 @@ module "alz-connectivity-virtual-wan" {
 
 # provider additional output for downstream units (e.g. router IPs)
 data "azapi_resource" "virtual_wan_hub_details" {
-  for_each = local.virtual_wan_hubs
+  for_each = local.virtual_hub_map
 
   type        = "Microsoft.Network/virtualHubs@2025-05-01"
   resource_id = module.alz-connectivity-virtual-wan.virtual_hub_resource_ids[each.key]
