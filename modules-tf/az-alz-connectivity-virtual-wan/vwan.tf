@@ -54,7 +54,7 @@ module "alz-connectivity-virtual-wan" {
         virtual_router_auto_scale_min_capacity = vhub_value.virtual_router_auto_scale_min_capacity
       }
 
-      virtual_network_connections = try(vhub_value.virtual_network_connections, {})
+      virtual_network_connections = try(vhub_value.virtual_network_connections, null)
 
       # express_route_circuit_connections = []
 
@@ -64,9 +64,9 @@ module "alz-connectivity-virtual-wan" {
 
       # routing_intents = {}
 
-      vpn_site_connections = try(vhub_value.vpn_site_connections, {})
+      vpn_site_connections = try(vhub_value.vpn_site_connections, null)
 
-      vpn_sites = try(vhub_value.vpn_sites, {})
+      vpn_sites = try(vhub_value.vpn_sites, null)
 
       # sidecar_virtual_network = {}
 
@@ -79,14 +79,14 @@ module "alz-connectivity-virtual-wan" {
       # vnet gateways are deployed based on enabled_resources.virtual_network_gateway_vpn / enabled_resources.virtual_network_gateway_express_route
       #     this object allows configuring properties that are non-default
       #     hence: null --> default settings
-      virtual_network_gateways = try(vhub_value.virtual_network_gateways, {})
+      virtual_network_gateways = try(vhub_value.virtual_network_gateways, null)
 
       # private_dns_zones = {}
 
       # private_dns_resolver = {}
     }
 
-  } : {}
+  } : null
 
   timeouts = {
     # initial creation of vWAN components can take well over an hour
