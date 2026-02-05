@@ -405,7 +405,7 @@ locals {
         hub_routing_preference                 = try(local.parsed_hub_artefacts[k].hubRoutingPreference, "ExpressRoute")
         virtual_router_auto_scale_min_capacity = try(local.parsed_hub_artefacts[k].virtualRouterAutoScaleConfiguration.minCapacity, 2)
 
-        # vnc are not coming from artefact; only via variable input
+        # vnc are not currently coming from artefact; only via variable input
         virtual_network_connections = {
           for vnc_key, vnc_value in try(var.virtual_wan_hubs[k].virtual_network_connections, {}) : vnc_key => merge(
             {
@@ -414,6 +414,8 @@ locals {
             },
             vnc_value
           )
+          # connect to all matching artefacts || only to the main location  
+          if vnc_value.connect_to_main_location == false || (vnc_value.connect_to_main_location == true && l_k == "main") 
         }
 
         # vpn gateways are only required if connections are defined (or a non-default one is defined via artefacts

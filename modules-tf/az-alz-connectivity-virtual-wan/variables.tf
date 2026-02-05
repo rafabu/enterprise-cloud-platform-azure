@@ -81,6 +81,8 @@ variable "virtual_wan_hubs" {
         inbound_route_map_id  = optional(string)
         outbound_route_map_id = optional(string)
       }))
+      # if several hubs (sites) are present, default to connecting to the main location exclusively
+      connect_to_main_location = optional(bool, true)
     })), {})
 
     ### Virtual Network Gateways ###
