@@ -6,13 +6,13 @@ locals {
       ecp_level = "l0"
       azure-roleAssignments = [
         {
-          scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+          scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
           # roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
-          roleDefinitionId = "ac63b705-f282-497d-ac71-919bf39d939d" , # Management Group Reader Role
+          roleDefinitionId = "ac63b705-f282-497d-ac71-919bf39d939d", # Management Group Reader Role
           condition        = null
         },
         {
-          scope            = data.azurerm_subscription.launchpad.id           # launchpad subscription
+          scope            = data.azurerm_subscription.launchpad.id # launchpad subscription
           roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader
           condition        = null
         },
@@ -91,6 +91,10 @@ locals {
             },
             {
               id   = "2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
+              type = "Role"
+            },
+            {
+              id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1", # LicenseAssignment.Read.All
               type = "Role"
             }
           ]
@@ -201,6 +205,10 @@ locals {
             },
             {
               id   = "2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
+              type = "Role"
+            },
+            {
+              id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1", # LicenseAssignment.Read.All
               type = "Role"
             }
           ]
