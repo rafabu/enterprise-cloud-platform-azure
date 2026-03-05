@@ -33,14 +33,10 @@ resource "azurerm_key_vault" "mgm" {
 
   public_network_access_enabled = true
   network_acls {
-    bypass         = "AzureServices"
-    default_action = "Deny"
-    ip_rules = [
-      "193.5.235.118/32",
-      "212.98.37.52/32"
-    ]
-    virtual_network_subnet_ids = [
-    ]
+    bypass                     = "AzureServices"
+    default_action             = "Deny"
+    ip_rules                   = []
+    virtual_network_subnet_ids = []
   }
 
   tags = var.azure_tags

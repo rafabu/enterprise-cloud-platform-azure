@@ -208,7 +208,7 @@ locals {
               type = "Role"
             },
             {
-              id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1", # LicenseAssignment.Read.All
+              id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1" # LicenseAssignment.Read.All
               type = "Role"
             }
           ]

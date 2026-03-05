@@ -1,5 +1,5 @@
 data "azurerm_client_config" "con" {
-    provider = azurerm.connectivity
+  provider = azurerm.connectivity
 }
 
 # where resource names include location info, use short names

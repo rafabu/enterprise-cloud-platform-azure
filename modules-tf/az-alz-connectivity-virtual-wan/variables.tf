@@ -330,7 +330,7 @@ variable "vpn_connection_artefacts" {
       artefactName = string
     }))
   }))
-  description = "merged vpnSite artefacts sourced from library"
+  description = "merged vpnConnection artefacts sourced from library"
 }
 
 variable "virtual_wan_artefacts" {
