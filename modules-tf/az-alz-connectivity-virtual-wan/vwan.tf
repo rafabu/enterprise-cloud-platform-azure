@@ -126,3 +126,14 @@ data "azapi_resource" "virtual_wan_hub_details" {
     azapi_resource.resource_group_vwan_hub
   ]
 }
+
+resource "random_integer" "virtual_hub_id" {
+  for_each = local.virtual_hub_location_map
+  keepers = {
+    key = each.key
+  }
+
+  max = 99
+  min = 2
+}
+
