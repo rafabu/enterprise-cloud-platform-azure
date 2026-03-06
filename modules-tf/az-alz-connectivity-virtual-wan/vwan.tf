@@ -46,7 +46,7 @@ module "alz-connectivity-virtual-wan" {
 
       hub = {
         # add vwan/hub location index to name if non-default hub key
-        name                                   = vhub_key == "ecpa_${lower(vhub_value.location)}_${vhub_value.address_prefix}" ? "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-${lower(local.location_code[vhub_value.location])}-01" : "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-${lower(local.location_code[vhub_value.location])}-${format("%02d", random_integer.virtual_hub_id[vhub_key].result)}"
+        name                                   = vhub_key == "ecpa_${lower(vhub_value.location)}_${vhub_value.address_prefix}" ? "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-${lower(local.location_code[vhub_value.location])}-01" : "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-${lower(local.location_code[vhub_value.location])}-${format("%02d", random_integer.virtual_hub_id["${vhub_value.location_key}_${vhub_value.hub_artefact_key}"].result)}"
         address_prefix                         = vhub_value.address_prefix
         parent_id                              = vhub_value.resource_group_id
         sku                                    = vhub_value.sku
