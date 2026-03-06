@@ -37,7 +37,7 @@ module "alz-connectivity-virtual-wan" {
 
   # if no hubs are defined, the AVM module will not deploy any vWAN resources (not even the vWAN itself)
   #     so if no WAN artefact is defined, deactivate the hubs as well, otherwise a default WAN would be created.
-  virtual_hubs = length(values(local.virtual_hub_map)[0]) > 0 ? {
+  virtual_hubs = length(local.virtual_hub_map) > 0 ? {
     for vhub_key, vhub_value in local.virtual_hub_map : vhub_key => {
 
       enabled_resources = vhub_value.enabled_resources
