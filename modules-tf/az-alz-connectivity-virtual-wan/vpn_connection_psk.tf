@@ -141,7 +141,7 @@ ephemeral "azapi_resource_action" "key_vault_secret_link_connection_shared_key_r
   for_each = {
     for k, v in local.vpn_link_connection_helper_object : k => v
     if v.shared_key_object.value_key_vault_read == true &&
-    length(var.key_vault_id) > 0
+    try(length(var.key_vault_id), 0) > 0
   }
 
   type        = "Microsoft.KeyVault/vaults/secrets@2025-05-01"
