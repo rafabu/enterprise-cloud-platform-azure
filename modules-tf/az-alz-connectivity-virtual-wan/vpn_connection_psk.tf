@@ -35,7 +35,7 @@ locals {
             value_key_vault_read = length(try(link.shared_key_object.value, "")) > 0 ? false : try(link.shared_key_object.value_random, true) ? try(link.shared_key_object.value_key_vault_read, true) : false
             value_key_vault_secret_name = lower(format(
               # azurerm_key_vault_secret's name to be 1 to 127 chars.
-              "psk_%s_%s_%s", # "psk_<location>_<remote site name>_<link connection name>" Example: "psk_switzerlandnorth_ecp-example-static-routing_link1-connection"
+              "psk-%s-%s-%s", # "psk-<location>-<remote site name>-<link connection name>" Example: "psk-switzerlandnorth-ecp-example-static-routing-link1-connection"
               # location
               lower(local.location_code[local.hub_locations[sc_value.location_key].azure_location]),
               # remote site name
