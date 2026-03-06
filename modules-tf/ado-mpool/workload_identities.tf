@@ -6,29 +6,29 @@ locals {
       ecp_level = "l0"
       azure-roleAssignments = [
         {
-          scope            = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+          scope = data.azurerm_management_group.ecp_root_parent.id # ECP root parent management group
           # roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7",           # Reader
-          roleDefinitionId = "ac63b705-f282-497d-ac71-919bf39d939d" , # Management Group Reader Role
+          roleDefinitionId = "ac63b705-f282-497d-ac71-919bf39d939d" # Management Group Reader Role
           condition        = null
         },
         {
-          scope            = data.azurerm_subscription.launchpad.id           # launchpad subscription
+          scope            = data.azurerm_subscription.launchpad.id # launchpad subscription
           roleDefinitionId = "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader
           condition        = null
         },
         {
-          scope            = var.backend_storage_accounts["l0"].id,  # backend storage account
-          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
+          scope            = var.backend_storage_accounts["l0"].id  # backend storage account
+          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1" # Storage Blob Data Reader
           condition        = null
         },
         {
-          scope            = var.backend_storage_accounts["l1"].id,  # backend storage account
-          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
+          scope            = var.backend_storage_accounts["l1"].id  # backend storage account
+          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1" # Storage Blob Data Reader
           condition        = null
         },
         {
-          scope            = var.backend_storage_accounts["l2"].id,  # backend storage account
-          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", # Storage Blob Data Reader
+          scope            = var.backend_storage_accounts["l2"].id  # backend storage account
+          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1" # Storage Blob Data Reader
           condition        = null
         }
       ],
@@ -52,30 +52,30 @@ locals {
       ],
       entra-application-requiredResourceAccess = [
         {
-          resourceAppId = "00000003-0000-0000-c000-000000000000", # Microsoft Graph
+          resourceAppId = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
           resourceAccess = [
             {
-              id   = "5b567255-7703-4780-807c-7be8301ae99b", # Group.Read.All
+              id   = "5b567255-7703-4780-807c-7be8301ae99b" # Group.Read.All
               type = "Role"
             },
             {
-              id   = "df021288-bdef-4463-88db-98f22de89214", # User.Read.All
+              id   = "df021288-bdef-4463-88db-98f22de89214" # User.Read.All
               type = "Role"
             },
             {
-              id   = "9a5d68dd-52b0-4cc2-bd40-abcf44ac3a30", # Application.Read.All
+              id   = "9a5d68dd-52b0-4cc2-bd40-abcf44ac3a30" # Application.Read.All
               type = "Role"
             },
             {
-              id   = "b185aa14-d8d2-42c1-a685-0f5596613624", # CustomSecAttributeDefinition.Read.All
+              id   = "b185aa14-d8d2-42c1-a685-0f5596613624" # CustomSecAttributeDefinition.Read.All
               type = "Role"
             },
             {
-              id   = "246dd0d5-5bd0-4def-940b-0421030a5b68", # Policy.Read.All
+              id   = "246dd0d5-5bd0-4def-940b-0421030a5b68" # Policy.Read.All
               type = "Role"
             },
             {
-              id   = "cd4161cb-f098-48f8-a884-1eda9a42434c", # PrivilegedAssignmentSchedule.Read.AzureADGroup
+              id   = "cd4161cb-f098-48f8-a884-1eda9a42434c" # PrivilegedAssignmentSchedule.Read.AzureADGroup
               type = "Role"
             },
             # azuread_privileged_access_group_assignment_schedule unfortunately needs
@@ -92,6 +92,10 @@ locals {
             {
               id   = "2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
               type = "Role"
+            },
+            {
+              id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1" # LicenseAssignment.Read.All
+              type = "Role"
             }
           ]
         }
@@ -99,7 +103,7 @@ locals {
       # entra-directory-roleAssignments = [
       #   {
       #     # Global Reader
-      #     roleDefinitionId = "f2ef992c-3afb-46b9-b7cf-a126ee74c451",
+      #     roleDefinitionId = "f2ef992c-3afb-46b9-b7cf-a126ee74c451"
       #     "directoryScopeId" : "/"
       #   }
       # ],
@@ -124,19 +128,19 @@ locals {
         {
           scope = var.backend_storage_accounts["l0"].id, # backend storage account
           # security reader
-          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe", # Storage Blob Data Contributor
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
           condition        = null
         },
         {
           scope = var.backend_storage_accounts["l1"].id, # backend storage account
           # security reader
-          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe", # Storage Blob Data Contributor
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
           condition        = null
         },
         {
           scope = var.backend_storage_accounts["l2"].id, # backend storage account
           # security reader
-          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe", # Storage Blob Data Contributor
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
           condition        = null
         }
       ],
@@ -156,43 +160,43 @@ locals {
       ],
       entra-application-requiredResourceAccess = [
         {
-          resourceAppId = "00000003-0000-0000-c000-000000000000", # Microsoft Graph
+          resourceAppId = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
           resourceAccess = [
             {
-              id   = "5b567255-7703-4780-807c-7be8301ae99b", # Group.Read.All
+              id   = "5b567255-7703-4780-807c-7be8301ae99b" # Group.Read.All
               type = "Role"
             },
             {
-              id   = "df021288-bdef-4463-88db-98f22de89214", # User.Read.All
+              id   = "df021288-bdef-4463-88db-98f22de89214" # User.Read.All
               type = "Role"
             },
             {
-              id   = "1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9", # Application.ReadWrite.All
+              id   = "1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9" # Application.ReadWrite.All
               type = "Role"
             },
             {
-              id   = "06b708a9-e830-4db3-a914-8e69da51d44f", # AppRoleAssignment.ReadWrite.All
+              id   = "06b708a9-e830-4db3-a914-8e69da51d44f" # AppRoleAssignment.ReadWrite.All
               type = "Role"
             },
             {
-              id   = "12338004-21f4-4896-bf5e-b75dfaf1016d", # CustomSecAttributeDefinition.ReadWrite.All
+              id   = "12338004-21f4-4896-bf5e-b75dfaf1016d" # CustomSecAttributeDefinition.ReadWrite.All
               type = "Role"
             },
             {
-              id   = "246dd0d5-5bd0-4def-940b-0421030a5b68", # Policy.Read.All
+              id   = "246dd0d5-5bd0-4def-940b-0421030a5b68" # Policy.Read.All
               type = "Role"
             },
             {
-              id   = "01c0a623-fc9b-48e9-b794-0756f8e8f067", # Policy.ReadWrite.ConditionalAccess
+              id   = "01c0a623-fc9b-48e9-b794-0756f8e8f067" # Policy.ReadWrite.ConditionalAccess
               type = "Role"
             },
             {
-              id   = "1c6e93a6-28e2-4cbb-9f64-1a46a821124d", # Policy.ReadWrite.SecurityDefaults
+              id   = "1c6e93a6-28e2-4cbb-9f64-1a46a821124d" # Policy.ReadWrite.SecurityDefaults
               type = "Role"
             },
             # PIM related roles
             {
-              id   = "41202f2c-f7ab-45be-b001-85c9728b9d69", # PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup
+              id   = "41202f2c-f7ab-45be-b001-85c9728b9d69" # PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup
               type = "Role"
             },
             {
@@ -202,6 +206,10 @@ locals {
             {
               id   = "2f6817f8-7b12-4f0f-bc18-eeaf60705a9e" # PrivilegedAccess.ReadWrite.AzureADGroup
               type = "Role"
+            },
+            {
+              id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1" # LicenseAssignment.Read.All
+              type = "Role"
             }
           ]
         }
@@ -209,7 +217,7 @@ locals {
       # entra-directory-roleAssignments = [
       #   {
       #     # Global Reader
-      #     roleDefinitionId = "f2ef992c-3afb-46b9-b7cf-a126ee74c451",
+      #     roleDefinitionId = "f2ef992c-3afb-46b9-b7cf-a126ee74c451"
       #     "directoryScopeId" : "/"
       #   }
       # ],
