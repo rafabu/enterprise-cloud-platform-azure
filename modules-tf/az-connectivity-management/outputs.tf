@@ -23,7 +23,7 @@ output "virtual_network_subnets" {
 }
 
 output "key_vault" {
-  value = length(try(azurerm_key_vault.mgm["this"].id, null)) == 0 ? null : {
+  value = try(length(azurerm_key_vault.mgm["this"].id), 0) == 0 ? null : {
     id             = azurerm_key_vault.mgm["this"].id
     name           = azurerm_key_vault.mgm["this"].name
     resource_group = azurerm_key_vault.mgm["this"].resource_group_name
