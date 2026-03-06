@@ -268,12 +268,6 @@ locals {
     flatten([for entry, attr in local.virtual_hub_list : values(attr)])
   )
 
-  virtual_hub_location_id_map = {
-    for k, v in local.virtual_hub_location_map : k => {
-      value = format("%02d", random_integer.virtual_hub_id[k].result)
-    }
-  }
-
   ### VPN Gateway Artefact Processing ###
   vpn_gateway_vhub_info = {
     for k, v in local.parsed_vpn_gateway_artefacts : k => {
