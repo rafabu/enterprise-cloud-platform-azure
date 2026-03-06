@@ -1,5 +1,3 @@
-data "azapi_client_config" "current" {}
-
 # where resource names include location info, use short names
 module "azure-region-info" {
   source  = "Azure/avm-utl-regions/azurerm"
