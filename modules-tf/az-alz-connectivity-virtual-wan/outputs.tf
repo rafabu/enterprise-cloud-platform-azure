@@ -24,9 +24,6 @@ output "azure_virtual_wan_hub_resource_details" {
       name     = v.name
       id       = v.id
       location = v.location
-
-      ecp_artefactName = k == "ecpa_${lower(v.location)}" ? local.vwan_hub_artefact_default : k
-
       address_prefix             = v.output.properties["addressPrefix"]
       network_virtual_appliances = v.output.properties["networkVirtualAppliances"]
       virtual_router_asn         = v.output.properties["virtualRouterAsn"]
