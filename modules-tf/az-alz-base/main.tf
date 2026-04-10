@@ -1,6 +1,6 @@
 module "alz" {
   source  = "Azure/avm-ptn-alz/azurerm"
-  version = "0.15.0"
+  version = "v0.19.1"
 
   architecture_name = var.ecp_alz_architecture_name
   location          = var.azure_location
