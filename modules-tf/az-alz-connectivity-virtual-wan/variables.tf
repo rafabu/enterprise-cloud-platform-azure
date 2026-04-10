@@ -224,6 +224,18 @@ variable "virtual_network_artefacts" {
     }))
   }))
   description = "merged virtualNetwork artefacts sourced from library"
+
+  validation {
+    condition = alltrue([
+      for subnet in var.virtual_network_artefacts :
+      subnet.privateEndpointVNetPolicies == null
+      || contains([
+        "Basic",
+        "Disabled"
+      ], subnet.privateEndpointVNetPolicies)
+    ])
+    error_message = "privateEndpointVNetPolicies must be one of: Basic, Disabled (or omitted)."
+  }
 }
 
 variable "virtual_hub_artefacts" {
