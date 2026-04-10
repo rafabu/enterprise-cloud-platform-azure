@@ -227,12 +227,12 @@ variable "virtual_network_artefacts" {
 
   validation {
     condition = alltrue([
-      for subnet in var.virtual_network_artefacts :
-      subnet.privateEndpointVNetPolicies == null
+      for vnet in var.virtual_network_artefacts :
+      vnet.artefact.privateEndpointVNetPolicies == null
       || contains([
         "Basic",
         "Disabled"
-      ], subnet.privateEndpointVNetPolicies)
+      ], vnet.artefact.privateEndpointVNetPolicies)
     ])
     error_message = "privateEndpointVNetPolicies must be one of: Basic, Disabled (or omitted)."
   }
@@ -364,7 +364,7 @@ variable "virtual_wan_artefacts" {
 
 variable "ecp_archetype_definitions" {
   type = object({
-    name           = string
+    # name           = string
     virtual_wan    = optional(list(string), [])
     virtual_hub    = optional(list(string), [])
     vpn_gateway    = optional(list(string), [])
@@ -374,7 +374,7 @@ variable "ecp_archetype_definitions" {
     er_connection  = optional(list(string), [])
   })
   default = {
-    name = "ecp-vwan"
+    # name = "ecp-vwan"
     virtual_wan = [
       "l2-connectivity-wan-standard-sku"
     ]
