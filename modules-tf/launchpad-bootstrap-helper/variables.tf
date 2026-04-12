@@ -39,6 +39,18 @@ variable "virtual_network_definitions" {
     privateEndpointVNetPolicies = optional(string)
   }))
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
+
+  validation {
+    condition = alltrue([
+      for subnet in var.virtual_network_definitions :
+      subnet.privateEndpointVNetPolicies == null
+      || contains([
+        "Basic",
+        "Disabled"
+      ], subnet.privateEndpointVNetPolicies)
+    ])
+    error_message = "privateEndpointVNetPolicies must be one of: Basic, Disabled (or omitted)."
+  }
 }
 
 variable "virtual_network_artefact_names" {

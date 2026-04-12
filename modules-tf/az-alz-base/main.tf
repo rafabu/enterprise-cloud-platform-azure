@@ -1,6 +1,6 @@
 module "alz" {
   source  = "Azure/avm-ptn-alz/azurerm"
-  version = "0.15.0"
+  version = "0.19.1"
 
   architecture_name = var.ecp_alz_architecture_name
   location          = var.azure_location
@@ -90,6 +90,17 @@ module "alz" {
           value = var.alz_management_resource_ids.log_analytics_workspace_id
         }
     ) } : {},
+
+    ##### DEV SPECIFIC POLICY OVERRIDES #####
+    #      disarm key vault purge protection policy
+    try(var.ecp_environment_stage, "") == "dev" ? {
+      key_vault_guardrails_purge_protection_missing_effect = jsonencode(
+        {
+          value = "Audit"
+        }
+    ) } : {},
+
+
     # extension to Deploy-Private-DNS-Zones assignment (see alz_policy_default_values.json in extension library)
     local.policy_default_values_private_dns_zones
   )

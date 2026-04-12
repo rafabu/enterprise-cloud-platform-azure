@@ -11,7 +11,7 @@ resource "azapi_resource" "resource_group_vwan" {
 resource "azapi_resource" "resource_group_vwan_hub" {
   for_each = toset(distinct([
     for k, v in local.virtual_wan_hub_location_map : v.location
-    if coalesce(var.azure_location, local.hub_locations["main"].azure_location) != v.location
+    if coalesce(lower(var.azure_location), local.hub_locations["main"].azure_location) != v.location
   ]))
 
   type      = "Microsoft.Resources/resourceGroups@2025-04-01"

@@ -42,12 +42,12 @@ locals {
       sku = {
         # Default Managed_DevOps_Pool: "Standard_D2ds_v5"
         # AMD EPYC 9654 (Genoa)
-        name = coalesce(var.managed_devops_pool_vmss_fabric_profile.sku_name, "Standard_D2as_v5") # --> Standard_D*as_v6 is not compatible (v2 VM image only)
+        name = coalesce(var.managed_devops_pool_vmss_fabric_profile.sku_name, "Standard_D2as_v5") # --> Standard_D*as_v6 is compatible (v2 VM image only)
       }
       images = [for img in try(var.managed_devops_pool_vmss_fabric_profile.image, {
-        aliases            = ["ubuntu-24.04/latest"]
+        aliases            = ["ubuntu-24.04-g2"]
         buffer             = "*"
-        wellKnownImageName = "ubuntu-24.04/latest"
+        wellKnownImageName = "ubuntu-24.04-g2/latest"
         }) : {
 
         aliases            = try(img.aliases, [img.well_known_image_name])

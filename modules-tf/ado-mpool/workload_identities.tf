@@ -336,10 +336,10 @@ resource "azurerm_federated_identity_credential" "mpool" {
   }
 
   provider = azurerm.launchpad
+         
+  user_assigned_identity_id = azurerm_user_assigned_identity.mpool[each.key].id
 
-  parent_id           = azurerm_user_assigned_identity.mpool[each.key].id
   name                = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
-  resource_group_name = azurerm_user_assigned_identity.mpool[each.key].resource_group_name
 
   audience = ["api://AzureADTokenExchange"]
   issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
