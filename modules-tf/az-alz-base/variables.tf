@@ -8,6 +8,12 @@ variable "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
 }
 
+variable "ecp_environment_stage" {
+  type        = string
+  description = "The stage of the environment in the ECP environment lifecycle (e.g. 'dev', 'test', 'prod')."
+  default     = ""
+}
+
 variable "ecp_azure_root_parent_management_group_id" {
   type        = string
   description = "The management group ID of the parent management group for the ECP environment"

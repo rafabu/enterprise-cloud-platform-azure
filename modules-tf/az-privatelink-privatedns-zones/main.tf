@@ -44,7 +44,7 @@ locals {
 
 module "private_dns_zones" {
   source  = "Azure/avm-ptn-network-private-link-private-dns-zones/azurerm"
-  version = "0.22.2"
+  version = "0.22.2" # "0.23.0" added additional zones; check before upgrade
 
   parent_id = azapi_resource.resource_group.id
 

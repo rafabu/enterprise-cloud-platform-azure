@@ -86,6 +86,18 @@ variable "virtual_network_artefacts" {
     }))
   }))
   description = "merged virtualNetwork artefacts sourced from library"
+
+  validation {
+    condition = alltrue([
+      for subnet in var.virtual_network_artefacts :
+      subnet.privateEndpointVNetPolicies == null
+      || contains([
+        "Basic",
+        "Disabled"
+      ], subnet.privateEndpointVNetPolicies)
+    ])
+    error_message = "privateEndpointVNetPolicies must be one of: Basic, Disabled (or omitted)."
+  }
 }
 
 variable "virtual_network_subnet_artefacts" {
@@ -111,6 +123,32 @@ variable "virtual_network_subnet_artefacts" {
     }))
   }))
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
+
+validation {
+    condition = alltrue([
+      for subnet in var.virtual_network_subnet_artefacts :
+      subnet.privateEndpointNetworkPolicies == null
+      || contains([
+        "Enabled",
+        "NetworkSecurityGroupEnabled",
+        "RouteTableEnabled",
+        "Disabled"
+      ], subnet.privateEndpointNetworkPolicies)
+    ])
+    error_message = "privateEndpointNetworkPolicies must be one of: Enabled, NetworkSecurityGroupEnabled, RouteTableEnabled, Disabled (or omitted)."
+  }
+
+  validation {
+    condition = alltrue([
+      for subnet in var.virtual_network_subnet_artefacts :
+      subnet.privateLinkServiceNetworkPolicies == null
+      || contains([
+        "Enabled",
+        "Disabled"
+      ], subnet.privateLinkServiceNetworkPolicies)
+    ])
+    error_message = "privateLinkServiceNetworkPolicies must be one of: Enabled, Disabled (or omitted)."
+  }
 }
 
 variable "ecp_archetype_definitions" {
