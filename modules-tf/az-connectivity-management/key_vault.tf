@@ -11,7 +11,7 @@ locals {
 # azurerm_key_vault queries data plane; switch to azapi so this can proceed even with
 #     firewall closed and no public endpoint
 #     Note: No secret resource created in this step - hence no data plane access needed at this point
-resource "azapi_resource" "kv_mgm" {
+resource "azapi_resource" "mgm_vault" {
   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
 
   type      = "Microsoft.KeyVault/vaults@2026-02-01"
@@ -51,63 +51,21 @@ resource "azapi_resource" "kv_mgm" {
   }
 }
 
-# resource "azurerm_key_vault" "mgm" {
-#   provider = azurerm.connectivity
-
-#   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
-
-#   resource_group_name = azurerm_resource_group.mgm.name
-#   name = join("-", compact([
-#     data.azurecaf_name.kv.result,
-#     local.location_code[lower(local.hub_locations["main"].azure_location)]
-#   ]))
-#   location = local.hub_locations["main"].azure_location
-
-#   sku_name  = "standard"
-#   tenant_id = data.azurerm_client_config.con.tenant_id
-
-#   access_policy                   = []
-#   enabled_for_deployment          = false
-#   enabled_for_disk_encryption     = false
-#   enabled_for_template_deployment = false
-#   rbac_authorization_enabled      = true
-
-#   purge_protection_enabled   = false
-#   soft_delete_retention_days = 7
-
-#   public_network_access_enabled = true
-#   network_acls {
-#     bypass                     = "AzureServices"
-#     default_action             = "Deny"
-#     ip_rules                   = []
-#     virtual_network_subnet_ids = []
-#   }
-
-#   tags = var.azure_tags
-
-#   lifecycle {
-#     ignore_changes = [
-#       tags
-#     ]
-#   }
-# }
-
-
 resource "azurerm_private_endpoint" "mgm_vault" {
   provider = azurerm.connectivity
 
   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
 
-  location            = azapi_resource.kv_mgm[each.key].location
-  name                = "${azapi_resource.kv_mgm[each.key].name}-pep"
-  resource_group_name = azapi_resource.kv_mgm[each.key].resource_group_name
+  location            = azapi_resource.mgm_vault[each.key].location
+  name                = "${azapi_resource.mgm_vault[each.key].name}-pep"
+  resource_group_name = azapi_resource.mgm_vault[each.key].resource_group_name
   subnet_id           = values(azurerm_subnet.mgm)[0].id
-  custom_network_interface_name = "${azurerm_key_vault.mgm[each.key].name}-pepnic"
+  custom_network_interface_name = "${azapi_resource.mgm_vault[each.key].name}-pepnic"
 
   private_service_connection {
     is_manual_connection           = false
-    name                           = "pse-${azurerm_key_vault.mgm[each.key].name}-pep"
-    private_connection_resource_id = azurerm_key_vault.mgm[each.key].id
+    name                           = "pse-${azapi_resource.mgm_vault[each.key].name}-pep"
+    private_connection_resource_id = azapi_resource.mgm_vault[each.key].id
     subresource_names              = ["vault"]
   }
 
