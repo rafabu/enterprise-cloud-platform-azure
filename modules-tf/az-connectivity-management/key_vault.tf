@@ -58,7 +58,7 @@ resource "azurerm_private_endpoint" "mgm_vault" {
 
   location            = azapi_resource.mgm_vault[each.key].location
   name                = "${azapi_resource.mgm_vault[each.key].name}-pep"
-  resource_group_name = azapi_resource.mgm_vault[each.key].resource_group_name
+  resource_group_name = azurerm_resource_group.mgm.name
   subnet_id           = values(azurerm_subnet.mgm)[0].id
   custom_network_interface_name = "${azapi_resource.mgm_vault[each.key].name}-pepnic"
 
