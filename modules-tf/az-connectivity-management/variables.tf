@@ -89,12 +89,12 @@ variable "virtual_network_artefacts" {
 
   validation {
     condition = alltrue([
-      for subnet in var.virtual_network_artefacts :
-      subnet.privateEndpointVNetPolicies == null
+      for vnet in var.virtual_network_artefacts :
+      vnet.artefact.privateEndpointVNetPolicies == null
       || contains([
         "Basic",
         "Disabled"
-      ], subnet.privateEndpointVNetPolicies)
+      ], vnet.artefact.privateEndpointVNetPolicies)
     ])
     error_message = "privateEndpointVNetPolicies must be one of: Basic, Disabled (or omitted)."
   }
@@ -127,13 +127,13 @@ variable "virtual_network_subnet_artefacts" {
 validation {
     condition = alltrue([
       for subnet in var.virtual_network_subnet_artefacts :
-      subnet.privateEndpointNetworkPolicies == null
+      subnet.artefact.privateEndpointNetworkPolicies == null
       || contains([
         "Enabled",
         "NetworkSecurityGroupEnabled",
         "RouteTableEnabled",
         "Disabled"
-      ], subnet.privateEndpointNetworkPolicies)
+      ], subnet.artefact.privateEndpointNetworkPolicies)
     ])
     error_message = "privateEndpointNetworkPolicies must be one of: Enabled, NetworkSecurityGroupEnabled, RouteTableEnabled, Disabled (or omitted)."
   }
@@ -141,11 +141,11 @@ validation {
   validation {
     condition = alltrue([
       for subnet in var.virtual_network_subnet_artefacts :
-      subnet.privateLinkServiceNetworkPolicies == null
+      subnet.artefact.privateLinkServiceNetworkPolicies == null
       || contains([
         "Enabled",
         "Disabled"
-      ], subnet.privateLinkServiceNetworkPolicies)
+      ], subnet.artefact.privateLinkServiceNetworkPolicies)
     ])
     error_message = "privateLinkServiceNetworkPolicies must be one of: Enabled, Disabled (or omitted)."
   }
