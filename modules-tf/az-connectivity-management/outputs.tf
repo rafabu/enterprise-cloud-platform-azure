@@ -32,10 +32,10 @@ output "virtual_network_subnets" {
 # }
 
 output "key_vault" {
-  value = try(length(azapi_resource.kv_mgm["this"].id), 0) == 0 ? null : {
-    id             = azapi_resource.kv_mgm["this"].id
-    name           = azapi_resource.kv_mgm["this"].name
-    resource_group = azurerm_resource_group.mgm.name   # no attribute on azapi
-    location       = azapi_resource.kv_mgm["this"].location
+  value = try(length(azapi_resource.mgm_vault["this"].id), 0) == 0 ? null : {
+    id             = azapi_resource.mgm_vault["this"].id
+    name           = azapi_resource.mgm_vault["this"].name
+    resource_group = azurerm_resource_group.mgm.name
+    location       = azapi_resource.mgm_vault["this"].location
   }
 }
