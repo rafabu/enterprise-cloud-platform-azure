@@ -8,18 +8,13 @@ locals {
   ]
 }
 
-moved {
-  from = azurerm_key_vault.mgm["this"]
-  to   = azapi_resource.kv_mgm["this"]
-}
-
-# azurerm_key_vault queries data plane; switch to azapi
+# azurerm_key_vault queries data plane; switch to azapi so this can proceed even with
+#     firewall closed and no public endpoint
+#     Note: No secret resource created in this step - hence no data plane access needed at this point
 resource "azapi_resource" "kv_mgm" {
-  provider = azurerm.connectivity   # azapi inherits provider aliases too
-
   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
 
-  type      = "Microsoft.KeyVault/vaults@2023-07-01"
+  type      = "Microsoft.KeyVault/vaults@2026-02-01"
   name      = join("-", compact([
     data.azurecaf_name.kv.result,
     local.location_code[lower(local.hub_locations["main"].azure_location)]
