@@ -96,6 +96,10 @@ locals {
             {
               id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1" # LicenseAssignment.Read.All
               type = "Role"
+            },
+            {
+              id   = "69e67828-780e-47fd-b28c-7b27d14864e6" # RoleManagementPolicy.Read.AzureADGroup
+              type = "Role"
             }
           ]
         }
@@ -209,6 +213,10 @@ locals {
             },
             {
               id   = "e2f98668-2877-4f38-a2f4-8202e0717aa1" # LicenseAssignment.Read.All
+              type = "Role"
+            },
+            {
+              id   = "b38dcc4d-a239-4ed6-aa84-6c65b284f97c" # RoleManagementPolicy.ReadWrite.AzureADGroup
               type = "Role"
             }
           ]
@@ -336,10 +344,10 @@ resource "azurerm_federated_identity_credential" "mpool" {
   }
 
   provider = azurerm.launchpad
-         
+
   user_assigned_identity_id = azurerm_user_assigned_identity.mpool[each.key].id
 
-  name                = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
+  name = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
 
   audience = ["api://AzureADTokenExchange"]
   issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
