@@ -22,6 +22,15 @@ output "backend_storage_accounts" {
       ecp_resource_exists                            = length(data.azurerm_resources.backend_storage_accounts[key].resources) == 1
       ecp_terraform_backend                          = local.backend_type[key]
       ecp_terraform_backend_changed_since_last_apply = local.backend_type_changed[key]
+      ecp_terraform_backend_private_endpoint_fqdn = try(
+        local.backend_storage_account_pep_blob_detail[format("%s%s-pep-blob", data.azurecaf_name.st.result, key)].properties.customDnsConfigs[0].fqdn,
+        null
+      )
+      ecp_terraform_backend_private_endpoint_ips = try(
+        local.backend_storage_account_pep_blob_detail[format("%s%s-pep-blob", data.azurecaf_name.st.result, key)].properties.customDnsConfigs[0].ipAddresses,
+        []
+      )
+      ecp_terraform_backend_private_endpoint_resolution_valid = try(data.external.pep_blob_name_resolution[key].result.fqdn_resolution_success, "false") == "true" ? true : false
     }
   }
 }

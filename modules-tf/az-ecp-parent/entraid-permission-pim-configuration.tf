@@ -126,6 +126,10 @@ resource "azuread_privileged_access_group_assignment_schedule" "contributor_memb
   justification        = "Grant permanent assignment to privileged group '${azuread_group_without_members.contributor_permission.display_name}'"
   permanent_assignment = true
 
+  lifecycle {
+    ignore_changes = ["justification"]
+  }
+
   depends_on = [
     time_sleep.contributor_policy_wait
   ]
@@ -141,6 +145,10 @@ resource "azuread_privileged_access_group_assignment_schedule" "contributor_owne
 
   justification        = "Grant permanent ownership of privileged group '${azuread_group_without_members.contributor_permission.display_name}'"
   permanent_assignment = true
+
+  lifecycle {
+    ignore_changes = ["justification"]
+  }
 
   depends_on = [
     time_sleep.contributor_policy_wait
@@ -158,6 +166,10 @@ resource "azuread_privileged_access_group_eligibility_schedule" "contributor_mem
 
   justification        = "Grant eligible membership from group '${azuread_group_without_members.contributor_role.display_name}' to privileged group '${azuread_group_without_members.contributor_permission.display_name}'"
   permanent_assignment = true
+
+  lifecycle {
+    ignore_changes = ["justification"]
+  }
 
   depends_on = [
     time_sleep.contributor_policy_wait
