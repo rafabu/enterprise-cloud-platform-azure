@@ -42,6 +42,28 @@ data "azurerm_resources" "backend_storage_accounts" {
   name = format("%s%s", data.azurecaf_name.st.result, each.key)
 }
 
+# Blob Private Endpoint details
+data "azapi_resource_list" "backend_storage_account_pep_blob" {
+
+  type      = "Microsoft.Network/privateEndpoints@2025-05-01"
+  parent_id = "/subscriptions/${data.azurerm_client_config.this.subscription_id}"
+
+  response_export_values = [
+    "value"
+  ]
+}
+
+locals {
+  backend_storage_account_pep_blob_detail = {
+    for key, attr in try(data.azapi_resource_list.backend_storage_account_pep_blob.output.value, {}) : attr.name => {
+      id         = attr.id
+      name       = attr.name
+      location   = attr.location
+      properties = attr.properties
+    }
+  }
+}
+
 # PowerShell-based public IP detection with multiple sources and retry logic
 data "external" "public_ip_robust" {
   program = ["pwsh",
@@ -59,4 +81,24 @@ data "external" "this_local_ip" {
   ]
 
   query = null
+}
+
+data "external" "pep_blob_name_resolution" {
+  for_each = toset(local.backend_levels)
+
+  program = ["pwsh",
+    "-File",
+    "${path.module}/Get-LocalNameResolution.ps1"
+  ]
+
+  query = {
+    fqdn = try(
+      local.backend_storage_account_pep_blob_detail[format("%s%s-pep-blob", data.azurecaf_name.st.result, each.key)].properties.customDnsConfigs[0].fqdn,
+      ""
+    )
+    ips = jsonencode(try(
+      local.backend_storage_account_pep_blob_detail[format("%s%s-pep-blob", data.azurecaf_name.st.result, each.key)].properties.customDnsConfigs[0].ipAddresses,
+      []
+    ))
+  }
 }
