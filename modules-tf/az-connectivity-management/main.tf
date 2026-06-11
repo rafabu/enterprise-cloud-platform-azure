@@ -5,7 +5,7 @@ data "azurerm_client_config" "con" {
 # where resource names include location info, use short names
 module "azure-region-info" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.12.0"
+  version = var.avm-utl-regions_version
 
   enable_telemetry = false
 }

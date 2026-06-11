@@ -1,6 +1,6 @@
 module "alz_management" {
   source  = "Azure/avm-ptn-alz-management/azurerm"
-  version = "0.9.0"
+  version = var.avm-ptn-alz-management_version
 
   providers = {
     azurerm = azurerm.management
