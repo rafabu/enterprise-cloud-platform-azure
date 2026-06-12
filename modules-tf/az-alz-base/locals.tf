@@ -7,22 +7,20 @@ locals {
     # DNS zones not (yet) implemented in ALZ 'Deploy-Private-DNS-Zones' policy initiative
     #     or the custom ECP policy initiative 'ECP-Deploy-Private-DNS-Z'
     #     as of version 2.4.0
+
+    # last aligned with ALZ 2026.04.3
     "azure_attestation",
     "azure_avd_global",
     "azure_bot_svc_token",
-    "azure_chaos_studio",
     "azure_container_apps",
     "azure_cosmos_db_analytical",
     "azure_cosmos_db_mongo_vcore",
     "azure_cosmos_db_postgres",
-    "azure_data_explorer",
-    "azure_deployment_environments",
+    # "azure_data_explorer",    # azureDataExplorerPrivateDnsZoneId
     "azure_digital_twins",
     "azure_fabric",
     "azure_healthcare",
     "azure_healthcare_dicom",
-    "azure_healthcare_fhir",
-    "azure_healthcare_workspaces",
     "azure_iot_hub_update",
     "azure_managed_hsm",
     "azure_managed_prometheus",
@@ -42,7 +40,12 @@ locals {
     "azure_static_web_apps_partitioned_3",
     "azure_static_web_apps_partitioned_4",
     "azure_static_web_apps_partitioned_5",
-    "azure_synapse"
+    "azure_synapse",
+    # added with AVM v0.23.0
+    "azure_event_grid_mqtt",
+    "azure_managed_redis",
+    "azure_purview_service",
+    "azure_acr_data_default_location"
   ]
 
   policy_private_dns_zones_to_skip = compact(distinct(concat(

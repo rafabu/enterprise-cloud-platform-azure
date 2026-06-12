@@ -18,29 +18,36 @@ locals {
     # additional zones to be deployed to avm-ptn-network-private-link-private-dns-zones module's default parameter 'private_link_private_dns_zones'.
     #  but was amended to work with the ALZ policy initiative 'Deploy-Private-DNS-Zones'.
     #  last checked with:
-    #     - avm-ptn-network-private-link-private-dns-zones version 0.22.2
-    #     - Deploy-Private-DNS-Zones version 2.4.0
+    #     - avm-ptn-network-private-link-private-dns-zones version 0.23.2
+    #     - Deploy-Private-DNS-Zones version 2.5.0
     #      https://github.com/Azure/terraform-azurerm-avm-ptn-network-private-link-private-dns-zones
     #      https://github.com/Azure/Azure-Landing-Zones-Library/blob/main/platform/alz/policy_set_definitions/Deploy-Private-DNS-Zones.alz_policy_set_definition.json
-    azure_chaos_studio = {
-      zone_name = "privatelink.chaos-studio.azure.com"
-    }
-    azure_deployment_environments = {
-      zone_name = "privatelink.devcenter.azure.com"
+
+    # in ALZ 2026.04.2 (policy initiative Deploy-Private-DNS-Zones v2.5.0) but not in #     AVM avm-ptn-network-private-link-private-dns-zones 0.23.2 (11.06.2026):
+    azure_acr_data_default_location = {
+      zone_name = "${lower(var.azure_location)}.data.privatelink.azurecr.io"
     }
   }
-  # missing from ALZ policy 2.4.0 but present in AVM 0.22.2:
-  # - privatelink.openai.azure.com
-  # - privatelink.mysql.database.azure.com
-  # - privatelink.postgres.database.azure.com
-  # - privatelink.purview.azure.com
-  # - privatelink.purviewstudio.azure.com
-  # - privatelink.grafana.azure.com
-  # - privatelink.azurestaticapps.net
-  # - privatelink.fhir.azurehealthcareapis.com
-  # - privatelink.dicom.azurehealthcareapis.com
-}
+  
+  # missing from
+  #     ALZ 2026.04.2 (policy initiative Deploy-Private-DNS-Zones v2.5.0)
+  # but present in 
+  #     AVM avm-ptn-network-private-link-private-dns-zones 0.23.2 (11.06.2026):
+  # - privatelink.openai.azure.com:             azure_ai_oai
+  # - privatelink.mysql.database.azure.com:     azure_mysql_db_server
+  # - privatelink.postgres.database.azure.com:  azure_postgres_sql_server
+  # - privatelink.purview.azure.com:            azure_purview_account
+  # - privatelink.purviewstudio.azure.com:      azure_purview_studio
+  # - privatelink.azurestaticapps.net:          azure_static_web_apps
+  # - privatelink.1.azurestaticapps.net:        azure_static_web_apps_partitioned_1
+  # - privatelink.2.azurestaticapps.net:        azure_static_web_apps_partitioned_2
+  # - privatelink.3.azurestaticapps.net:        azure_static_web_apps_partitioned_3
+  # - privatelink.4.azurestaticapps.net:        azure_static_web_apps_partitioned_4
+  # - privatelink.5.azurestaticapps.net:        azure_static_web_apps_partitioned_5
 
+# Reference: https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns
+
+}
 
 module "private_dns_zones" {
   source  = "Azure/avm-ptn-network-private-link-private-dns-zones/azurerm"
