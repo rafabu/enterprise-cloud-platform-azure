@@ -72,8 +72,8 @@ module "private_dns_zones" {
   }
 
   private_link_private_dns_zones_regex_filter = {
-    enabled = var.private_link_private_dns_zones_regex_filter != null
-    regex   = var.private_link_private_dns_zones_regex_filter != null ? var.private_link_private_dns_zones_regex_filter : null
+    enabled      = var.private_link_private_dns_zones_regex_filter != null
+    regex_filter = var.private_link_private_dns_zones_regex_filter != null ? var.private_link_private_dns_zones_regex_filter : null
   }
 
   resource_group_role_assignments = null
