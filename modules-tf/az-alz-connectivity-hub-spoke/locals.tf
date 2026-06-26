@@ -6,13 +6,13 @@ locals {
   hub_locations = merge(
     var.azure_location != "" && var.ecp_network_main_ipv4_address_space != "" ? {
       "main" = {
-        azure_location                      = var.azure_location
+        azure_location                      = lower(var.azure_location)
         ecp_network_main_ipv4_address_space = var.ecp_network_main_ipv4_address_space
         is_main_location                    = true
       }
       } : {
       for k, v in var.ecp_hub_locations : "main" => {
-        azure_location                      = v.azure_location
+        azure_location                      = lower(v.azure_location)
         ecp_network_main_ipv4_address_space = v.ecp_network_main_ipv4_address_space
         is_main_location                    = coalesce(v.is_main_location, false)
       }
@@ -20,7 +20,7 @@ locals {
     },
     {
       for k, v in var.ecp_hub_locations : k => {
-        azure_location                      = v.azure_location
+        azure_location                      = lower(v.azure_location)
         ecp_network_main_ipv4_address_space = v.ecp_network_main_ipv4_address_space
         is_main_location                    = coalesce(v.is_main_location, false)
       }
