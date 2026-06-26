@@ -23,7 +23,8 @@ resource "azurerm_public_ip" "mpool" {
   location            = azurerm_resource_group.mpool.location
   resource_group_name = azurerm_resource_group.mpool.name
   allocation_method   = "Static"
-  sku                 = "Standard"
+  sku                 = "StandardV2"
+  sku_tier            = "Regional"
   zones               = null
 }
 
@@ -35,7 +36,7 @@ resource "azurerm_nat_gateway" "mpool" {
   name                = replace(data.azurecaf_name.rg.result, "-rg-", "-ng-")
   location            = azurerm_resource_group.mpool.location
   resource_group_name = azurerm_resource_group.mpool.name
-  sku_name            = "Standard"
+  sku_name            = "StandardV2"
   zones               = null
 }
 

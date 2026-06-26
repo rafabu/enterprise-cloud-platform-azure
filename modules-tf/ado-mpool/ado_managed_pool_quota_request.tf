@@ -97,7 +97,6 @@ data "azapi_resource_action" "provider_usage_recheck" {
   ]
 
   lifecycle {
-
     postcondition {
       condition = [
         for usage in self.output.value : usage.limit
