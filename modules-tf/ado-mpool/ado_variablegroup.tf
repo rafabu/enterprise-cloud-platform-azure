@@ -10,7 +10,7 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
 
   variable {
-    name  = "ecp_configuration_repo_tag"
+    name  = "ecp_configuration_repo_ref"
     value = var.ecp_configuration_repo_version
   }
 
