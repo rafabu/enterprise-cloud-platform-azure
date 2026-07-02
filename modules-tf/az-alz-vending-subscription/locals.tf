@@ -32,19 +32,44 @@ locals {
 
   subscription_display_name = "testing-stuff"
 
+  network_security_groups = {
+    nsg1 = {
+      name     = "nsg-spoke1"
+      resource_group_key = "rg1"
+      location = var.azure_location
+    }
+  }
   virtual_networks = {
     vnet1 = {
-      name                    = "vnet-spoke1"
-      resource_group_key      = "rg1"
-      address_space           = ["10.1.0.0/16"]
-      hub_network_resource_id = azurerm_virtual_network.hub.id
+      name               = "vnet-spoke1"
+      resource_group_key = "rg1"
+      address_space      = ["10.1.0.0/24"]
+      location           = var.azure_location
+      # vWAN connect
+      vwan_connection_enabled = true
+      vwan_hub_resource_id    = "/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-wan-szn/providers/Microsoft.Network/virtualHubs/iaih-d9-vhub-ecpa-con-szn-01"
+
+      subnets = {
+        subnet1 = {
+          network_security_group = {
+            key_reference = "nsg1"
+          }
+          name                                          = "number1"
+          address_prefixes                              = ["10.1.0.0/27"]
+          private_endpoint_network_policies_enabled     = false
+          private_link_service_network_policies_enabled = false
+          default_outbound_access_enabled               = false
+          service_endpoints                             = []
+          delegations                                   = []
+        }
+      }
     }
-    vnet2 = {
-      name                    = "vnet-spoke2"
-      resource_group_key      = "rg2"
-      address_space           = ["10.2.0.0/16"]
-      hub_network_resource_id = azurerm_virtual_network.hub.id
-    }
+    # vnet2 = {
+    #   name                    = "vnet-spoke2"
+    #   resource_group_key      = "rg2"
+    #   address_space           = ["10.2.0.0/16"]
+    #   hub_network_resource_id = azurerm_virtual_network.hub.id
+    # }
   }
 
 

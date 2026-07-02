@@ -3,8 +3,8 @@ data "azapi_client_config" "current" {
 
 
 
-module "alz_management" {
-  source  = "Azure/avm-ptn-alz-sub-vending/azurerm"
+module "vending" {
+  source  = "Azure/avm-ptn-alz-sub-vending/azure"
   version = var.avm-ptn-alz-sub-vending_version
 
   location = var.azure_location
@@ -37,11 +37,15 @@ module "alz_management" {
   }
   subscription_workload = "Production"
 
+
+  network_security_group_enabled = true
+  network_security_groups        = local.network_security_groups
+
   # virtual network variables
   virtual_network_enabled = true
   virtual_networks        = local.virtual_networks
 
   enable_telemetry = false
 
-  tags = var.azure_tags
+  # tags = var.azure_tags
 }
