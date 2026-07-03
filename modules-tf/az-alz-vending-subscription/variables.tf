@@ -18,6 +18,18 @@ variable "azure_tags" {
   default = {}
 }
 
+variable "ecp_parent_management_group_id" {
+  type        = string
+  default = "/providers/Microsoft.Management/managementGroups/iaih-d9-mg-ecpa-deployment"
+  description = "The management group ID of the root parent management group for the ECP environment"
+}
+
+variable "ecp_parent_management_group_name" {
+  type        = string
+  default = "iaih-d9-mg-ecpa-deployment"
+  description = "The management group name of the root parent management group for the ECP environment"
+}
+
 variable "ecp_management_subscription_id" {
   type        = string
   description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"

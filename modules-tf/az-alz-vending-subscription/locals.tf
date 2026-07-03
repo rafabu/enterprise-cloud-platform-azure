@@ -1,19 +1,91 @@
 locals {
-  # subscription_id_management = var.ecp_management_subscription_id
-  # resource_group_name        = data.azurecaf_name.rg.result
-
-  # connectivity (Private DNS Zones)
-  # subscription_id_connectivity     = var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? var.ecp_connectivity_subscription_id : var.ecp_management_subscription_id
-  # resource_group_name_connectivity = replace(local.resource_group_name, "-mgmt", "-conn")
-
-  # resource_group_id = provider::azapi::subscription_resource_id(
-  #   local.subscription_id_management,
-  #   "Microsoft.Resources/resourceGroups",
-  #   [
-  #     local.resource_group_name
-  #   ]
-  # )
-
+  entra_roles_with_permission = {
+    lz-owner = {
+      name_suffix = "contributor"
+      role_member_object_ids = [
+        "86984e3c-69ef-4cf0-9c37-3c5e940408cd", # Raphael Burri (guest user)
+        "c17ad8e5-871f-4d00-a6c1-c4b7841dd573", # Lukas Rottach (guest user)
+        "678326f7-78a8-4916-83e8-5671ef662b94", # Cédric Mendelin (guest user)
+        "27adb7f0-20f5-47aa-b0a6-7f8996b0058f"  # Sebastian Ebner (guest users)
+      ]
+      use_pim = false
+      pim_permanent_role_member_object_ids = [
+        data.azapi_client_config.current.object_id
+      ]
+      permission_rbac_role_definitions = {
+        subscription-owner = {
+          definition                = "Subscription-Owner (${var.ecp_parent_management_group_name})" # alz provider adds MG id to custom role names
+          definition_lookup_enabled = true
+          relative_scope            = ""
+          # condition                 = <<-EOT
+          # (
+          #  (
+          #   !(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})
+          #  )
+          #  OR 
+          #  (
+          #   @Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
+          #  )
+          # )
+          # AND
+          # (
+          #  (
+          #   !(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})
+          #  )
+          #  OR 
+          #  (
+          #   @Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
+          #  )
+          # )
+          # EOT
+          # condition_version         = "2.0"
+        }
+        key-vault-administrator = {
+          definition     = "Key Vault Administrator"
+          relative_scope = ""
+        }
+        storage-account-contributor = {
+          definition     = "Storage Account Contributor"
+          relative_scope = ""
+        }
+        storage-blob-data-owner = {
+          definition     = "Storage Blob Data Owner"
+          relative_scope = ""
+        }
+        virtual-machine-administrator-login = {
+          definition     = "Virtual Machine Administrator Login"
+          relative_scope = ""
+        }
+      }
+    }
+    lz-user = {
+      name_suffix = "user"
+      role_member_object_ids = [
+        "86984e3c-69ef-4cf0-9c37-3c5e940408cd", # Raphael Burri (guest user)
+        "c17ad8e5-871f-4d00-a6c1-c4b7841dd573", # Lukas Rottach (guest user)
+        "678326f7-78a8-4916-83e8-5671ef662b94", # Cédric Mendelin (guest user)
+        "27adb7f0-20f5-47aa-b0a6-7f8996b0058f"  # Sebastian Ebner (guest users)
+      ]
+      use_pim = false
+      pim_permanent_role_member_object_ids = [
+        data.azapi_client_config.current.object_id
+      ]
+      permission_rbac_role_definitions = {
+        reader = {
+          definition     = "Reader"
+          relative_scope = ""
+        }
+        backup-reader = {
+          definition     = "Backup Reader"
+          relative_scope = ""
+        }
+        virtual-machine-user-login = {
+          definition     = "Virtual Machine User Login"
+          relative_scope = ""
+        }
+      }
+    }
+  }
   resource_groups = {
     nwrg = {
       # Make sure to create this if you want to be able to cancel you subscription
@@ -30,18 +102,27 @@ locals {
     }
   }
 
-  role_assignments = {
-    test = {
-      principal_id   = data.azapi_client_config.current.object_id
-      definition     = "Storage Blob Data Contributor"
-      relative_scope = ""
+  role_rbac_assignment_definition_list = [
+    for role_key, role_value in local.entra_roles_with_permission : {
+      for definition_key, definition_value in role_value.permission_rbac_role_definitions :
+      "${role_key}-${definition_key}" => merge(
+        {
+          definition_lookup_enabled = false
+          principal_id      = module.entra_id_permissions[role_key].permission_group_object_id
+          principalType     = "Group"
+          relative_scope    = null
+          condition         = null
+          condition_version = null
+
+        },
+        definition_value
+      )
     }
-    subscription_owner = {
-      principal_id   = data.azapi_client_config.current.object_id
-      definition     = "/providers/Microsoft.Authorization/roleDefinitions/e5a8f031-c5c1-5621-a3e3-24cee7d46280" # "Subscription-Owner (iaih-d9-mg-ecpa-deployment)"
-      relative_scope = ""
-    }
-  }
+  ]
+  role_rbac_assignment_definitions = zipmap(
+    flatten([for key, attr in local.role_rbac_assignment_definition_list : keys(attr)]),
+    flatten([for key, attr in local.role_rbac_assignment_definition_list : values(attr)])
+  )
 
   subscription_display_name = "testing-stuff"
 
@@ -84,12 +165,4 @@ locals {
     #   hub_network_resource_id = azurerm_virtual_network.hub.id
     # }
   }
-
-
-
-
-
-
-
-
 }

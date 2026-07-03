@@ -1,14 +1,17 @@
+data "azuread_client_config" "current" {
+}
+
 ##################################################    Entra ID Groups    ##################################################
 # Role
 resource "azuread_group_without_members" "role" {
   # PIM-able (privileged) group takes naming of permission group
-  display_name = var.role_display_name
+  display_name            = var.role_display_name
   prevent_duplicate_names = true
-  security_enabled   = true
-  assignable_to_role = var.use_pim
+  security_enabled        = true
+  assignable_to_role      = var.use_pim
 
   owners = [
-    data.azurerm_client_config.current.object_id
+    data.azuread_client_config.current.object_id
   ]
 
   lifecycle {
@@ -31,10 +34,10 @@ resource "azuread_group_without_members" "permission" {
   display_name = var.permission_display_name
   # Error: could not check for existing group(s): unable to list Groups with filter "displayName eq '*****************'": the context used must have a deadline attached for polling purposes, but got no deadline
   prevent_duplicate_names = true
-  security_enabled = true
+  security_enabled        = true
 
   owners = [
-    data.azurerm_client_config.current.object_id
+    data.azuread_client_config.current.object_id
   ]
 
   lifecycle {
@@ -54,7 +57,7 @@ resource "azuread_group_member" "permission" {
 ################################
 # Eligible Principals Group
 resource "azuread_group_without_members" "role_eligible" {
-  for_each = toset(use_pim ? ["this"] : [])
+  for_each = toset(var.use_pim ? ["this"] : [])
 
   display_name = var.role_eligible_display_name
 
@@ -63,7 +66,7 @@ resource "azuread_group_without_members" "role_eligible" {
   assignable_to_role      = var.use_pim
 
   owners = [
-    data.azurerm_client_config.current.object_id
+    data.azuread_client_config.current.object_id
   ]
 
   lifecycle {
@@ -95,10 +98,10 @@ resource "time_sleep" "replication_wait" {
   create_duration = "120s" # entra replication delay
 }
 
-resource "azuread_group_without_members_role_management_policy" "role_policy" {
+resource "azuread_group_role_management_policy" "role_policy" {
   for_each = toset(var.use_pim ? ["this"] : [])
 
-  group_id = azuread_group_without_members.role["this"].object_id
+  group_id = azuread_group_without_members.role.object_id
   role_id  = "member"
 
   activation_rules {
@@ -137,7 +140,7 @@ resource "time_sleep" "policy_replication_wait" {
   for_each = toset(var.use_pim ? ["this"] : [])
 
   depends_on = [
-    azuread_group_without_members_role_management_policy.role_policy
+    azuread_group_role_management_policy.role_policy
   ]
 
   create_duration = "120s" # entra replication delay

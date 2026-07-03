@@ -15,7 +15,7 @@ module "vending" {
 
   # role assignment
   role_assignment_enabled = true
-  role_assignments = local.role_assignments
+  role_assignments = local.role_rbac_assignment_definitions
 
   # subscription variables
   subscription_alias_enabled                        = false
