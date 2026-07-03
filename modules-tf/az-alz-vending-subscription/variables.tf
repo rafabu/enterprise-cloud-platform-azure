@@ -72,3 +72,9 @@ The management group ID forms part of the Azure resource ID. E.g.,
 `/providers/Microsoft.Management/managementGroups/{managementGroupId}`.
 DESCRIPTION
 }
+
+variable "private_dns_zone_resource_ids" {
+  type        = list(string)
+  default     = ["/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-privatelink-dnszones/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"]
+  description = "List of resource IDs for Private DNS Zones to link to the virtual networks."
+}

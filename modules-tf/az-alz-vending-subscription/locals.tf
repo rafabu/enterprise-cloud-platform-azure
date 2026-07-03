@@ -30,13 +30,26 @@ locals {
     }
   }
 
+  role_assignments = {
+    test = {
+      principal_id   = data.azapi_client_config.current.object_id
+      definition     = "Storage Blob Data Contributor"
+      relative_scope = ""
+    }
+    subscription_owner = {
+      principal_id   = data.azapi_client_config.current.object_id
+      definition     = "/providers/Microsoft.Authorization/roleDefinitions/e5a8f031-c5c1-5621-a3e3-24cee7d46280" # "Subscription-Owner (iaih-d9-mg-ecpa-deployment)"
+      relative_scope = ""
+    }
+  }
+
   subscription_display_name = "testing-stuff"
 
   network_security_groups = {
     nsg1 = {
-      name     = "nsg-spoke1"
+      name               = "nsg-spoke1"
       resource_group_key = "rg1"
-      location = var.azure_location
+      location           = var.azure_location
     }
   }
   virtual_networks = {

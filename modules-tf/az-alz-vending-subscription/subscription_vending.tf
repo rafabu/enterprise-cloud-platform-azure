@@ -15,13 +15,7 @@ module "vending" {
 
   # role assignment
   role_assignment_enabled = true
-  role_assignments = {
-    test = {
-      principal_id   = data.azapi_client_config.current.object_id
-      definition     = "Storage Blob Data Contributor"
-      relative_scope = ""
-    }
-  }
+  role_assignments = local.role_assignments
 
   # subscription variables
   subscription_alias_enabled                        = false
@@ -35,7 +29,9 @@ module "vending" {
   subscription_tags = {
     created_by = "avm-ptn-alz-sub-vending"
   }
-  subscription_workload = "Production"
+  # Whether to update an existing subscription with the supplied tags and display name (in conjunction with subscription_management_group_association_enabled and subscription_id))
+  subscription_update_existing = true
+  subscription_workload        = null
 
 
   network_security_group_enabled = true
