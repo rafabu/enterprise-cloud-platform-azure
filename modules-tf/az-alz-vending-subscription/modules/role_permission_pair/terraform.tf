@@ -3,7 +3,7 @@ terraform {
 
   required_providers {
     azuread = {
-      source  = "Azure/azuread"
+      source  = "hashicorp/azuread"
       version = "~> 3.9" # 3.9 contains specific fixes for PIM
     }
   }
