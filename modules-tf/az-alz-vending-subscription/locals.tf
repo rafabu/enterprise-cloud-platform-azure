@@ -108,11 +108,11 @@ locals {
       "${role_key}-${definition_key}" => merge(
         {
           definition_lookup_enabled = false
-          principal_id      = module.entra_id_permissions[role_key].permission_group_object_id
-          principalType     = "Group"
-          relative_scope    = null
-          condition         = null
-          condition_version = null
+          principal_id              = module.entra_id_permissions[role_key].permission_group_object_id
+          principalType             = "Group"
+          relative_scope            = null
+          condition                 = null
+          condition_version         = null
 
         },
         definition_value
@@ -144,6 +144,18 @@ locals {
       vwan_hub_resource_id    = "/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-wan-szn/providers/Microsoft.Network/virtualHubs/iaih-d9-vhub-ecpa-con-szn-01"
 
       subnets = {
+        "privateendpoints" = {
+          network_security_group = {
+            key_reference = "nsg1"
+          }
+          name                                          = "private-endpoints"
+          address_prefixes                              = ["10.1.0.192/26"]
+          private_endpoint_network_policies_enabled     = false
+          private_link_service_network_policies_enabled = false
+          default_outbound_access_enabled               = false
+          service_endpoints                             = []
+          delegations                                   = []
+        }
         subnet1 = {
           network_security_group = {
             key_reference = "nsg1"
@@ -165,4 +177,21 @@ locals {
     #   hub_network_resource_id = azurerm_virtual_network.hub.id
     # }
   }
+
+  subnet_resource_ids = flatten([
+    for key, val in local.virtual_networks : [
+      for subnet_key, subnet_val in val.subnets : "${module.vending.virtual_network_resource_ids[key]}/subnets/${subnet_val.name}"
+    ]
+  ])
+
+  private_endpoint_subnet_resource_ids = [
+    for key, val in local.virtual_networks : "${module.vending.virtual_network_resource_ids[key]}/subnets/${val.subnets["privateendpoints"].name}"
+    if val.subnets["privateendpoints"] != null
+  ]
+}
+
+
+output "zzz_subnet_resource_ids" {
+  value       = local.subnet_resource_ids
+  description = "The Azure resource ids of the subnets that resources have been deployed into."
 }

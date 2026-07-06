@@ -102,6 +102,12 @@ variable "private_dns_zone_resource_ids" {
   description = "List of resource IDs for Private DNS Zones to link to the virtual networks."
 }
 
+variable "azure_devops_project_creation_enabled" {
+  type        = bool
+  description = "Whether to create the Azure DevOps project."
+  default     = true
+}
+
 variable "azure_devops_project_name" {
   type        = string
   description = "The name of the Azure DevOps project"
@@ -112,4 +118,39 @@ variable "azure_devops_project_description" {
   type        = string
   description = "The description of the Azure DevOps project"
   default     = null
+}
+
+variable "resource_network_communication_mode" {
+  type        = string
+  description = "Configures PaaS resource network access mode. PrivateLink, Public or ServiceEndpoint. Defaults to PrivateLink."
+  default     = "PrivateLink"
+  validation {
+    condition = contains([
+      "PrivateLink",
+      "Public",
+      "ServiceEndpoint"
+    ], var.resource_network_communication_mode)
+    error_message = "resource_network_communication_mode must be one of PrivateLink, Public or ServiceEndpoint."
+  }
+}
+
+variable "storage_account_creation_enabled" {
+  type        = bool
+  description = "Whether to create a storage account (for terraform backend use)"
+  default     = true
+}
+
+variable "storage_account_network_rules" {
+  type = object({
+    bypass                     = optional(set(string), ["AzureServices"])
+    default_action             = optional(string, "Deny")
+    ip_rules                   = optional(set(string), [])
+    virtual_network_subnet_ids = optional(set(string), [])
+    private_link_access = optional(list(object({
+      endpoint_resource_id = string
+      endpoint_tenant_id   = optional(string)
+    })))
+  })
+  default     = {}
+  description = "Overrides for storage account network rules"
 }

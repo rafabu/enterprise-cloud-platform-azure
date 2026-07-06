@@ -1,3 +1,9 @@
+variable "azure_devops_project_creation_enabled" {
+  type        = bool
+  description = "Whether to create the Azure DevOps project."
+  default     = true
+}
+
 variable "azure_devops_project_name" {
   type        = string
   description = "Name of the Azure DevOps project to create."

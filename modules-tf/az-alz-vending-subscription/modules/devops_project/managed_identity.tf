@@ -32,6 +32,10 @@ resource "azapi_resource" "project_uami_lock" {
       notes = "Prevents accidental deletion of the DevOps project service connection identity"
     }
   }
+
+  depends_on = [
+    azapi_resource.federated_identity_credential
+  ]
 }
 
 # needs UAMI principal_id, not the client_id

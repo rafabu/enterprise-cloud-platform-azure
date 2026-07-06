@@ -50,16 +50,3 @@ resource "azapi_resource" "federated_identity_credential" {
     }
   }
 }
-
-resource "azapi_resource" "federated_identity_credential_lock" {
-  type      = "Microsoft.Authorization/locks@2020-05-01"
-  name      = "${azapi_resource.federated_identity_credential.name}-cannotdelete"
-  parent_id = azapi_resource.federated_identity_credential.id
-
-  body = {
-    properties = {
-      level = "CanNotDelete"
-      notes = "Prevents accidental deletion of the DevOps project federated identity credential"
-    }
-  }
-}

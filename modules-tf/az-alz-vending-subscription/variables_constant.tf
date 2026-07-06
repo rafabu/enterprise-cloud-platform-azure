@@ -3,7 +3,7 @@ variable "avm-ptn-alz-sub-vending_version" {
   const = true
 }
 
-variable "avm_res_storage_storageaccount_version" {
+variable "avm-res-storage-storageaccount_version" {
   type  = string
   const = true
 }
