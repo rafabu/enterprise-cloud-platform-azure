@@ -1,7 +1,7 @@
 locals {
   entra_roles_with_permission = {
     lz-owner = {
-      name_suffix = "contributor"
+      name_suffix = "owner"
       role_member_object_ids = [
         "86984e3c-69ef-4cf0-9c37-3c5e940408cd", # Raphael Burri (guest user)
         "c17ad8e5-871f-4d00-a6c1-c4b7841dd573", # Lukas Rottach (guest user)

@@ -5,6 +5,10 @@
 ##################################################    Enterprise Service Accounts    ##################################################
 data "azuread_client_config" "current" {}
 
+data "azuredevops_client_config" "current" {}
+
+data "azapi_client_config" "current" {}
+
 data "azuread_directory_object" "current" {
   object_id = data.azuread_client_config.current.object_id
 }

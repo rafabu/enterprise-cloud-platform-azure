@@ -48,6 +48,17 @@ variable "ecp_connectivity_subscription_id" {
   }
 }
 
+variable "ecp_azure_devops_organization_name" {
+  type        = string
+  description = "name of Azure DevOps organization"
+}
+
+variable "ecp_azure_devops_managed_devops_pool_name" {
+  type        = string
+  default = "iaih-d9-mpool-ecpalp-ado-mpool"
+  description = "name of Azure DevOps managed agent pool"
+}
+
 variable "subscription_id" {
   type        = string
   default     = null

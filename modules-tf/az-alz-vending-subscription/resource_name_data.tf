@@ -4,6 +4,9 @@ locals {
   name_template_role_assignable    = "ra-${local.name_prefixes}-${var.azure_resource_name_elements.name}-<role>"
   name_template_role_managed       = "rm-${local.name_prefixes}-${var.azure_resource_name_elements.name}-<role>"
   name_template_permission_managed = "pm-${local.name_prefixes}-${var.azure_resource_name_elements.name}-<permission>"
+
+  devops_variable_group_name     = "automation-vargrp-default"
+
 }
 data "azurecaf_name" "rg" {
   name          = try(var.azure_resource_name_elements.name, null)
@@ -13,4 +16,11 @@ data "azurecaf_name" "rg" {
   random_length = try(var.azure_resource_name_elements.random_length, 0)
   clean_input   = true
   use_slug      = true
+}
+
+locals {
+  variable_group_name = format(
+    "ecp_bootstrap_%s",
+    join("-", try(var.azure_resource_name_elements.prefixes, []))
+  )
 }
