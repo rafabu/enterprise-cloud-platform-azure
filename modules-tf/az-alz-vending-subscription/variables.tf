@@ -90,3 +90,15 @@ variable "private_dns_zone_resource_ids" {
   default     = ["/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-privatelink-dnszones/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"]
   description = "List of resource IDs for Private DNS Zones to link to the virtual networks."
 }
+
+variable "azure_devops_project_name" {
+  type        = string
+  description = "The name of the Azure DevOps project"
+  default     = null
+}
+
+variable "azure_devops_project_description" {
+  type        = string
+  description = "The description of the Azure DevOps project"
+  default     = null
+}
