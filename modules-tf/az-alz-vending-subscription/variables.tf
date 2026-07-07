@@ -20,13 +20,11 @@ variable "azure_tags" {
 
 variable "ecp_parent_management_group_id" {
   type        = string
-  default = "/providers/Microsoft.Management/managementGroups/iaih-d9-mg-ecpa-deployment"
   description = "The management group ID of the root parent management group for the ECP environment"
 }
 
 variable "ecp_parent_management_group_name" {
   type        = string
-  default = "iaih-d9-mg-ecpa-deployment"
   description = "The management group name of the root parent management group for the ECP environment"
 }
 
@@ -55,7 +53,7 @@ variable "ecp_azure_devops_organization_name" {
 
 variable "ecp_azure_devops_managed_devops_pool_name" {
   type        = string
-  default = "iaih-d9-mpool-ecpalp-ado-mpool"
+  default     = "iaih-d9-mpool-ecpalp-ado-mpool"
   description = "name of Azure DevOps managed agent pool"
 }
 
@@ -120,10 +118,36 @@ variable "azure_devops_project_description" {
   default     = null
 }
 
+variable "vnet_address_space" {
+  type        = list(string)
+  description = "The address space for the workload VNet"
+  default     = []
+}
+
+variable "subnet_configuration" {
+  type = list(
+    object({
+      name             = string
+      address_prefixes = list(string)
+
+      private_endpoint_network_policies             = optional(string, "Disabled") # Disabled: no specific behaviour regarding NSG and UDR for private endpoints in this subnet
+      private_link_service_network_policies_enabled = optional(bool, true)         # true: cannot deploy private link services to subnet(s) by default
+
+      default_outbound_access_enabled = optional(bool, false)
+
+      private_endpoint_allocate = optional(bool, false) # use this subnet to create private endpoints in
+
+      delegations       = optional(list(string), [])
+      service_endpoints = optional(list(string), null)
+    })
+  )
+  default     = []
+  description = "The subnet configuration for the workload VNet"
+}
+
 variable "resource_network_communication_mode" {
   type        = string
   description = "Configures PaaS resource network access mode. PrivateLink, Public or ServiceEndpoint. Defaults to PrivateLink."
-  default     = "PrivateLink"
   validation {
     condition = contains([
       "PrivateLink",
@@ -132,6 +156,39 @@ variable "resource_network_communication_mode" {
     ], var.resource_network_communication_mode)
     error_message = "resource_network_communication_mode must be one of PrivateLink, Public or ServiceEndpoint."
   }
+}
+
+variable "bastion_connect_enabled" {
+  type        = bool
+  description = "Whether to connect to the bastion host"
+  default     = false
+}
+
+variable "bastion_vnet_id" {
+  type        = string
+  description = "The ID of the bastion vnet"
+  nullable    = true
+  default     = null
+}
+
+variable "bastion_resource_id" {
+  type        = string
+  description = "The ID of the bastion host"
+  nullable    = true
+  default     = null
+}
+
+
+variable "vwan_connect_enabled" {
+  type        = bool
+  description = "Whether to connect to the vWAN"
+  default     = true
+}
+
+variable "vwan_hub_resource_id" {
+  type        = string
+  description = "The ID of the vWAN hub"
+  default     = null
 }
 
 variable "storage_account_creation_enabled" {
@@ -153,4 +210,56 @@ variable "storage_account_network_rules" {
   })
   default     = {}
   description = "Overrides for storage account network rules"
+}
+
+variable "nat_gateway_connection_enabled" {
+  type        = bool
+  description = "Whether to connect the workload VNet to a pre-existing NAT Gateway"
+  default     = false
+}
+
+variable "nat_gateway_resource_id" {
+  type        = string
+  description = "The ID of the NAT Gateway to connect to"
+  default     = null
+}
+
+variable "nat_gateway_creation_enabled" {
+  type        = bool
+  description = "Whether to create a NAT Gateway."
+  default     = false
+}
+
+variable "nat_gateway_public_ip_count" {
+  type        = number
+  description = "The number of public IPs for the NAT gateway"
+  default     = 1
+  validation {
+    condition     = var.nat_gateway_public_ip_count >= 1 && var.nat_gateway_public_ip_count <= 3
+    error_message = "Availability zone must be between 1 and 3"
+  }
+}
+
+// Permission Parameters
+variable "workload_owner_object_ids" {
+  type        = list(string)
+  default = []
+  description = "List of workload owners"
+}
+
+variable "workload_owners_use_pim" {
+  type        = bool
+  description = "Whether to use PIM for workload owners"
+  default     = false
+}
+
+variable "workload_user_object_ids" {
+  type        = list(string)
+  description = "List of workload users"
+}
+
+variable "workload_users_use_pim" {
+  type        = bool
+  description = "Whether to use PIM for workload users"
+  default     = false
 }

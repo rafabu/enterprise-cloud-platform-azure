@@ -59,3 +59,13 @@ variable "variable_group_name" {
   type        = string
   description = "Name of the variable group to create for the Azure DevOps project."
 }
+
+variable "storage_account_name" {
+    type        = string
+    description = "Name of the storage account to create for the Azure DevOps project."
+}
+
+variable "storage_account_resource_id" {
+    type        = string
+    description = "Resource ID of the storage account to create for the Azure DevOps project."
+}

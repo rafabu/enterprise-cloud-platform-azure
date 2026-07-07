@@ -6,8 +6,8 @@ module "storage_account" {
   for_each = toset(var.storage_account_creation_enabled ? ["this"] : [])
 
   name      = data.azurecaf_name.st.result
-  location  = azapi_resource.resource_group_management.location
-  parent_id = azapi_resource.resource_group_management.id
+  location  = var.azure_location
+  parent_id = module.vending.resource_group_resource_ids["mgmt"]
 
   account_kind                    = "StorageV2"
   account_sku_name                = "Standard_ZRS"
@@ -75,9 +75,20 @@ module "storage_account" {
 
   }
 
-  tags = azapi_resource.resource_group_management.tags
+  tags = var.azure_tags
 
   enable_telemetry = false
+}
+
+resource "time_sleep" "storage_account_destroy_wait" {
+  for_each = toset(var.storage_account_creation_enabled ? ["this"] : [])
+
+  depends_on = [
+    module.storage_account
+  ]
+
+  create_duration = null
+  destroy_duration = "60s"
 }
 
 # # DoNotDelete locks on resources
@@ -95,6 +106,10 @@ resource "azapi_resource" "storage_account_container_lock" {
       notes = "Prevents accidental deletion of the storage account's \"tfstate\" container"
     }
   }
+
+  depends_on = [
+    time_sleep.storage_account_destroy_wait
+  ]
 }
 
 resource "azapi_resource" "storage_account_private_endpoint_blob_lock" {
@@ -103,7 +118,8 @@ resource "azapi_resource" "storage_account_private_endpoint_blob_lock" {
   type = "Microsoft.Authorization/locks@2020-05-01"
 
   name      = "${data.azurecaf_name.st.result}-pep-blob-lock-cannotdelete"
-  parent_id = "${azapi_resource.resource_group_management.id}/providers/Microsoft.Network/privateEndpoints/${data.azurecaf_name.st.result}-pep-blob"
+  parent_id = "${module.vending.resource_group_resource_ids["mgmt"]}/providers/Microsoft.Network/privateEndpoints/${data.azurecaf_name.st.result}-pep-blob"
+  # parent_id = module.storage_account["this"].private_endpoints["blob"].resource_id
 
   body = {
     properties = {
@@ -113,6 +129,11 @@ resource "azapi_resource" "storage_account_private_endpoint_blob_lock" {
   }
 
   depends_on = [
-    module.storage_account
+    time_sleep.storage_account_destroy_wait
   ]
+}
+
+output "zzz_blob_private_endpoint_resource_id" {
+  value       = module.storage_account["this"].private_endpoints["blob"]
+  description = "The resource ID of the blob private endpoint"
 }

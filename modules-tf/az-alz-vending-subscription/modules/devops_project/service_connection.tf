@@ -27,6 +27,10 @@ resource "azuredevops_serviceendpoint_azurerm" "this" {
       description,
     ]
   }
+
+  depends_on = [
+    time_sleep.project_uami_wait
+  ]
 }
 
 # grant access to service endpoint for all pipelines in the project
@@ -49,4 +53,9 @@ resource "azapi_resource" "federated_identity_credential" {
       subject   = azuredevops_serviceendpoint_azurerm.this.workload_identity_federation_subject
     }
   }
+
+  depends_on = [
+    time_sleep.project_uami_wait
+  ]
+
 }

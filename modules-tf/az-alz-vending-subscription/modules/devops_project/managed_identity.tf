@@ -21,6 +21,16 @@ resource "azapi_resource" "project_uami" {
   }
 }
 
+# give Entra ID time to replicate the new UAMI before creating the service principal entitlement
+resource "time_sleep" "project_uami_wait" {
+  create_duration  = "60s"
+  destroy_duration = "30s"
+
+  depends_on = [
+    azapi_resource.project_uami
+  ]
+}
+
 resource "azapi_resource" "project_uami_lock" {
   type      = "Microsoft.Authorization/locks@2020-05-01"
   name      = "${var.managed_identity_name}-cannotdelete"
@@ -34,7 +44,8 @@ resource "azapi_resource" "project_uami_lock" {
   }
 
   depends_on = [
-    azapi_resource.federated_identity_credential
+    azapi_resource.federated_identity_credential,
+    time_sleep.project_uami_wait
   ]
 }
 
@@ -42,6 +53,10 @@ resource "azapi_resource" "project_uami_lock" {
 resource "azuredevops_service_principal_entitlement" "project_uami" {
   origin_id = azapi_resource.project_uami.output.properties.principalId
   origin    = "aad"
+
+  depends_on = [
+    time_sleep.project_uami_wait
+  ]
 }
 
 resource "azuredevops_group_membership" "project_uami_project_administrators" {
@@ -56,4 +71,8 @@ resource "azuredevops_group_membership" "project_uami_project_administrators" {
 resource "azuread_group_member" "lz_subscription_contributor_permission_project_uami" {
   group_object_id  = var.owner_permission_group_object_id
   member_object_id = azapi_resource.project_uami.output.properties.principalId
+
+  depends_on = [
+    time_sleep.project_uami_wait
+  ]
 }

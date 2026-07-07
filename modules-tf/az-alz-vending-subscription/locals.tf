@@ -1,14 +1,11 @@
 locals {
+
+  # Entra ID Roles and Permissions
   entra_roles_with_permission = {
     lz-owner = {
       name_suffix = "owner"
-      role_member_object_ids = [
-        "86984e3c-69ef-4cf0-9c37-3c5e940408cd", # Raphael Burri (guest user)
-        "c17ad8e5-871f-4d00-a6c1-c4b7841dd573", # Lukas Rottach (guest user)
-        "678326f7-78a8-4916-83e8-5671ef662b94", # Cédric Mendelin (guest user)
-        "27adb7f0-20f5-47aa-b0a6-7f8996b0058f"  # Sebastian Ebner (guest users)
-      ]
-      use_pim = false
+      role_member_object_ids = var.workload_owner_object_ids
+      use_pim = var.workload_owners_use_pim
       pim_permanent_role_member_object_ids = [
         data.azapi_client_config.current.object_id
       ]
@@ -60,13 +57,8 @@ locals {
     }
     lz-user = {
       name_suffix = "user"
-      role_member_object_ids = [
-        "86984e3c-69ef-4cf0-9c37-3c5e940408cd", # Raphael Burri (guest user)
-        "c17ad8e5-871f-4d00-a6c1-c4b7841dd573", # Lukas Rottach (guest user)
-        "678326f7-78a8-4916-83e8-5671ef662b94", # Cédric Mendelin (guest user)
-        "27adb7f0-20f5-47aa-b0a6-7f8996b0058f"  # Sebastian Ebner (guest users)
-      ]
-      use_pim = false
+      role_member_object_ids = var.workload_user_object_ids
+      use_pim = var.workload_users_use_pim
       pim_permanent_role_member_object_ids = [
         data.azapi_client_config.current.object_id
       ]
@@ -84,21 +76,6 @@ locals {
           relative_scope = ""
         }
       }
-    }
-  }
-  resource_groups = {
-    nwrg = {
-      # Make sure to create this if you want to be able to cancel you subscription
-      name     = "NetworkWatcherRG"
-      location = var.azure_location
-    }
-    rg1 = {
-      name     = "${data.azurecaf_name.rg.result}-spoke1"
-      location = var.azure_location
-    }
-    rg2 = {
-      name     = "${data.azurecaf_name.rg.result}-spoke2"
-      location = var.azure_location
     }
   }
 
@@ -124,74 +101,75 @@ locals {
     flatten([for key, attr in local.role_rbac_assignment_definition_list : values(attr)])
   )
 
-  subscription_display_name = "testing-stuff"
+  resource_groups = {
+    nwrg = {
+      # Make sure to create this if you want to be able to cancel you subscription
+      name     = "NetworkWatcherRG"
+      location = var.azure_location
+    }
+    mgmt = {
+      name     = "${data.azurecaf_name.rg.result}-mgmt"
+      location = var.azure_location
+    }
+    vnet = {
+      name     = "${data.azurecaf_name.rg.result}-vnet"
+      location = var.azure_location
+    }
+  }
+
+  subscription_display_name = replace("${data.azurecaf_name.rg.result}", "-rg-", "-sub-")
 
   network_security_groups = {
-    nsg1 = {
-      name               = "nsg-spoke1"
-      resource_group_key = "rg1"
+    lz-nsg = {
+      name               = data.azurecaf_name.nsg.result
+      resource_group_key = "vnet"
       location           = var.azure_location
     }
   }
+  
   virtual_networks = {
-    vnet1 = {
-      name               = "vnet-spoke1"
-      resource_group_key = "rg1"
-      address_space      = ["10.1.0.0/24"]
+    lz-vnet = {
+      name               = data.azurecaf_name.vnet.result
+      resource_group_key = "vnet"
+      address_space      = var.vnet_address_space
       location           = var.azure_location
       # vWAN connect
-      vwan_connection_enabled = true
-      vwan_hub_resource_id    = "/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-wan-szn/providers/Microsoft.Network/virtualHubs/iaih-d9-vhub-ecpa-con-szn-01"
+      vwan_connection_enabled = var.vwan_connect_enabled
+      vwan_hub_resource_id    = var.vwan_connect_enabled ? var.vwan_hub_resource_id : null
 
       subnets = {
-        "privateendpoints" = {
+        for key, val in var.subnet_configuration : key => {
           network_security_group = {
-            key_reference = "nsg1"
+            key_reference = "lz-nsg"
           }
-          name                                          = "private-endpoints"
-          address_prefixes                              = ["10.1.0.192/26"]
-          private_endpoint_network_policies_enabled     = false
-          private_link_service_network_policies_enabled = false
-          default_outbound_access_enabled               = false
-          service_endpoints                             = []
-          delegations                                   = []
-        }
-        subnet1 = {
-          network_security_group = {
-            key_reference = "nsg1"
-          }
-          name                                          = "number1"
-          address_prefixes                              = ["10.1.0.0/27"]
-          private_endpoint_network_policies_enabled     = false
-          private_link_service_network_policies_enabled = false
-          default_outbound_access_enabled               = false
-          service_endpoints                             = []
-          delegations                                   = []
+          name                                          = val.name
+          address_prefixes                              = val.address_prefixes
+          private_endpoint_network_policies_enabled     = try(val.private_endpoint_network_policies, "Disabled")
+          private_link_service_network_policies_enabled = try(val.private_link_service_network_policies_enabled, true)
+          default_outbound_access_enabled               = try(val.default_outbound_access_enabled, false)
+          service_endpoints                             = try(val.service_endpoints, [])
+          delegations = try([for del_key, del_val in val.delegations : {
+            name = uuidv5("dns", del_val)
+            service_delegation = {
+              name = del_val
+          } }], [])
+          # extra attribute to steer creation of private endpoints in this subnet (not consumed by AVM)
+          private_endpoint_allocate = try(val.private_endpoint_allocate, false)
         }
       }
     }
-    # vnet2 = {
-    #   name                    = "vnet-spoke2"
-    #   resource_group_key      = "rg2"
-    #   address_space           = ["10.2.0.0/16"]
-    #   hub_network_resource_id = azurerm_virtual_network.hub.id
-    # }
   }
 
-  subnet_resource_ids = flatten([
+  subnet_resource_ids = distinct(flatten([
     for key, val in local.virtual_networks : [
       for subnet_key, subnet_val in val.subnets : "${module.vending.virtual_network_resource_ids[key]}/subnets/${subnet_val.name}"
     ]
-  ])
+  ]))
 
-  private_endpoint_subnet_resource_ids = [
-    for key, val in local.virtual_networks : "${module.vending.virtual_network_resource_ids[key]}/subnets/${val.subnets["privateendpoints"].name}"
-    if val.subnets["privateendpoints"] != null
-  ]
-}
-
-
-output "zzz_subnet_resource_ids" {
-  value       = local.subnet_resource_ids
-  description = "The Azure resource ids of the subnets that resources have been deployed into."
+  private_endpoint_subnet_resource_ids = distinct(flatten([
+    for key, val in local.virtual_networks : [
+      for subnet_key, subnet_val in val.subnets : "${module.vending.virtual_network_resource_ids[key]}/subnets/${subnet_val.name}"
+      if subnet_val.private_endpoint_allocate == true
+    ]
+  ]))
 }

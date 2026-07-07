@@ -46,14 +46,14 @@ resource "azuredevops_variable_group" "this_vending_output" {
   #     name  = "workloadManagementResourceGrouId"
   #     value = module.resource_group_management.resource_id
   #   }
-  #   variable {
-  #     name  = "workloadManagementStorageAccountName"
-  #     value = try(module.storage_account["this"].name, "")
-  #   }
-  #   variable {
-  #     name  = "workloadManagementStorageAccountId"
-  #     value = try(module.storage_account["this"].resource_id, "")
-  #   }
+    variable {
+      name  = "workloadManagementStorageAccountName"
+      value = var.storage_account_name
+    }
+    variable {
+      name  = "workloadManagementStorageAccountId"
+      value = var.storage_account_resource_id
+    }
   #   variable {
   #     name  = "workloadManagementLogAnalyticsWorkspaceName"
   #     value = try(module.log_analytics_workspace["this"].resource.name, "")
