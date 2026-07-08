@@ -132,8 +132,3 @@ resource "azapi_resource" "storage_account_private_endpoint_blob_lock" {
     time_sleep.storage_account_destroy_wait
   ]
 }
-
-output "zzz_blob_private_endpoint_resource_id" {
-  value       = module.storage_account["this"].private_endpoints["blob"]
-  description = "The resource ID of the blob private endpoint"
-}

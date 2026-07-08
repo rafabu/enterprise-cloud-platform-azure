@@ -10,9 +10,3 @@ module "entra_id_permissions" {
   use_pim                              = each.value.use_pim
   pim_permanent_role_member_object_ids = each.value.pim_permanent_role_member_object_ids
 }
-
-
-output "zzz_entra_id_permissions" {
-  value       = { for k, v in module.entra_id_permissions : k => v }
-  description = "The Entra ID groups created for the role-permission pairs."
-}

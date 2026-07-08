@@ -3,9 +3,9 @@ locals {
   # Entra ID Roles and Permissions
   entra_roles_with_permission = {
     lz-owner = {
-      name_suffix = "owner"
+      name_suffix            = "owner"
       role_member_object_ids = var.workload_owner_object_ids
-      use_pim = var.workload_owners_use_pim
+      use_pim                = var.workload_owners_use_pim
       pim_permanent_role_member_object_ids = [
         data.azapi_client_config.current.object_id
       ]
@@ -56,9 +56,9 @@ locals {
       }
     }
     lz-user = {
-      name_suffix = "user"
+      name_suffix            = "user"
       role_member_object_ids = var.workload_user_object_ids
-      use_pim = var.workload_users_use_pim
+      use_pim                = var.workload_users_use_pim
       pim_permanent_role_member_object_ids = [
         data.azapi_client_config.current.object_id
       ]
@@ -126,7 +126,7 @@ locals {
       location           = var.azure_location
     }
   }
-  
+
   virtual_networks = {
     lz-vnet = {
       name               = data.azurecaf_name.vnet.result
@@ -138,24 +138,31 @@ locals {
       vwan_hub_resource_id    = var.vwan_connect_enabled ? var.vwan_hub_resource_id : null
 
       subnets = {
-        for key, val in var.subnet_configuration : key => {
+        for key, val in var.subnet_configuration : key => merge({
           network_security_group = {
             key_reference = "lz-nsg"
           }
           name                                          = val.name
           address_prefixes                              = val.address_prefixes
-          private_endpoint_network_policies_enabled     = try(val.private_endpoint_network_policies, "Disabled")
+          private_endpoint_network_policies             = try(val.private_endpoint_network_policies, "Disabled")
           private_link_service_network_policies_enabled = try(val.private_link_service_network_policies_enabled, true)
           default_outbound_access_enabled               = try(val.default_outbound_access_enabled, false)
           service_endpoints                             = try(val.service_endpoints, [])
           delegations = try([for del_key, del_val in val.delegations : {
-            name = uuidv5("dns", del_val)
+            name = del_val
             service_delegation = {
               name = del_val
           } }], [])
           # extra attribute to steer creation of private endpoints in this subnet (not consumed by AVM)
           private_endpoint_allocate = try(val.private_endpoint_allocate, false)
-        }
+          },
+          # do not add NAT Gateway link on private endpoint subnet (not required)
+          local.nat_gateway_resource_id != null && try(val.private_endpoint_allocate, false) == false ? {
+            nat_gateway = {
+              id = local.nat_gateway_resource_id
+            }
+          } : {}
+        )
       }
     }
   }
