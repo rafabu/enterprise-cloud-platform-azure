@@ -3,6 +3,14 @@ data "azuread_client_config" "current" {
 
 ##################################################    Entra ID Groups    ##################################################
 # Role
+locals {
+  role_member_object_ids = distinct(concat(
+    [
+      data.azuread_client_config.current.object_id
+    ],
+  var.role_member_object_ids))
+}
+
 resource "azuread_group_without_members" "role" {
   # PIM-able (privileged) group takes naming of permission group
   display_name            = var.role_display_name
@@ -10,9 +18,7 @@ resource "azuread_group_without_members" "role" {
   security_enabled        = true
   assignable_to_role      = var.use_pim
 
-  owners = [
-    data.azuread_client_config.current.object_id
-  ]
+  owners = var.use_pim ? [data.azuread_client_config.current.object_id] : local.role_member_object_ids
 
   lifecycle {
     ignore_changes = [
@@ -65,9 +71,7 @@ resource "azuread_group_without_members" "role_eligible" {
   security_enabled        = true
   assignable_to_role      = var.use_pim
 
-  owners = [
-    data.azuread_client_config.current.object_id
-  ]
+  owners = local.role_member_object_ids
 
   lifecycle {
     ignore_changes = [

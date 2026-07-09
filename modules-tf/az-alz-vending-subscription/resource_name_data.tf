@@ -1,11 +1,12 @@
 locals {
   name_prefixes = join("-", try(var.azure_resource_name_elements.prefixes, []))
+  name_suffixes = join("-", try(var.azure_resource_name_elements.suffixes, []))
 
-  name_template_role_assignable    = "ra-${local.name_prefixes}-${var.azure_resource_name_elements.name}-<role>"
-  name_template_role_managed       = "rm-${local.name_prefixes}-${var.azure_resource_name_elements.name}-<role>"
-  name_template_permission_managed = "pm-${local.name_prefixes}-${var.azure_resource_name_elements.name}-<permission>"
+  name_template_role_assignable    = "ra-${local.name_prefixes}-${var.azure_resource_name_elements.name}-${local.name_suffixes}-<role>"
+  name_template_role_managed       = "rm-${local.name_prefixes}-${var.azure_resource_name_elements.name}-${local.name_suffixes}-<role>"
+  name_template_permission_managed = "pm-${local.name_prefixes}-${var.azure_resource_name_elements.name}-${local.name_suffixes}-<permission>"
 
-  devops_variable_group_name     = "automation-vargrp-default"
+  devops_variable_group_name     = "automation-vargrp-${var.azure_resource_name_elements.name}-${local.name_suffixes}"
 
 }
 data "azurecaf_name" "rg" {
@@ -66,13 +67,4 @@ data "azurecaf_name" "pip" {
   random_length = try(var.azure_resource_name_elements.random_length, 0)
   clean_input   = true
   use_slug      = true
-}
-
-
-
-locals {
-  variable_group_name = format(
-    "ecp_bootstrap_%s",
-    join("-", try(var.azure_resource_name_elements.prefixes, []))
-  )
 }
