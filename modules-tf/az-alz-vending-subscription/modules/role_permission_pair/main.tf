@@ -35,7 +35,7 @@ resource "azuread_group_without_members" "role" {
   security_enabled        = true
   assignable_to_role      = var.use_pim
 
-  owners = var.use_pim ? [data.azuread_client_config.current.object_id] : local.role_member_object_ids
+  owners = var.use_pim ? [] : local.role_member_object_ids
 
   lifecycle {
     ignore_changes = [
@@ -137,7 +137,7 @@ resource "azuread_group_role_management_policy" "role_member_policy" {
   #     permanent and eligible assignments
   active_assignment_rules {
     expiration_required                = false
-    expire_after                       = null
+    expire_after                       = "P365D"
     require_justification              = true
     require_multifactor_authentication = false
     require_ticket_info                = false
@@ -175,7 +175,7 @@ resource "azuread_group_role_management_policy" "role_owner_policy" {
   #     permanent and eligible assignments
   active_assignment_rules {
     expiration_required                = false
-    expire_after                       = null
+    expire_after                       = "P365D"
     require_justification              = true
     require_multifactor_authentication = false
     require_ticket_info                = false
