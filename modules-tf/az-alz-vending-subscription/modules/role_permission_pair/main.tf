@@ -23,7 +23,7 @@ data "azuread_directory_object" "current" {
 locals {
   role_member_object_ids = distinct(concat(
     [
-      data.azuread_client_config.current.object_id
+      "edbed720-059e-4c71-9626-5abced49bc49"
     ],
   var.role_member_object_ids))
 }
