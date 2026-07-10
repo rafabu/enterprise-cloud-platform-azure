@@ -1,6 +1,23 @@
 data "azuread_client_config" "current" {
 }
 
+data "azuread_directory_object" "current" {
+  object_id = data.azuread_client_config.current.object_id
+}
+
+resource "terraform_data" "ServicePrincipal" {
+  for_each = toset(var.use_pim ? ["this"] : [])
+
+  input    = data.azuread_directory_object.current.type
+
+  lifecycle {
+    precondition {
+      condition     = data.azuread_directory_object.current.type == "ServicePrincipal"
+      error_message = "PIM policy && PIM schedule can only be assigned using a ServicePrincipal (not an interactive account). This is an Azure Resource API restriction."
+    }
+  }
+}
+
 ##################################################    Entra ID Groups    ##################################################
 # Role
 locals {

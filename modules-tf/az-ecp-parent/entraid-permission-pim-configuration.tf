@@ -18,6 +18,20 @@ resource "time_sleep" "contributor_replication_wait" {
   }
 }
 
+resource "terraform_data" "ServicePrincipal" {
+  for_each = toset(var.ecp_deployment_entraid_contributor_group_pim_enabled ? ["this"] : [])
+
+  input    = data.azuread_directory_object.this.type
+
+  lifecycle {
+    precondition {
+      condition     = data.azuread_directory_object.this.type == "ServicePrincipal"
+      error_message = "PIM policy && PIM schedule can only be assigned using a ServicePrincipal (not an interactive account). This is an Azure Resource API restriction."
+    }
+  }
+}
+
+
 # PIM policy (for the group)
 resource "azuread_group_role_management_policy" "contributor_member_policy" {
   for_each = toset(var.ecp_deployment_entraid_contributor_group_pim_enabled ? ["this"] : [])
@@ -126,7 +140,7 @@ resource "azuread_privileged_access_group_assignment_schedule" "contributor_memb
   justification        = "Grant permanent assignment to privileged group '${azuread_group_without_members.contributor_permission.display_name}'"
   permanent_assignment = true
 
- lifecycle {
+  lifecycle {
     ignore_changes = [
       justification # MacOS seems to add weird characters that cannot be updated later
     ]
@@ -148,7 +162,7 @@ resource "azuread_privileged_access_group_assignment_schedule" "contributor_owne
   justification        = "Grant permanent ownership of privileged group '${azuread_group_without_members.contributor_permission.display_name}'"
   permanent_assignment = true
 
-lifecycle {
+  lifecycle {
     ignore_changes = [
       justification # MacOS seems to add weird characters that cannot be updated later
     ]
@@ -171,7 +185,7 @@ resource "azuread_privileged_access_group_eligibility_schedule" "contributor_mem
   justification        = "Grant eligible membership from group '${azuread_group_without_members.contributor_role.display_name}' to privileged group '${azuread_group_without_members.contributor_permission.display_name}'"
   permanent_assignment = true
 
-lifecycle {
+  lifecycle {
     ignore_changes = [
       justification # MacOS seems to add weird characters that cannot be updated later
     ]
@@ -310,6 +324,12 @@ resource "azuread_privileged_access_group_assignment_schedule" "reader_member_wo
   justification        = "Grant permanent assignment to privileged group '${azuread_group_without_members.reader_permission.display_name}'"
   permanent_assignment = true
 
+  lifecycle {
+    ignore_changes = [
+      justification # MacOS seems to add weird characters that cannot be updated later
+    ]
+  }
+
   depends_on = [
     time_sleep.reader_policy_wait
   ]
@@ -325,6 +345,12 @@ resource "azuread_privileged_access_group_assignment_schedule" "reader_owner_wor
 
   justification        = "Grant permanent ownership of privileged group '${azuread_group_without_members.reader_permission.display_name}'"
   permanent_assignment = true
+
+  lifecycle {
+    ignore_changes = [
+      justification # MacOS seems to add weird characters that cannot be updated later
+    ]
+  }
 
   depends_on = [
     time_sleep.reader_policy_wait
