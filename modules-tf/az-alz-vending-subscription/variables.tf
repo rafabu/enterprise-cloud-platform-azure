@@ -51,9 +51,18 @@ variable "ecp_azure_devops_organization_name" {
   description = "name of Azure DevOps organization"
 }
 
+variable "ecp_azure_devops_project_name" {
+  type        = string
+  description = "Name of Azure DevOps project for ECP Platform"
+}
+
+variable "ecp_azure_devops_repository_name" {
+  type        = string
+  description = "Name of Azure DevOps repository for ECP"
+}
+
 variable "ecp_azure_devops_managed_devops_pool_name" {
   type        = string
-  default     = "iaih-d9-mpool-ecpalp-ado-mpool"
   description = "name of Azure DevOps managed agent pool"
 }
 
