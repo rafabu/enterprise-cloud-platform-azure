@@ -9,3 +9,14 @@ output "yaml_pipelines" {
     }
   }
 }
+
+output "environments" {
+  description = "core properties of Azure DevOps environments created"
+  value = {
+    for key, val in azuredevops_environment.ecp : key => {
+      id          = val.id,
+      name        = val.name,
+      description = val.description
+    }
+  }
+}

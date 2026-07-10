@@ -3,6 +3,7 @@ locals {
     "l0", # bootstrap
     "l1",
     "l2",
+    "l3",
   ]
 }
 

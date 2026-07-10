@@ -50,6 +50,12 @@ variable "ecp_connectivity_subscription_id" {
   }
 }
 
+variable "private_link_private_dns_zones_regex_filter" {
+  type        = string
+  default     = null
+  description = "Regex filter to select which Private DNS Zones to deploy. If not specified, all Private DNS Zones will be deployed."
+}
+
 variable "virtual_network_link_id_list" {
   type        = list(string)
   default     = []

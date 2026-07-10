@@ -12,6 +12,10 @@ locals {
       name        = "${var.ecp_environment_name}_ECP_Platform_Level2"
       description = "Enterprise Cloud Platform (ECP) environment ${var.ecp_environment_name}: Platform Level2"
     }
+    ecp_platform_level3 = {
+      name        = "${var.ecp_environment_name}_ECP_Platform_Level3"
+      description = "Enterprise Cloud Platform (ECP) environment ${var.ecp_environment_name}: Platform Level3"
+    }
   }
 }
 
