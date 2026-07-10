@@ -250,24 +250,24 @@ variable "nat_gateway_public_ip_count" {
 }
 
 // Permission Parameters
-variable "workload_owner_object_ids" {
+variable "workload_owners_group_member_object_ids" {
   type        = list(string)
   default = []
   description = "List of workload owners"
 }
 
-variable "workload_owners_use_pim" {
+variable "workload_owners_group_use_pim" {
   type        = bool
-  description = "Whether to use PIM for workload owners"
+  description = "Whether to use PIM for workload owners group"
   default     = false
 }
 
-variable "workload_user_object_ids" {
+variable "workload_users_group_member_object_ids" {
   type        = list(string)
   description = "List of workload users"
 }
 
-variable "workload_users_use_pim" {
+variable "workload_users_group_use_pim" {
   type        = bool
   description = "Whether to use PIM for workload users"
   default     = false
