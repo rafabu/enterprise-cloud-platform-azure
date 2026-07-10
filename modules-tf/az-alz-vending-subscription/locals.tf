@@ -4,8 +4,8 @@ locals {
   entra_roles_with_permission = {
     lz-owner = {
       name_suffix            = "owner"
-      role_member_object_ids = var.workload_owner_object_ids
-      use_pim                = var.workload_owners_use_pim
+      role_member_object_ids = var.workload_owners_group_member_object_ids
+      use_pim                = var.workload_owners_group_use_pim
       pim_permanent_role_member_object_ids = [
         data.azapi_client_config.current.object_id
       ]
@@ -57,8 +57,8 @@ locals {
     }
     lz-user = {
       name_suffix            = "user"
-      role_member_object_ids = var.workload_user_object_ids
-      use_pim                = var.workload_users_use_pim
+      role_member_object_ids = var.workload_users_group_member_object_ids
+      use_pim                = var.workload_users_group_use_pim
       pim_permanent_role_member_object_ids = [
         data.azapi_client_config.current.object_id
       ]
