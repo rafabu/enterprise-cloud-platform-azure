@@ -6,7 +6,7 @@ locals {
       name_suffix            = "owner"
       role_member_object_ids = var.workload_owners_group_member_object_ids
       role_owner_object_ids = distinct(concat(
-        [azapi_resource.uami.output.properties.clientId],
+        [azapi_resource.uami.output.properties.principalId],
         var.workload_owners_group_owners_object_ids
       ))
       use_pim = var.workload_owners_group_use_pim
@@ -63,7 +63,7 @@ locals {
       name_suffix            = "user"
       role_member_object_ids = var.workload_users_group_member_object_ids
       role_owner_object_ids = distinct(concat(
-        [azapi_resource.uami.output.properties.clientId],
+        [azapi_resource.uami.output.properties.principalId],
         var.workload_users_group_owners_object_ids
       ))
       use_pim = var.workload_users_group_use_pim

@@ -54,7 +54,7 @@ resource "azuread_group" "role_eligible" {
 
   members = var.role_member_object_ids
   owners = distinct(concat(
-    # [var.vending_managed_identity_object_id],
+    [var.vending_managed_identity_object_id],
     var.role_owner_object_ids
   ))
 
