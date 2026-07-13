@@ -189,6 +189,8 @@ resource "azuread_privileged_access_group_assignment_schedule" "role_member_assi
 }
 
 resource "azuread_privileged_access_group_assignment_schedule" "role_owner_assignment" {
+  for_each = toset(var.use_pim ? ["this"] : [])
+
   # ECP deployment principal has to become owner
   group_id        = azuread_group.role.object_id
   principal_id    = var.vending_managed_identity_object_id
