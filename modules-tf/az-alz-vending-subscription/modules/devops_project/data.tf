@@ -23,13 +23,9 @@ data "azuredevops_group_membership" "enterprise_service_accounts" {
 }
 
 data "azuread_service_principal" "master_spi" {
-  for_each = toset(data.azuread_directory_object.current.type == "ServicePrincipal" ? ["this"] : [])
-
-  client_id = data.azuread_client_config.current.client_id
+  client_id = var.vending_managed_identity_client_id
 }
 
 data "azuredevops_service_principal" "master_spi" {
-  for_each = data.azuread_service_principal.master_spi
-
-  display_name = each.value.display_name
+  display_name = data.azuread_service_principal.master_spi.display_name
 }

@@ -7,7 +7,7 @@ locals {
       role_member_object_ids = var.workload_owners_group_member_object_ids
       use_pim                = var.workload_owners_group_use_pim
       pim_permanent_role_member_object_ids = [
-        "edbed720-059e-4c71-9626-5abced49bc49"
+        azapi_resource.uami.output.properties.principalId
       ]
       permission_rbac_role_definitions = {
         subscription-owner = {
@@ -60,7 +60,7 @@ locals {
       role_member_object_ids = var.workload_users_group_member_object_ids
       use_pim                = var.workload_users_group_use_pim
       pim_permanent_role_member_object_ids = [
-        "edbed720-059e-4c71-9626-5abced49bc49"
+        azapi_resource.uami.output.properties.principalId
       ]
       permission_rbac_role_definitions = {
         reader = {

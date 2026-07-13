@@ -1,62 +1,11 @@
 ##################################################    Identity for Service Connection (UAMI)    ##################################################
 #     is being made 'Project Administrator' on new project so service connection will be able to configure
 #     the DevOps project accordingly, should users decide to automate their own DevOps Project setup
-resource "azapi_resource" "project_uami" {
-  type      = "Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30"
-  name      = var.managed_identity_name
-  parent_id = var.resource_group_id
-  location  = var.resource_group_location
-
-  tags = var.resource_group_tags
-
-  response_export_values = [
-    "properties.principalId",
-    "properties.clientId"
-  ]
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-# give Entra ID time to replicate the new UAMI before creating the service principal entitlement
-resource "time_sleep" "project_uami_wait" {
-  create_duration  = "60s"
-  destroy_duration = "30s"
-
-  depends_on = [
-    azapi_resource.project_uami
-  ]
-}
-
-resource "azapi_resource" "project_uami_lock" {
-  type      = "Microsoft.Authorization/locks@2020-05-01"
-  name      = "${var.managed_identity_name}-cannotdelete"
-  parent_id = azapi_resource.project_uami.id
-
-  body = {
-    properties = {
-      level = "CanNotDelete"
-      notes = "Prevents accidental deletion of the DevOps project service connection identity"
-    }
-  }
-
-  depends_on = [
-    azapi_resource.federated_identity_credential,
-    time_sleep.project_uami_wait
-  ]
-}
 
 # needs UAMI principal_id, not the client_id
 resource "azuredevops_service_principal_entitlement" "project_uami" {
-  origin_id = azapi_resource.project_uami.output.properties.principalId
+  origin_id = var.managed_identity_object_id
   origin    = "aad"
-
-  depends_on = [
-    time_sleep.project_uami_wait
-  ]
 }
 
 resource "azuredevops_group_membership" "project_uami_project_administrators" {
@@ -70,9 +19,5 @@ resource "azuredevops_group_membership" "project_uami_project_administrators" {
 # grant it access to subscription (for deployments)
 resource "azuread_group_member" "lz_subscription_contributor_permission_project_uami" {
   group_object_id  = var.owner_permission_group_object_id
-  member_object_id = azapi_resource.project_uami.output.properties.principalId
-
-  depends_on = [
-    time_sleep.project_uami_wait
-  ]
+  member_object_id = var.managed_identity_object_id
 }

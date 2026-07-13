@@ -18,6 +18,16 @@ variable "azure_tags" {
   default = {}
 }
 
+variable "ecp_azure_deployment_service_principal_client_id" {
+  type        = string
+  description = "Client ID of the Azure deployment service principal."
+}
+
+variable "ecp_azure_deployment_service_principal_object_id" {
+  type        = string
+  description = "Object ID of the Azure deployment service principal."
+}
+
 variable "ecp_parent_management_group_id" {
   type        = string
   description = "The management group ID of the root parent management group for the ECP environment"
