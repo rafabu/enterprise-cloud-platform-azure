@@ -15,9 +15,3 @@ resource "azuredevops_group_membership" "project_uami_project_administrators" {
   ]
   mode = "add"
 }
-
-# grant it access to subscription (for deployments)
-resource "azuread_group_member" "lz_subscription_contributor_permission_project_uami" {
-  group_object_id  = var.owner_permission_group_object_id
-  member_object_id = var.managed_identity_object_id
-}
