@@ -8,7 +8,7 @@ resource "azuread_group" "role" {
   assignable_to_role      = var.use_pim
 
   members = var.use_pim ? [] : var.role_member_object_ids
-  owners = var.use_pim ? [] : distinct(concat(
+  owners = var.use_pim ? [var.vending_managed_identity_object_id] : distinct(concat(
     [var.vending_managed_identity_object_id],
     var.role_owner_object_ids
   ))
