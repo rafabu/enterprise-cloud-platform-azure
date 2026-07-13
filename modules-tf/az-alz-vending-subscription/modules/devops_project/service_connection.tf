@@ -1,6 +1,6 @@
 ##################################################    Service Connection    ################################################## 
 locals {
-  uami_subscription_id   = provider::azapi::parse_resource_id("Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30", azapi_resource.project_uami.id).subscription_id
+  uami_subscription_id   = provider::azapi::parse_resource_id("Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30", var.managed_identity_resource_id).subscription_id
   uami_subscription_name = data.azapi_resource.lz_subscription.output.displayName
 }
 
@@ -16,7 +16,7 @@ resource "azuredevops_serviceendpoint_azurerm" "this" {
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   description                            = "Managed by ECP LZ Vending DevOps"
   credentials {
-    serviceprincipalid = azapi_resource.project_uami.output.properties.clientId
+    serviceprincipalid = var.managed_identity_client_id
   }
   azurerm_spn_tenantid      = data.azapi_client_config.current.tenant_id
   azurerm_subscription_id   = local.uami_subscription_id
@@ -27,10 +27,6 @@ resource "azuredevops_serviceendpoint_azurerm" "this" {
       description,
     ]
   }
-
-  depends_on = [
-    time_sleep.project_uami_wait
-  ]
 }
 
 # grant access to service endpoint for all pipelines in the project
@@ -44,7 +40,7 @@ resource "azuredevops_pipeline_authorization" "this" {
 resource "azapi_resource" "federated_identity_credential" {
   type      = "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2024-11-30"
   name      = replace("Azure-DevOps_${data.azuredevops_client_config.current.name}_${azuredevops_project.this.name}", " ", "_")
-  parent_id = azapi_resource.project_uami.id
+  parent_id = var.managed_identity_resource_id
 
   body = {
     properties = {
@@ -53,9 +49,4 @@ resource "azapi_resource" "federated_identity_credential" {
       subject   = azuredevops_serviceendpoint_azurerm.this.workload_identity_federation_subject
     }
   }
-
-  depends_on = [
-    time_sleep.project_uami_wait
-  ]
-
 }

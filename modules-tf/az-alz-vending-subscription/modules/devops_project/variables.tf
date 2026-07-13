@@ -1,3 +1,8 @@
+variable "vending_managed_identity_client_id" {
+  type        = string
+  description = "Client ID of the managed identity to create for the Azure DevOps project."
+}
+
 variable "azure_devops_project_creation_enabled" {
   type        = bool
   description = "Whether to create the Azure DevOps project."
@@ -15,9 +20,19 @@ variable "azure_devops_project_description" {
   description = "Description of the Azure DevOps project to create."
 }
 
-variable "managed_identity_name" {
+variable "managed_identity_resource_id" {
   type        = string
-  description = "Name of the managed identity to create for the Azure DevOps project."
+  description = "Resource ID of the managed identity to create for the Azure DevOps project."
+}
+
+variable "managed_identity_object_id" {
+  type        = string
+  description = "Object ID (Principal Id)of the managed identity to create for the Azure DevOps project."
+}
+
+variable "managed_identity_client_id" {
+  type        = string
+  description = "Client ID of the managed identity to create for the Azure DevOps project."
 }
 
 variable "owner_permission_group_object_id" {
