@@ -37,6 +37,12 @@ resource "azuread_group" "permission" {
   owners = [
     var.vending_managed_identity_object_id
   ]
+
+  lifecycle {
+    ignore_changes = [
+      owners
+    ]
+  }
 }
 
 ################################
