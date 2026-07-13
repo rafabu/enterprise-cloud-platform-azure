@@ -5,8 +5,12 @@ locals {
     lz-owner = {
       name_suffix            = "owner"
       role_member_object_ids = var.workload_owners_group_member_object_ids
-      use_pim                = var.workload_owners_group_use_pim
-      pim_permanent_role_member_object_ids = [
+      role_owner_object_ids = distinct(concat(
+        [azapi_resource.uami.output.properties.clientId],
+        var.workload_owners_group_owners_object_ids
+      ))
+      use_pim = var.workload_owners_group_use_pim
+      permanent_permission_member_object_ids = [
         azapi_resource.uami.output.properties.principalId
       ]
       permission_rbac_role_definitions = {
@@ -58,8 +62,12 @@ locals {
     lz-user = {
       name_suffix            = "user"
       role_member_object_ids = var.workload_users_group_member_object_ids
-      use_pim                = var.workload_users_group_use_pim
-      pim_permanent_role_member_object_ids = [
+      role_owner_object_ids = distinct(concat(
+        [azapi_resource.uami.output.properties.clientId],
+        var.workload_users_group_owners_object_ids
+      ))
+      use_pim = var.workload_users_group_use_pim
+      permanent_permission_member_object_ids = [
         azapi_resource.uami.output.properties.principalId
       ]
       permission_rbac_role_definitions = {

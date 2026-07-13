@@ -266,6 +266,12 @@ variable "workload_owners_group_member_object_ids" {
   description = "List of workload owners"
 }
 
+variable "workload_owners_group_owners_object_ids" {
+  type        = list(string)
+  default = []
+  description = "List of workload owners who are also owners of the group"
+}
+
 variable "workload_owners_group_use_pim" {
   type        = bool
   description = "Whether to use PIM for workload owners group"
@@ -273,6 +279,12 @@ variable "workload_owners_group_use_pim" {
 }
 
 variable "workload_users_group_member_object_ids" {
+  type        = list(string)
+  default = []
+  description = "List of workload users"
+}
+
+variable "workload_users_group_owners_object_ids" {
   type        = list(string)
   description = "List of workload users"
 }
