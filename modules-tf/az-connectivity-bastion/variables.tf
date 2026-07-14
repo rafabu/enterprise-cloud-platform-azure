@@ -166,17 +166,3 @@ variable "ecp_archetype_definitions" {
   }
   description = "The ECP archetype definitions by 'archetypeName' which are valid for this deployment."
 }
-
-variable "enabled_resources" {
-  type = object({
-    key_vault = optional(bool, true)
-  })
-  default = {
-    key_vault = true
-  }
-}
-
-variable "private_dns_zone_ids" {
-  type    = list(string)
-  default = []
-}

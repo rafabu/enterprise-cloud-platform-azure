@@ -14,3 +14,11 @@ module "entra_id_permissions" {
 
   vending_managed_identity_object_id = var.ecp_azure_deployment_service_principal_object_id
 }
+
+# additional member to the Entra ID role groups (e.g. for Bastion)
+resource "azuread_group_member" "additional_entra_id_group_members" {
+  for_each = local.additional_entra_id_group_members_flattened
+
+  group_object_id  = each.value.group_object_id
+  member_object_id = module.entra_id_permissions[each.value.role_group_key].role_group_object_id
+}

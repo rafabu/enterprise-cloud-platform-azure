@@ -187,4 +187,20 @@ locals {
       if subnet_val.private_endpoint_allocate == true
     ]
   ]))
+
+  # Flatten additional_entra_id_group_members into all combinations of group_object_id and role_group_key
+  additional_entra_id_group_members_flattened = {
+    for combination in flatten([
+      for group_name, group_data in var.additional_entra_id_group_members : [
+        for role_key in group_data.role_group_keys : {
+          group_object_id = group_data.group_object_id
+          role_group_key  = role_key
+          unique_key      = "${group_data.group_object_id}_${role_key}"
+        }
+      ]
+    ]) : combination.unique_key => {
+      group_object_id = combination.group_object_id
+      role_group_key  = combination.role_group_key
+    }
+  }
 }

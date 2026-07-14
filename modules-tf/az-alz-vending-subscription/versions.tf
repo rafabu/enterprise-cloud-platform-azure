@@ -1,25 +1,21 @@
 terraform {
   required_version = ">= 1.15"
   required_providers {
-    alz = {
-      source  = "azure/alz"
-      version = "~> 0.20"
-    }
     azapi = {
-      source  = "Azure/azapi"
-      version = "~> 2.5"
+      source  = "azure/azapi"
+      version = "~> 2.10"
     }
-    modtm = {
-      source  = "Azure/modtm"
-      version = "~> 0.3"
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 3.9"
     }
-    azurecaf = {
-      source  = "aztfmod/azurecaf"
-      version = "~> 1.2"
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = "~> 1.15"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.75"
     }
   }
 }
