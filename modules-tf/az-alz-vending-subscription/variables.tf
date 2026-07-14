@@ -262,13 +262,13 @@ variable "nat_gateway_public_ip_count" {
 // Permission Parameters
 variable "workload_owners_group_member_object_ids" {
   type        = list(string)
-  default = []
+  default     = []
   description = "List of workload owners"
 }
 
 variable "workload_owners_group_owners_object_ids" {
   type        = list(string)
-  default = []
+  default     = []
   description = "List of workload owners who are also owners of the group"
 }
 
@@ -280,7 +280,7 @@ variable "workload_owners_group_use_pim" {
 
 variable "workload_users_group_member_object_ids" {
   type        = list(string)
-  default = []
+  default     = []
   description = "List of workload users"
 }
 
@@ -294,3 +294,14 @@ variable "workload_users_group_use_pim" {
   description = "Whether to use PIM for workload users"
   default     = false
 }
+
+variable "additional_entra_id_group_members" {
+  type = map(object({
+    group_object_id = string
+    role_group_keys = list(string)
+  }))
+  default     = {}
+  description = "Additional members to add to the Entra ID groups. The key is the group name and the value is a list of object IDs."
+}
+
+
