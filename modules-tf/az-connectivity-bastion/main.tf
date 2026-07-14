@@ -1,5 +1,4 @@
-data "azurerm_client_config" "con" {
-  provider = azurerm.connectivity
+data "azapi_client_config" "con" {
 }
 
 # where resource names include location info, use short names

@@ -1,60 +1,62 @@
-# resource "azurerm_virtual_network" "mgm" {
-#   provider = azurerm.connectivity
+resource "azapi_resource" "bast_vnet" {
+  for_each = local.virtual_network_address_prefixes_location_object
 
-#   for_each = local.virtual_network_address_prefixes_location_object
+  type = "Microsoft.Network/virtualNetworks@2025-05-01"
+  name = join("-", compact([
+    data.azurecaf_name.vnet.result,
+    try(local.parsed_network_artefacts[each.value.artefact_key].nameElement, null),
+    local.location_code[lower(local.hub_locations[each.value.location_key].azure_location)]
+  ]))
+  location  = local.hub_locations[each.value.location_key].azure_location
+  parent_id = azapi_resource.resource_group.id
 
-#   name = join("-", compact([
-#     data.azurecaf_name.vnet.result,
-#     try(local.parsed_network_artefacts[each.value.artefact_key].nameElement, null),
-#     local.location_code[lower(local.hub_locations[each.value.location_key].azure_location)]
-#   ]))
-#   location            = local.hub_locations[each.value.location_key].azure_location
-#   resource_group_name = azurerm_resource_group.mgm.name
+  body = {
+    properties = {
+      addressSpace = {
+        addressPrefixes = each.value.address_prefixes
+      }
+      encryption = try(local.parsed_network_artefacts[each.value.artefact_key].encryption.enabled, false) == true ? {
+        enforcement = try(local.parsed_network_artefacts[each.value.artefact_key].encryption.enforcement, "AllowUnencrypted")
+      } : null
+      privateEndpointVNetPolicies = try(local.parsed_network_artefacts[each.value.artefact_key].privateEndpointVNetPolicies, null) == "Basic" ? "Basic" : null
+    }
+    tags = var.azure_tags
+  }
 
-#   address_space = each.value.address_prefixes
+  response_export_values = [
+    "*"
+  ]
 
-#   dynamic "encryption" {
-#     for_each = try(local.parsed_network_artefacts[each.value.artefact_key].encryption.enabled, false) == true ? ["encrypt"] : []
-#     content {
-#       enforcement = try(local.parsed_network_artefacts[each.value.artefact_key].encryption.enforcement, "AllowUnencrypted")
-#     }
-#   }
-#   private_endpoint_vnet_policies = try(local.parsed_network_artefacts[each.value.artefact_key].privateEndpointVNetPolicies, null) == "Basic" ? "Basic" : null
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
 
-#   tags = var.azure_tags
+resource "azapi_resource" "bast_subnet" {
+  for_each = local.virtual_network_subnet_address_prefixes_location_object
 
-#   lifecycle {
-#     ignore_changes = [
-#       tags
-#     ]
-#   }
-# }
+  type = "Microsoft.Network/virtualNetworks/subnets@2025-05-01"
+  name = local.parsed_network_subnet_artefacts[each.value.artefact_key].name
+  parent_id = azapi_resource.bast_vnet[join(
+    "_",
+    [
+      each.value.location_key,
+      local.parsed_network_subnet_artefacts[each.value.artefact_key].virtualNetwork.artefactName
+    ]
+  )].id
 
-# resource "azurerm_subnet" "mgm" {
-#   provider = azurerm.connectivity
+  body = {
+    properties = {
+      addressPrefix                     = each.value.address_prefixes[0]
+      defaultOutboundAccess             = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].defaultOutboundAccess, null)
+      privateEndpointNetworkPolicies    = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].privateEndpointNetworkPolicies, null)
+      privateLinkServiceNetworkPolicies = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
+    }
+  }
 
-#   for_each = local.virtual_network_subnet_address_prefixes_location_object
-
-
-#   name = local.parsed_network_subnet_artefacts[each.value.artefact_key].name
-#   resource_group_name = azurerm_virtual_network.mgm[join(
-#     "_",
-#     [
-#       each.value.location_key,
-#       local.parsed_network_subnet_artefacts[each.value.artefact_key].virtualNetwork.artefactName
-#     ]
-#   )].resource_group_name
-#   virtual_network_name = azurerm_virtual_network.mgm[join(
-#     "_",
-#     [
-#       each.value.location_key,
-#       local.parsed_network_subnet_artefacts[each.value.artefact_key].virtualNetwork.artefactName
-#     ]
-#   )].name
-#   address_prefixes = each.value.address_prefixes
-
-#   default_outbound_access_enabled   = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].defaultOutboundAccess, null)
-#   private_endpoint_network_policies = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].privateEndpointNetworkPolicies, null)
-#   # defaults to true
-#   private_link_service_network_policies_enabled = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
-# }
+  response_export_values = [
+    "*"
+  ]
+}

@@ -27,8 +27,3 @@ data "azurecaf_name" "bas" {
   clean_input   = true
   use_slug      = true
 }
-
-output "bastion_name" {
-  value       = data.azurecaf_name.bas.result
-  description = "The name of the bastion host."
-}
