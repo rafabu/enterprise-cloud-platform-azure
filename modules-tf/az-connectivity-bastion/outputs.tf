@@ -26,3 +26,32 @@ output "virtual_network_subnets" {
     }
   }
 }
+
+output "public_ip_addresses" {
+  value = {
+    for key, val in azapi_resource.bast_pip : key => {
+      id             = val.id
+      name           = val.name
+      resource_group = azapi_resource.resource_group.name
+      location       = val.location
+      ip_address     = val.output.properties.ipAddress
+    }
+  }
+}
+
+output "bastion_hosts" {
+  value = {
+    for key, val in azapi_resource.bastion : key => {
+      id             = val.id
+      name           = val.name
+      resource_group = azapi_resource.resource_group.name
+      location       = val.location
+      sku            = val.body.sku.name
+    }
+  }
+}
+
+output "bastion_host_reader_permission_group_object_id" {
+  value       = azuread_group_without_members.bastion_reader.object_id
+  description = "The ID of the bastion reader permission group."
+}

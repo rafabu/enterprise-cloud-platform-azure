@@ -40,7 +40,7 @@ locals {
 
   virtual_network_address_prefixes_location_list = [
     for k, v in local.parsed_network_artefacts : {
-      for l_k, l_v in local.hub_locations : "${l_k}_${k}" => {
+      for l_k, l_v in local.hub_locations : l_k => {
         location_key = l_k
         artefact_key = k
         address_prefixes = (
@@ -60,7 +60,7 @@ locals {
   )
   virtual_network_subnet_address_prefixes_location_list = [
     for k, v in local.parsed_network_subnet_artefacts : {
-      for l_k, l_v in local.hub_locations : "${l_k}_${k}" => {
+      for l_k, l_v in local.hub_locations : l_k => {
         location_key = l_k
         artefact_key = k
         address_prefixes = (

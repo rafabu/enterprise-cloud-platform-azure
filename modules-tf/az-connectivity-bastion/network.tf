@@ -4,7 +4,7 @@ resource "azapi_resource" "bast_vnet" {
   type = "Microsoft.Network/virtualNetworks@2025-05-01"
   name = join("-", compact([
     data.azurecaf_name.vnet.result,
-    try(local.parsed_network_artefacts[each.value.artefact_key].nameElement, null),
+    "bastion",
     local.location_code[lower(local.hub_locations[each.value.location_key].azure_location)]
   ]))
   location  = local.hub_locations[each.value.location_key].azure_location
@@ -18,7 +18,7 @@ resource "azapi_resource" "bast_vnet" {
       encryption = try(local.parsed_network_artefacts[each.value.artefact_key].encryption.enabled, false) == true ? {
         enforcement = try(local.parsed_network_artefacts[each.value.artefact_key].encryption.enforcement, "AllowUnencrypted")
       } : null
-      privateEndpointVNetPolicies = try(local.parsed_network_artefacts[each.value.artefact_key].privateEndpointVNetPolicies, null) == "Basic" ? "Basic" : null
+      privateEndpointVNetPolicies = try(local.parsed_network_artefacts[each.value.artefact_key].privateEndpointVNetPolicies, null) == "Basic" ? "Basic" : "Disabled"
     }
     tags = var.azure_tags
   }
@@ -39,20 +39,14 @@ resource "azapi_resource" "bast_subnet" {
 
   type = "Microsoft.Network/virtualNetworks/subnets@2025-05-01"
   name = local.parsed_network_subnet_artefacts[each.value.artefact_key].name
-  parent_id = azapi_resource.bast_vnet[join(
-    "_",
-    [
-      each.value.location_key,
-      local.parsed_network_subnet_artefacts[each.value.artefact_key].virtualNetwork.artefactName
-    ]
-  )].id
+  parent_id = azapi_resource.bast_vnet[each.key].id
 
   body = {
     properties = {
       addressPrefix                     = each.value.address_prefixes[0]
       defaultOutboundAccess             = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].defaultOutboundAccess, null)
       privateEndpointNetworkPolicies    = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].privateEndpointNetworkPolicies, null)
-      privateLinkServiceNetworkPolicies = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : null
+      privateLinkServiceNetworkPolicies = try(local.parsed_network_subnet_artefacts[each.value.artefact_key].privateLinkServiceNetworkPolicies, null) == "Disabled" ? false : "Enabled"
     }
   }
 
