@@ -143,7 +143,47 @@ locals {
       location           = var.azure_location
       # vWAN connect
       vwan_connection_enabled = var.vwan_connect_enabled
-      vwan_hub_resource_id    = var.vwan_connect_enabled ? var.vwan_hub_resource_id : null
+      vwan_hub_resource_id = "/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-wan-szn/providers/Microsoft.Network/virtualHubs/iaih-d9-vhub-ecpa-con-szn-01"
+      # vwan_hub_resource_id = var.vwan_connect_enabled ? try(
+      #   var.vwan_hub_resources_by_location[var.vwan_hub_location].id,
+      #   try(
+      #     var.vwan_hub_resources_by_location[var.azure_location].id,
+      #     "NO-vWAN-HUB-RESOURCE-ID"
+      #   )
+      # ) : null
+
+      # Bastion peering (re-use the "hub network feature)")
+      hub_network_resource_id = var.bastion_connect_enabled ? var.bastion_vnet_id : null
+      hub_peering_enabled     = var.bastion_connect_enabled
+      hub_peering_direction   = var.bastion_connect_enabled ? "both" : null
+      hub_peering_name_tohub  = var.bastion_connect_enabled ? "bastionhost_${data.azurecaf_name.vnet.result}_${provider::azurerm::parse_resource_id(var.bastion_vnet_id).resource_name}" : null
+      hub_peering_options_tohub = var.bastion_connect_enabled ? {
+        allow_forwarded_traffic       = false
+        allow_gateway_transit         = false
+        allow_virtual_network_access  = true
+        do_not_verify_remote_gateways = true
+        #     enable_only_ipv6_peering      = optional(bool, false)
+        #     local_peered_address_spaces   = optional(list(string), [])
+        #     local_peered_subnets          = optional(list(string), [])
+        peer_complete_vnets = true
+        #     remote_peered_address_spaces  = optional(list(string), [])
+        #     remote_peered_subnets         = optional(list(string), [])
+        use_remote_gateways = false
+      } : null
+      hub_peering_name_fromhub = var.bastion_connect_enabled ? "bastionhost_${provider::azurerm::parse_resource_id(var.bastion_vnet_id).resource_name}_${data.azurecaf_name.vnet.result}" : null
+      hub_peering_options_fromhub = var.bastion_connect_enabled ? {
+        allow_forwarded_traffic       = false
+        allow_gateway_transit         = false
+        allow_virtual_network_access  = true
+        do_not_verify_remote_gateways = true
+        # enable_only_ipv6_peering      = optional(bool, false)
+        # local_peered_address_spaces   = optional(list(string), [])
+        # local_peered_subnets          = optional(list(string), [])
+        peer_complete_vnets = true
+        # remote_peered_address_spaces  = optional(list(string), [])
+        # remote_peered_subnets         = optional(list(string), [])
+        use_remote_gateways = false
+      } : null
 
       subnets = {
         for key, val in var.subnet_configuration : key => merge({
@@ -198,9 +238,28 @@ locals {
           unique_key      = "${group_data.group_object_id}_${role_key}"
         }
       ]
-    ]) : combination.unique_key => {
+      ]) : combination.unique_key => {
       group_object_id = combination.group_object_id
       role_group_key  = combination.role_group_key
     }
   }
+}
+
+
+output "zzz_pre-select-vwan_hub_location" {
+  value = try(var.vwan_hub_resources_by_location[var.vwan_hub_location], "no_match")
+}
+
+output "zzz_pre-select-azure_location" {
+  value = try(var.vwan_hub_resources_by_location[var.azure_location], "no_match")
+}
+
+output "zzz_vwan_id" {
+  value = var.vwan_connect_enabled ? try(
+        var.vwan_hub_resources_by_location[var.vwan_hub_location].id,
+        try(
+          var.vwan_hub_resources_by_location[var.azure_location].id,
+          "NO-vWAN-HUB-RESOURCE-ID"
+        )
+      ) : null
 }

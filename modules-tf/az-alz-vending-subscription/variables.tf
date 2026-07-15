@@ -197,16 +197,26 @@ variable "bastion_resource_id" {
   default     = null
 }
 
-
 variable "vwan_connect_enabled" {
   type        = bool
   description = "Whether to connect to the vWAN"
   default     = true
 }
 
-variable "vwan_hub_resource_id" {
+variable "vwan_hub_location" {
   type        = string
-  description = "The ID of the vWAN hub"
+  description = "The location of the vWAN hub. If not given, defaults to choosing the vWAN hub in the same region or the default one."
+  default     = null
+}
+
+variable "vwan_hub_resources_by_location" {
+  type = map(object({
+    name           = string
+    id             = string
+    location       = string
+    address_prefix = string
+  }))
+  description = "The vWAN hub resources keyed by location"
   default     = null
 }
 
