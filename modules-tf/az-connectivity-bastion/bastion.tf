@@ -16,13 +16,14 @@ resource "azapi_resource" "bastion" {
     }
 
     properties = {
-      disableCopyPaste         = false
-      enableIpConnect          = false
-      enableKerberos           = false
-      enablePrivateOnlyBastion = false
-      enableSessionRecording   = false
-      enableShareableLink      = false
-      enableTunneling          = false
+      disableCopyPaste         = var.azure_bastion_configuration.sku == "Basic" ? false : var.azure_bastion_configuration.copy_paste_disabled
+      enableIpConnect          = var.azure_bastion_configuration.sku == "Basic" ? false : var.azure_bastion_configuration.ip_connect_enabled
+      enableKerberos           = var.azure_bastion_configuration.sku == "Basic" ? false : var.azure_bastion_configuration.kerberos_enabled
+      enablePrivateOnlyBastion = var.azure_bastion_configuration.sku == "Basic" ? false : var.azure_bastion_configuration.private_only_bastion_enabled
+      enableSessionRecording   = var.azure_bastion_configuration.sku == "Premium" ? var.azure_bastion_configuration.session_recording_enabled : false
+      enableShareableLink      = var.azure_bastion_configuration.sku == "Basic" ? false : var.azure_bastion_configuration.shareable_link_enabled
+      enableTunneling          = var.azure_bastion_configuration.sku == "Basic" ? false : var.azure_bastion_configuration.tunneling_enabled
+
       ipConfigurations = [
         {
           name = "IPConf"
@@ -37,20 +38,13 @@ resource "azapi_resource" "bastion" {
           }
         }
       ]
-      #   networkAcls = {
-      #     ipRules = [
-      #       {
-      #         addressPrefix = "string"
-      #       }
-      #     ]
-      #   }
-      scaleUnits = 2
+      scaleUnits = var.azure_bastion_configuration.sku == "Basic" ? 2 : var.azure_bastion_configuration.scale_units
       virtualNetwork = {
         id = azapi_resource.bast_vnet[each.key].id
       }
     }
     sku = {
-      name = "Basic"
+      name = var.azure_bastion_configuration.sku
     }
     zones = ["1", "2", "3"]
   }
