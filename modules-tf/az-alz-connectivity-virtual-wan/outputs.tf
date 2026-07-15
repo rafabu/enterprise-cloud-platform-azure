@@ -37,7 +37,7 @@ output "azure_virtual_wan_hub_resource_details_by_location" {
   value = {
     for location in distinct([
       for v in data.azapi_resource.virtual_wan_hub_details : v.location
-    ]) : location => (
+    ]) : lower(location) => (
       [
         for k, v in data.azapi_resource.virtual_wan_hub_details :
         {

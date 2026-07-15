@@ -143,14 +143,13 @@ locals {
       location           = var.azure_location
       # vWAN connect
       vwan_connection_enabled = var.vwan_connect_enabled
-      vwan_hub_resource_id = "/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-wan-szn/providers/Microsoft.Network/virtualHubs/iaih-d9-vhub-ecpa-con-szn-01"
-      # vwan_hub_resource_id = var.vwan_connect_enabled ? try(
-      #   var.vwan_hub_resources_by_location[var.vwan_hub_location].id,
-      #   try(
-      #     var.vwan_hub_resources_by_location[var.azure_location].id,
-      #     "NO-vWAN-HUB-RESOURCE-ID"
-      #   )
-      # ) : null
+      vwan_hub_resource_id = var.vwan_connect_enabled ? try(
+        var.vwan_hub_resources_by_location[lower(var.vwan_hub_location)].id,
+        try(
+          var.vwan_hub_resources_by_location[lower(var.azure_location)].id,
+          "NO-vWAN-HUB-RESOURCE-ID"
+        )
+      ) : null
 
       # Bastion peering (re-use the "hub network feature)")
       hub_network_resource_id = var.bastion_connect_enabled ? var.bastion_vnet_id : null
@@ -243,23 +242,4 @@ locals {
       role_group_key  = combination.role_group_key
     }
   }
-}
-
-
-output "zzz_pre-select-vwan_hub_location" {
-  value = try(var.vwan_hub_resources_by_location[lower(var.vwan_hub_location)], "no_match")
-}
-
-output "zzz_pre-select-azure_location" {
-  value = try(var.vwan_hub_resources_by_location[lower(var.azure_location)], "no_match")
-}
-
-output "zzz_vwan_id" {
-  value = var.vwan_connect_enabled ? try(
-        var.vwan_hub_resources_by_location[lower(var.vwan_hub_location)].id,
-        try(
-          var.vwan_hub_resources_by_location[lower(var.azure_location)].id,
-          "NO-vWAN-HUB-RESOURCE-ID"
-        )
-      ) : null
 }
