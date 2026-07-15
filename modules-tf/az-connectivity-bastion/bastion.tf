@@ -1,7 +1,7 @@
 resource "azapi_resource" "bastion" {
   for_each = local.hub_locations
 
-  type = "Microsoft.Network/bastionHosts@2025-05-01"
+  type = "Microsoft.Network/bastionHosts@2025-07-01" # 2025-09-01 / 2026-01-01
   name = join("-", compact([
     data.azurecaf_name.bas.result,
     "bastion",
@@ -11,10 +11,14 @@ resource "azapi_resource" "bastion" {
   parent_id = azapi_resource.resource_group.id
 
   body = {
+    identity = {
+      type = "systemAssigned" # yes: with lowercase "s"
+    }
+
     properties = {
       disableCopyPaste         = false
       enableIpConnect          = false
-      enableKerberos           = true
+      enableKerberos           = false
       enablePrivateOnlyBastion = false
       enableSessionRecording   = false
       enableShareableLink      = false
@@ -55,9 +59,14 @@ resource "azapi_resource" "bastion" {
 
   response_export_values = ["*"]
 
+  schema_validation_enabled = false
+
   lifecycle {
     ignore_changes = [
-      tags
+      tags,
+      identity["identity_ids"],
+      identity["principal_id"],
+      identity["tenant_id"]
     ]
   }
 }

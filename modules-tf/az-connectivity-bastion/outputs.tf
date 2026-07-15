@@ -47,6 +47,7 @@ output "bastion_hosts" {
       resource_group = azapi_resource.resource_group.name
       location       = val.location
       sku            = val.body.sku.name
+      identity       = val.output.identity
     }
   }
 }
