@@ -58,7 +58,7 @@ variable "ecp_hub_locations" {
     ecp_network_main_ipv4_address_space = string
     is_main_location                    = optional(bool, false)
   }))
-  default    = {}
+  default     = {}
   description = "Regions to deploy ecp hub components to that need geographical dispersion. Note: Setting var.azure_location and var.ecp_network_main_ipv4_address_space overrides a default."
 }
 
@@ -124,7 +124,7 @@ variable "virtual_network_subnet_artefacts" {
   }))
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
 
-validation {
+  validation {
     condition = alltrue([
       for subnet in var.virtual_network_subnet_artefacts :
       subnet.artefact.privateEndpointNetworkPolicies == null
@@ -165,4 +165,20 @@ variable "ecp_archetype_definitions" {
     ]
   }
   description = "The ECP archetype definitions by 'archetypeName' which are valid for this deployment."
+}
+
+variable "azure_bastion_configuration" {
+  type = object({
+    copy_paste_disabled          = optional(bool, false)
+    ip_connect_enabled           = optional(bool, false)
+    kerberos_enabled             = optional(bool, false)
+    private_only_bastion_enabled = optional(bool, false)
+    session_recording_enabled    = optional(bool, false)
+    shareable_link_enabled       = optional(bool, false)
+    tunneling_enabled            = optional(bool, false)
+    scale_units                  = optional(number, 2)
+    sku                          = optional(string, "Standard")
+  })
+  default     = {}
+  description = "Configuration for the Azure Bastion host."
 }

@@ -32,3 +32,26 @@ output "azure_virtual_wan_hub_resource_details" {
   }
   description = "The detailed properties of the virtual hubs associated with the virtual WAN."
 }
+
+output "azure_virtual_wan_hub_resource_details_by_location" {
+  value = {
+    for location in distinct([
+      for v in data.azapi_resource.virtual_wan_hub_details : v.location
+    ]) : location => (
+      [
+        for k, v in data.azapi_resource.virtual_wan_hub_details :
+        {
+          name     = v.name
+          id       = v.id
+          location = v.location
+          address_prefix             = v.output.properties["addressPrefix"]
+          network_virtual_appliances = v.output.properties["networkVirtualAppliances"]
+          virtual_router_asn         = v.output.properties["virtualRouterAsn"]
+          virtual_router_ips         = v.output.properties["virtualRouterIps"]
+        }
+        if v.location == location
+      ][0]
+    )
+  }
+  description = "The detailed properties of the first virtual hub for each location associated with the virtual WAN. Keyed by location."
+}
