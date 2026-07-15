@@ -247,18 +247,18 @@ locals {
 
 
 output "zzz_pre-select-vwan_hub_location" {
-  value = try(var.vwan_hub_resources_by_location[var.vwan_hub_location], "no_match")
+  value = try(var.vwan_hub_resources_by_location[lower(var.vwan_hub_location)], "no_match")
 }
 
 output "zzz_pre-select-azure_location" {
-  value = try(var.vwan_hub_resources_by_location[var.azure_location], "no_match")
+  value = try(var.vwan_hub_resources_by_location[lower(var.azure_location)], "no_match")
 }
 
 output "zzz_vwan_id" {
   value = var.vwan_connect_enabled ? try(
-        var.vwan_hub_resources_by_location[var.vwan_hub_location].id,
+        var.vwan_hub_resources_by_location[lower(var.vwan_hub_location)].id,
         try(
-          var.vwan_hub_resources_by_location[var.azure_location].id,
+          var.vwan_hub_resources_by_location[lower(var.azure_location)].id,
           "NO-vWAN-HUB-RESOURCE-ID"
         )
       ) : null
