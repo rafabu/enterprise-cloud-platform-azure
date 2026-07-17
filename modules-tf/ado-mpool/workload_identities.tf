@@ -30,6 +30,11 @@ locals {
           scope            = var.backend_storage_accounts["l2"].id  # backend storage account
           roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1" # Storage Blob Data Reader
           condition        = null
+        },
+        {
+          scope            = var.backend_storage_accounts["l3"].id  # backend storage account
+          roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1" # Storage Blob Data Reader
+          condition        = null
         }
       ],
       ado-memberships = [
@@ -143,6 +148,12 @@ locals {
         },
         {
           scope = var.backend_storage_accounts["l2"].id, # backend storage account
+          # security reader
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+          condition        = null
+        },
+         {
+          scope = var.backend_storage_accounts["l3"].id, # backend storage account
           # security reader
           roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
           condition        = null

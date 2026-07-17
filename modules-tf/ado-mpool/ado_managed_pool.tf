@@ -106,9 +106,11 @@ resource "azapi_resource" "managed_devops_pool" {
       maximumConcurrency         = local.managed_devops_pool_properties.maximumConcurrency
       organizationProfile = {
         kind = "AzureDevOps"
+        alias = local.ado_agent_pool_alias
         organizations = [
           {
-            url = "https://dev.azure.com/${var.ecp_azure_devops_organization_name}"
+            url   = "https://dev.azure.com/${var.ecp_azure_devops_organization_name}"
+           
             projects = [
               var.ecp_azure_devops_project_name
             ]
@@ -168,12 +170,20 @@ resource "azapi_resource" "managed_devops_pool" {
 
 # set pool permissions (authorizations on queue and all pipelines in the project (pre-authorize))
 data "azuredevops_agent_pool" "mpool" {
-  name = azapi_resource.managed_devops_pool.name
+  name = local.ado_agent_pool_alias
+
+  depends_on = [
+    azapi_resource.managed_devops_pool
+  ]
 }
 
 data "azuredevops_agent_queue" "mpool" {
   project_id = local.azure_devops_project.project_id
-  name       = azapi_resource.managed_devops_pool.name
+  name       = local.ado_agent_pool_alias
+
+  depends_on = [
+    azapi_resource.managed_devops_pool
+  ]
 }
 
 resource "azuredevops_pipeline_authorization" "agent_queue_shared" {

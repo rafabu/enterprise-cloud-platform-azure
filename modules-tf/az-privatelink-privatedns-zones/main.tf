@@ -28,7 +28,7 @@ locals {
       zone_name = "${lower(var.azure_location)}.data.privatelink.azurecr.io"
     }
   }
-  
+
   # missing from
   #     ALZ 2026.04.2 (policy initiative Deploy-Private-DNS-Zones v2.5.0)
   # but present in 
@@ -45,7 +45,7 @@ locals {
   # - privatelink.4.azurestaticapps.net:        azure_static_web_apps_partitioned_4
   # - privatelink.5.azurestaticapps.net:        azure_static_web_apps_partitioned_5
 
-# Reference: https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns
+  # Reference: https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns
 
 }
 
@@ -69,6 +69,11 @@ module "private_dns_zones" {
       zone_name                              = val.zone_name
       private_dns_zone_supports_private_link = true
     }
+  }
+
+  private_link_private_dns_zones_regex_filter = {
+    enabled      = var.private_link_private_dns_zones_regex_filter != null
+    regex_filter = var.private_link_private_dns_zones_regex_filter != null ? var.private_link_private_dns_zones_regex_filter : null
   }
 
   resource_group_role_assignments = null

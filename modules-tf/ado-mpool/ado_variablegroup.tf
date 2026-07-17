@@ -10,7 +10,7 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
 
   variable {
-    name  = "ecp_configuration_repo_tag"
+    name  = "ecp_configuration_repo_ref"
     value = var.ecp_configuration_repo_version
   }
 
@@ -34,7 +34,7 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
   variable {
     name  = "ecp_ado_agent_pool_azure"
-    value = azapi_resource.managed_devops_pool.name
+    value = local.ado_agent_pool_alias
   }
   variable {
     name = "ecp_ado_agent_pool_azure_images"
