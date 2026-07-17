@@ -38,6 +38,10 @@ locals {
     for rd in local.custom_role_definitions : rd
     if rd.role_name == "Subscription-Owner (${var.ecp_parent_management_group_name})"
   ][0]
+  custom_role_definition_privatednszone_record_contributor = [
+    for rd in local.custom_role_definitions : rd
+    if rd.role_name == "Private-DNS-Zone-Record-Contributor (${var.ecp_parent_management_group_name})"
+  ][0]
 
   subscription_owner_excluded_assignment_role_ids = [
     local.custom_role_definition_application_owners.name,

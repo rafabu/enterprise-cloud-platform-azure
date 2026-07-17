@@ -35,3 +35,62 @@ resource "azapi_resource" "virtual_network_private_dns_zone_link" {
     ]
   }
 }
+
+# (Custom) RBAC assignment to the Private DNS Zone resource group(s):
+#   allow to contribute DNS records (owner)
+#   and read them (user) 
+locals {
+  private_dns_zone_resource_group_ids = compact(distinct([
+    for pdz in var.private_dns_zone_resource_ids : provider::azapi::parse_resource_id("Microsoft.Network/privateDnsZones", pdz).resource_group_id
+  ]))
+}
+
+resource "azapi_resource" "dns_zone_reader_assignment" {
+  for_each = toset(local.private_dns_zone_resource_group_ids)
+
+  type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
+  name      = uuidv5("dns", "${each.key}_${module.entra_id_permissions["lz-user"].permission_group_object_id}")
+  parent_id = each.key
+  body = {
+    properties = {
+      # condition = "string"
+      # conditionVersion = "string"
+      # delegatedManagedIdentityResourceId = "string"
+      description      = "Private DNS Zone Record Reader assignment for Entra group 'lz-user' to read records in private DNS zone"
+      principalId      = module.entra_id_permissions["lz-user"].permission_group_object_id
+      principalType    = "Group"
+      roleDefinitionId = "/subscriptions/${var.ecp_connectivity_subscription_id}${local.custom_role_definition_privatednszone_record_reader.id}"
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      body["properties"]["description"]
+    ]
+  }
+}
+
+resource "azapi_resource" "dns_zone_record_contributor_assignment" {
+  for_each = toset(local.private_dns_zone_resource_group_ids)
+
+  type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
+  name      = uuidv5("dns", "${each.key}.${module.entra_id_permissions["lz-owner"].permission_group_object_id}")
+  parent_id = each.key
+  body = {
+    properties = {
+      # condition = "string"
+      # conditionVersion = "string"
+      # delegatedManagedIdentityResourceId = "string"
+      description      = "Private DNS Zone Record Contributor assignment for Entra group 'lz-owner' to manage records in private DNS zone"
+      principalId      = module.entra_id_permissions["lz-owner"].permission_group_object_id
+      principalType    = "Group"
+      roleDefinitionId = "/subscriptions/${var.ecp_connectivity_subscription_id}${local.custom_role_definition_privatednszone_record_contributor.id}"
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      body["properties"]["description"]
+    ]
+  }
+}
