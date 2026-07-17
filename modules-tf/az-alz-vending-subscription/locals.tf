@@ -15,31 +15,32 @@ locals {
       ]
       permission_rbac_role_definitions = {
         subscription-owner = {
-          definition                = "Subscription-Owner (${var.ecp_parent_management_group_name})" # alz provider adds MG id to custom role names
+          definition                = "Subscription-Owner-Role-Restricted (${var.ecp_parent_management_group_name})" # alz provider adds MG id to custom role names
           definition_lookup_enabled = true
           relative_scope            = ""
-          # condition                 = <<-EOT
-          # (
-          #  (
-          #   !(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})
-          #  )
-          #  OR 
-          #  (
-          #   @Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
-          #  )
-          # )
-          # AND
-          # (
-          #  (
-          #   !(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})
-          #  )
-          #  OR 
-          #  (
-          #   @Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
-          #  )
-          # )
-          # EOT
-          # condition_version         = "2.0"
+          # prevent owners to add highly privileged role assignments to the subscription and lower levels (e.g. Owner, User Access Administrator, etc.)
+          condition         = <<-EOT
+(
+  (
+   !(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})
+  )
+  OR 
+  (
+    @Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
+  )
+)
+AND
+(
+  (
+    !(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})
+  )
+  OR 
+  (
+    @Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
+  )
+)
+EOT
+          condition_version = "2.0"
         }
         key-vault-administrator = {
           definition     = "Key Vault Administrator"
