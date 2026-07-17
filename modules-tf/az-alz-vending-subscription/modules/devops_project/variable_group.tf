@@ -46,14 +46,41 @@ resource "azuredevops_variable_group" "this_vending_output" {
   #     name  = "workloadManagementResourceGrouId"
   #     value = module.resource_group_management.resource_id
   #   }
-    variable {
-      name  = "workloadManagementStorageAccountName"
-      value = var.storage_account_name
-    }
-    variable {
-      name  = "workloadManagementStorageAccountId"
-      value = var.storage_account_resource_id
-    }
+
+  # ECP Platform information
+  variable {
+    name  = "ecpManagementSubscriptionId"
+    value = var.ecp_management_subscription_id
+  }
+
+  variable {
+    name  = "ecpConnectivitySubscriptionId"
+    value = var.ecp_connectivity_subscription_id
+  }
+
+  variable {
+    name  = "ecpConnectivityPrivateDnsZoneResourceGroupName"
+    value = basename(var.ecp_connectivity_private_dns_zone_resource_group_id)
+  }
+
+  variable {
+    name  = "ecpIdentitySubscriptionId"
+    value = var.ecp_identity_subscription_id
+  }
+
+  variable {
+    name  = "ecpSecuritySubscriptionId"
+    value = var.ecp_security_subscription_id
+  }
+
+  variable {
+    name  = "workloadManagementStorageAccountName"
+    value = var.storage_account_name
+  }
+  variable {
+    name  = "workloadManagementStorageAccountId"
+    value = var.storage_account_resource_id
+  }
   #   variable {
   #     name  = "workloadManagementLogAnalyticsWorkspaceName"
   #     value = try(module.log_analytics_workspace["this"].resource.name, "")

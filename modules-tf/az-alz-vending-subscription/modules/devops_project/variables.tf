@@ -76,11 +76,36 @@ variable "variable_group_name" {
 }
 
 variable "storage_account_name" {
-    type        = string
-    description = "Name of the storage account to create for the Azure DevOps project."
+  type        = string
+  description = "Name of the storage account to create for the Azure DevOps project."
 }
 
 variable "storage_account_resource_id" {
-    type        = string
-    description = "Resource ID of the storage account to create for the Azure DevOps project."
+  type        = string
+  description = "Resource ID of the storage account to create for the Azure DevOps project."
+}
+
+variable "ecp_management_subscription_id" {
+  type        = string
+  description = "Subscription ID of the ECP Management subscription."
+}
+
+variable "ecp_connectivity_subscription_id" {
+  type        = string
+  description = "Subscription ID of the ECP Connectivity subscription."
+}
+
+variable "ecp_connectivity_private_dns_zone_resource_group_id" {
+  type        = string
+  description = "Resource group ID of the private DNS zone in the ECP Connectivity subscription."
+}
+
+variable "ecp_identity_subscription_id" {
+  type        = string
+  description = "Subscription ID of the ECP Identity subscription."
+}
+
+variable "ecp_security_subscription_id" {
+  type        = string
+  description = "Subscription ID of the ECP Security subscription."
 }

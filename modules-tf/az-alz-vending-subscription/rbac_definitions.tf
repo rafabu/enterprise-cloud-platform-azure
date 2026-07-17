@@ -36,7 +36,7 @@ locals {
   ][0]
   custom_role_definition_subscription_owner = [
     for rd in local.custom_role_definitions : rd
-    if rd.role_name == "Subscription-Owner (${var.ecp_parent_management_group_name})"
+    if rd.role_name == "Subscription-Owner-Role-Restricted (${var.ecp_parent_management_group_name})"
   ][0]
   custom_role_definition_privatednszone_record_contributor = [
     for rd in local.custom_role_definitions : rd

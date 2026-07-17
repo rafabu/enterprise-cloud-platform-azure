@@ -56,6 +56,24 @@ variable "ecp_connectivity_subscription_id" {
   }
 }
 
+variable "ecp_identity_subscription_id" {
+  type        = string
+  description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_identity_subscription_id))
+    error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
+  }
+}
+
+variable "ecp_security_subscription_id" {
+  type        = string
+  description = "The identifier of the Azure Subscription. (e.g '00000000-0000-0000-0000-000000000000')"
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.ecp_security_subscription_id))
+    error_message = "The subscription ID must be a valid GUID in the format '00000000-0000-0000-0000-000000000000'."
+  }
+}
+
 variable "ecp_azure_devops_organization_name" {
   type        = string
   description = "name of Azure DevOps organization"
@@ -113,9 +131,14 @@ The management group ID forms part of the Azure resource ID. E.g.,
 DESCRIPTION
 }
 
+variable "private_dns_zone_resource_group_id" {
+  type        = string
+  default     = null
+  description = "The resource group ID of the private DNS zone to link to the virtual networks."
+}
+
 variable "private_dns_zone_resource_ids" {
-  type        = list(string)
-  default     = ["/subscriptions/54a47b01-be16-4ac5-9c2c-a9847076d794/resourceGroups/iaih-d9-rg-ecpa-con-privatelink-dnszones/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"]
+  type = list(string)
   description = "List of resource IDs for Private DNS Zones to link to the virtual networks."
 }
 
