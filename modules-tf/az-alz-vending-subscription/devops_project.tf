@@ -3,8 +3,9 @@ module "devops_project" {
 
   for_each = toset(var.azure_devops_project_name != null ? ["this"] : [])
 
-  azure_devops_project_name        = var.azure_devops_project_name
-  azure_devops_project_description = var.azure_devops_project_description
+  azure_devops_project_name             = var.azure_devops_project_name
+  azure_devops_project_description      = var.azure_devops_project_description
+  azure_devops_project_creation_enabled = var.azure_devops_project_creation_enabled
 
   resource_group_id       = module.vending.resource_group_resource_ids["mgmt"]
   resource_group_location = var.azure_location
@@ -27,6 +28,13 @@ module "devops_project" {
   storage_account_resource_id = try(module.storage_account["this"].resource_id, "")
 
   vending_managed_identity_client_id = var.ecp_azure_deployment_service_principal_client_id
+
+  ecp_management_subscription_id   = var.ecp_management_subscription_id
+  ecp_connectivity_subscription_id = var.ecp_connectivity_subscription_id
+  ecp_identity_subscription_id     = var.ecp_identity_subscription_id
+  ecp_security_subscription_id     = var.ecp_security_subscription_id
+
+  ecp_connectivity_private_dns_zone_resource_group_id = var.private_dns_zone_resource_group_id
 
   depends_on = [
     time_sleep.uami_wait
