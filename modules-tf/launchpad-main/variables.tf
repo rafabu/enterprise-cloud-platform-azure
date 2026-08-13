@@ -3,9 +3,15 @@ variable "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
 }
 
+variable "ecp_launchpad_subscription_id" {
+  type        = string
+  description = "The subscription ID of the ECP launchpad subscription"
+}
+
+
 variable "ecp_azure_devops_automation_repository_name" {
   type        = string
-  default    = "ECP.Automation"
+  default     = "ECP.Automation"
   description = "Name of the ECP Azure DevOps automation repository"
 }
 

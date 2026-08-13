@@ -1,9 +1,12 @@
 output "resource_group" {
   description = "The ID of the resource group"
   value = {
-    id       = azurerm_resource_group.lp.id
-    name     = azurerm_resource_group.lp.name
-    location = azurerm_resource_group.lp.location
+    # id       = azurerm_resource_group.lp.id
+    # name     = azurerm_resource_group.lp.name
+    # location = azurerm_resource_group.lp.location
+    id       = azapi_resource.lp_rg.id
+    name     = azapi_resource.lp_rg.name
+    location = azapi_resource.lp_rg.location
   }
 }
 
