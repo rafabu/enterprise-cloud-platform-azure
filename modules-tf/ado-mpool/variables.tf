@@ -3,6 +3,11 @@ variable "ecp_network_main_ipv4_address_space" {
   description = "The main IPv4 address space for the ECP network"
 }
 
+variable "ecp_launchpad_subscription_id" {
+  type        = string
+  description = "The subscription ID of the ECP launchpad subscription"
+}
+
 variable "ecp_azure_devops_organization_name" {
   type        = string
   description = "name of Azure DevOps organization"

@@ -7,9 +7,7 @@ data "azapi_resource_action" "provider_usage" {
   method                 = "GET"
   response_export_values = ["*"]
 
-  depends_on = [
-    data.azapi_resource.provider_registration_recheck
-  ]
+  depends_on = []
 }
 
 locals {
