@@ -163,9 +163,7 @@ resource "azapi_resource" "managed_devops_pool" {
   schema_validation_enabled = true
 
   lifecycle {
-    ignore_changes = [
-      output # prevent "known after apply" changes for output only
-    ]
+    ignore_changes = []
   }
 
   depends_on = [
