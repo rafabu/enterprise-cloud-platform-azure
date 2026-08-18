@@ -1,3 +1,23 @@
+resource "terraform_data" "managed_devops_pool_size" {
+  input = {
+    # initial limit --> pre-deployment quota
+    managed_devops_pool_initial_limit             = local.managed_devops_pool_usage.limit
+    managed_devops_pool_initial_has_room          = local.managed_devops_pool_usage.this_has_room
+    managed_devops_pool_initial_missing_cpu_count = local.managed_devops_pool_usage.this_missing_cpu_count
+    managed_devops_pool_sku                       = local.managed_devops_pool_sku
+    managed_devops_pool_sku_family                = local.managed_devops_pool_usage.sku_family
+    managed_devops_pool_maximum_concurrency       = local.managed_devops_pool_properties.maximumConcurrency
+    managed_devops_pool_maximum_cpu_count         = local.managed_devops_pool_sku_cpu_count_total
+
+  }
+
+  # only re-consider when config changes (not on every plan/apply)
+  triggers_replace = [
+    local.managed_devops_pool_sku,
+    local.managed_devops_pool_properties.maximumConcurrency
+  ]
+}
+
 # need to get the actual quota usages via Microsoft.DevOpsInfrastructure/locations/usages
 #     currently that kind of quota cannot be queried directly via GET on Microsoft.Quota/quotas
 data "azapi_resource_action" "provider_usage" {
@@ -51,8 +71,7 @@ resource "terraform_data" "managed_devops_quota_request" {
   triggers_replace = {
     # force re-evaluation when relevant inputs change
     managed_devops_pool_sku                 = local.managed_devops_pool_sku
-    managed_devops_pool_sku_family          = local.managed_devops_pool_usage.this_sku_family
-    managed_devops_pool_sku_cpu_count_total = local.managed_devops_pool_sku_cpu_count_total
+    managed_devops_pool_maximum_concurrency = local.managed_devops_pool_properties.maximumConcurrency
   }
 
   # the SET operation on this is extremely sensitive to throttling; make sure it doesn't run too often!!!
@@ -64,11 +83,11 @@ resource "terraform_data" "managed_devops_quota_request" {
       $ErrorActionPreference = 'Continue'
       try {
         # this works - but doesn't report on success :-(
-        az quota update --resource-name "${local.managed_devops_pool_usage.sku_family}" --scope "${local.quota_request_scope}" --limit-object value=${local.managed_devops_pool_usage.limit + local.managed_devops_pool_usage.this_missing_cpu_count} 2>&1 | Out-Null
-        Write-Output "Quota request completed (exit code: $LASTEXITCODE) - note: non zero exit code is expected..."
+        az quota update --resource-name "${local.managed_devops_pool_usage.sku_family}" --scope "${local.quota_request_scope}" --limit-object value=${terraform_data.managed_devops_pool_size.output.managed_devops_pool_maximum_cpu_count} 2>&1 | Out-Null
+        Write-Output "Quota request for ${local.managed_devops_pool_usage.sku_family} and value ${terraform_data.managed_devops_pool_size.output.managed_devops_pool_maximum_cpu_count} completed (exit code: $LASTEXITCODE) - note: non zero exit code is expected..."
       }
       catch {
-        Write-Output "Quota request completed with error (expected): $($_.Exception.Message)"
+        Write-Output "Quota request for ${local.managed_devops_pool_usage.sku_family} and value ${terraform_data.managed_devops_pool_size.output.managed_devops_pool_maximum_cpu_count} completed with error (expected): $($_.Exception.Message)"
       }
       # need to wait for replication of quota after changing it
       Write-Output "Waiting 30 seconds for quota change replication..."
@@ -98,8 +117,9 @@ data "azapi_resource_action" "provider_usage_recheck" {
     postcondition {
       condition = [
         for usage in self.output.value : usage.limit
-        if lower(usage.name.value) == lower(local.managed_devops_pool_usage.sku_family)
-      ][0] >= local.managed_devops_pool_usage.limit + local.managed_devops_pool_usage.this_missing_cpu_count
+        if lower(usage.name.value) == lower(terraform_data.managed_devops_pool_size.output.managed_devops_pool_sku_family)
+      ][0] >= terraform_data.managed_devops_pool_size.output.managed_devops_pool_maximum_cpu_count
+
       error_message = "Microsoft.DevOpsInfrastructure quota request for ${local.managed_devops_pool_usage.sku_family} in region ${lower(var.azure_location)} has not been fulfilled; current limit is still insufficient."
     }
   }
