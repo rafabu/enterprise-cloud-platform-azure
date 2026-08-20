@@ -31,6 +31,18 @@ variable "ecp_configuration_repo_deployment_root_path" {
   description = "Root path in ECP.Configuration repository where environment configurations are stored"
 }
 
+variable "ecp_automation_terragrunt_version" {
+  type        = string
+  description = "Version of Terragrunt used for ECP automation (use this for pinning)"
+  default     = "latest"
+}
+
+variable "ecp_automation_terraform_version" {
+  type        = string
+  description = "Version of Terraform used for ECP automation (use this for pinning)"
+  default     = "latest"
+}
+
 variable "azure_location" {
   type = string
 }
