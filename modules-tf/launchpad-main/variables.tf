@@ -3,9 +3,15 @@ variable "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
 }
 
+variable "ecp_launchpad_subscription_id" {
+  type        = string
+  description = "The subscription ID of the ECP launchpad subscription"
+}
+
+
 variable "ecp_azure_devops_automation_repository_name" {
   type        = string
-  default    = "ECP.Automation"
+  default     = "ECP.Automation"
   description = "Name of the ECP Azure DevOps automation repository"
 }
 
@@ -23,6 +29,18 @@ variable "ecp_azure_devops_organization_name" {
 variable "ecp_configuration_repo_deployment_root_path" {
   type        = string
   description = "Root path in ECP.Configuration repository where environment configurations are stored"
+}
+
+variable "ecp_automation_terragrunt_version" {
+  type        = string
+  description = "Version of Terragrunt used for ECP automation (use this for pinning)"
+  default     = "latest"
+}
+
+variable "ecp_automation_terraform_version" {
+  type        = string
+  description = "Version of Terraform used for ECP automation (use this for pinning)"
+  default     = "latest"
 }
 
 variable "azure_location" {

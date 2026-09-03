@@ -156,7 +156,7 @@ EOT
       hub_network_resource_id = var.bastion_connect_enabled ? var.bastion_vnet_id : null
       hub_peering_enabled     = var.bastion_connect_enabled
       hub_peering_direction   = var.bastion_connect_enabled ? "both" : null
-      hub_peering_name_tohub  = var.bastion_connect_enabled ? "bastionhost_${data.azurecaf_name.vnet.result}_${provider::azurerm::parse_resource_id(var.bastion_vnet_id).resource_name}" : null
+      hub_peering_name_tohub  = var.bastion_connect_enabled ? "bastionhost_${data.azurecaf_name.vnet.result}_${provider::azapi::parse_resource_id("Microsoft.Network/virtualNetworks", var.bastion_vnet_id).name}" : null
       hub_peering_options_tohub = var.bastion_connect_enabled ? {
         allow_forwarded_traffic       = false
         allow_gateway_transit         = false
@@ -170,7 +170,7 @@ EOT
         #     remote_peered_subnets         = optional(list(string), [])
         use_remote_gateways = false
       } : null
-      hub_peering_name_fromhub = var.bastion_connect_enabled ? "bastionhost_${provider::azurerm::parse_resource_id(var.bastion_vnet_id).resource_name}_${data.azurecaf_name.vnet.result}" : null
+      hub_peering_name_fromhub = var.bastion_connect_enabled ? "bastionhost_${provider::azapi::parse_resource_id("Microsoft.Network/virtualNetworks", var.bastion_vnet_id).name}_${data.azurecaf_name.vnet.result}" : null
       hub_peering_options_fromhub = var.bastion_connect_enabled ? {
         allow_forwarded_traffic       = false
         allow_gateway_transit         = false

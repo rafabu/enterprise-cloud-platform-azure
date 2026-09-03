@@ -45,9 +45,14 @@ locals {
         name = coalesce(var.managed_devops_pool_vmss_fabric_profile.sku_name, "Standard_D2as_v5") # --> Standard_D*as_v6 is compatible (v2 VM image only)
       }
       images = [for img in try(var.managed_devops_pool_vmss_fabric_profile.image, {
-        aliases            = ["ubuntu-24.04-g2"]
+        aliases = [
+          "ubuntu-latest",
+          "ubuntu-24.04",
+          "ubuntu-24.04-g2",
+          "ubuntu-24.04-g2/latest" # /latest alias MUST be included
+        ]
         buffer             = "*"
-        wellKnownImageName = "ubuntu-24.04-g2/latest"
+        wellKnownImageName = "ubuntu-24.04-g2"
         }) : {
 
         aliases            = try(img.aliases, [img.well_known_image_name])
@@ -74,19 +79,17 @@ locals {
 # DevOpsInfrastructure service principal needs "Reader" and "Network Contributor"
 data "azuread_service_principal" "devops_infrastructure" {
   # DevOpsInfrastructure (MS-SPI)
-  client_id = "31687f79-5e43-4c1e-8c63-d9f4bff5cf8b"
+  client_id = "31687f79-5e43-4c1e-8c63-d9f4bff5cf8b" # DevOpsInfrastructure (appId: 31687f79-5e43-4c1e-8c63-d9f4bff5cf8b
 
-  depends_on = [
-    data.azapi_resource.provider_registration_recheck
-  ]
+  depends_on = []
 }
 
 resource "azurerm_role_assignment" "devops_infrastructure_vnet" {
   provider = azurerm.launchpad
 
   for_each = toset([
-    "acdd72a7-3385-48ef-bd42-f606fba81ae7",
-    "4d97b98b-1d4f-4787-a291-c67834d212e7"
+    "acdd72a7-3385-48ef-bd42-f606fba81ae7", # Reader
+    "4d97b98b-1d4f-4787-a291-c67834d212e7"  # Network Contributor
   ])
 
   scope              = var.virtual_network_id
@@ -105,12 +108,12 @@ resource "azapi_resource" "managed_devops_pool" {
       devCenterProjectResourceId = var.dev_center_project_resource_id
       maximumConcurrency         = local.managed_devops_pool_properties.maximumConcurrency
       organizationProfile = {
-        kind = "AzureDevOps"
+        kind  = "AzureDevOps"
         alias = local.ado_agent_pool_alias
         organizations = [
           {
-            url   = "https://dev.azure.com/${var.ecp_azure_devops_organization_name}"
-           
+            url = "https://dev.azure.com/${var.ecp_azure_devops_organization_name}"
+
             projects = [
               var.ecp_azure_devops_project_name
             ]
@@ -158,6 +161,10 @@ resource "azapi_resource" "managed_devops_pool" {
   tags = var.azure_tags
 
   schema_validation_enabled = true
+
+  lifecycle {
+    ignore_changes = []
+  }
 
   depends_on = [
     azuredevops_group_membership.mpool,

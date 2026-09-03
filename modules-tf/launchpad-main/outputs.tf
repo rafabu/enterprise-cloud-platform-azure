@@ -1,9 +1,12 @@
 output "resource_group" {
   description = "The ID of the resource group"
   value = {
-    id       = azurerm_resource_group.lp.id
-    name     = azurerm_resource_group.lp.name
-    location = azurerm_resource_group.lp.location
+    # id       = azurerm_resource_group.lp.id
+    # name     = azurerm_resource_group.lp.name
+    # location = azurerm_resource_group.lp.location
+    id       = azapi_resource.lp_rg.id
+    name     = azapi_resource.lp_rg.name
+    location = azapi_resource.lp_rg.location
   }
 }
 
@@ -31,3 +34,14 @@ output "azuredevops_organization_name" {
   description = "name of Azure DevOps organization"
   value       = var.ecp_azure_devops_organization_name
 }
+
+output "ecp_automation_terragrunt_version" {
+  description = "Version of Terragrunt used for ECP automation"
+  value       = var.ecp_automation_terragrunt_version
+}
+
+output "ecp_automation_terraform_version" {
+  description = "Version of Terraform used for ECP automation"
+  value       = var.ecp_automation_terraform_version
+}
+
