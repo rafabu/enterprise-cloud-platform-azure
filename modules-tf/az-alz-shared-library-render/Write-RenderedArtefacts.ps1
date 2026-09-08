@@ -9,8 +9,8 @@ $renderedFilesJson = [System.Text.Encoding]::Unicode.GetString(
 $renderedFiles = $renderedFilesJson | ConvertFrom-Json
 
 # Get unique destination folders
-$destinationFolders = $renderedFiles.PSObject.Properties.Value.destination_file_path | 
-ForEach-Object { Split-Path -Parent $_ } | 
+$destinationFolders = $renderedFiles.PSObject.Properties.Value.destination_file_path |
+ForEach-Object { Split-Path -Parent $_ } |
 Select-Object -Unique
 
 # Delete and recreate destination folders
@@ -19,7 +19,7 @@ foreach ($folder in $destinationFolders) {
         Write-Verbose "Removing existing folder: $folder"
         Remove-Item -Path $folder -Recurse -Force
     }
-    
+
     Write-Verbose "Creating folder: $folder"
     New-Item -ItemType Directory -Path $folder -Force | Out-Null
 }
@@ -30,13 +30,13 @@ foreach ($fileEntry in $renderedFiles.PSObject.Properties) {
     $fileInfo = $fileEntry.Value
     $destinationPath = $fileInfo.destination_file_path
     $content = $fileInfo.rendered_file_content
-    
+
     # Ensure parent directory exists
     $parentDir = Split-Path -Parent $destinationPath
     if (-not (Test-Path $parentDir)) {
         New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
     }
-    
+
     # Write file content
     Write-Verbose "Writing file: $destinationPath"
     $content | Out-File -FilePath $destinationPath -Encoding utf8 -NoNewline

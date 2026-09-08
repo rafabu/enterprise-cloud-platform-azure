@@ -44,4 +44,3 @@ output "ecp_automation_terraform_version" {
   description = "Version of Terraform used for ECP automation"
   value       = var.ecp_automation_terraform_version
 }
-

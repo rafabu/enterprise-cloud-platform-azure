@@ -45,7 +45,7 @@ variable "template_replacements" {
     name_replacements    = optional(map(string), {})  # Key-value pairs for file/directory name replacements
     use_regex            = optional(bool, false)      # Use regex for search patterns
   }))
-  default = {}
+  default     = {}
   description = "Template replacement configurations supporting both content and name replacements"
   # default = {
   #   "ecp_environment_replacement" = {

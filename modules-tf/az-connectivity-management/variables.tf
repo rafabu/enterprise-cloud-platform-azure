@@ -58,7 +58,7 @@ variable "ecp_hub_locations" {
     ecp_network_main_ipv4_address_space = string
     is_main_location                    = optional(bool, false)
   }))
-  default    = {}
+  default     = {}
   description = "Regions to deploy ecp hub components to that need geographical dispersion. Note: Setting var.azure_location and var.ecp_network_main_ipv4_address_space overrides a default."
 }
 
@@ -124,7 +124,7 @@ variable "virtual_network_subnet_artefacts" {
   }))
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
 
-validation {
+  validation {
     condition = alltrue([
       for subnet in var.virtual_network_subnet_artefacts :
       subnet.artefact.privateEndpointNetworkPolicies == null

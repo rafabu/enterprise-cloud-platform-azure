@@ -39,5 +39,3 @@ resource "azapi_resource" "bast_pip" {
     ]
   }
 }
-
-

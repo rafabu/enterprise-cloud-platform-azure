@@ -14,15 +14,15 @@ function Wait-TenantBackfill {
         [int]$MaxWaitMinutes = 10,
         [int]$PollIntervalSeconds = 10
     )
-    
+
     $startTime = Get-Date
-    
+
     while (((Get-Date) - $startTime).TotalMinutes -lt $MaxWaitMinutes) {
         Start-Sleep -Seconds $PollIntervalSeconds
-        
+
         $bfStatus = az rest --method POST --url "https://management.azure.com/providers/Microsoft.Management/tenantBackfillStatus?api-version=2020-05-01"
         $status = ($bfStatus | ConvertFrom-Json).status
-        
+
         if ($status -ieq "Completed") {
             return @{ Success = $true; Status = $bfStatus }
         }

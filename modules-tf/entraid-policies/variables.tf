@@ -18,7 +18,7 @@ variable "named_location_definitions" {
     deletedDateTime  = optional(string)
   }))
   description = "Map of conditional access named location definitions (countrynamedlocation), where the key is the artefactName and the value is an object containing properties of the named location policy."
-  
+
 }
 
 variable "conditional_access_policy_definitions" {
@@ -88,5 +88,5 @@ variable "conditional_access_policy_definitions" {
   }
   description = "Map of conditional access policy definitions (conditionalAccessPolicy), where the key is the artefactName and the value is an object containing properties of the conditional access policy."
 
-  
+
 }

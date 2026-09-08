@@ -9,7 +9,7 @@ terraform {
       source  = "azure/azapi"
       version = "~> 2.7"
     }
-     external = {
+    external = {
       source  = "hashicorp/external"
       version = "~> 2.3"
     }

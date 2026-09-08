@@ -27,4 +27,3 @@ data "azurecaf_name" "kv" {
   clean_input   = true
   use_slug      = true
 }
-

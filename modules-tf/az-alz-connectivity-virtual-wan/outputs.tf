@@ -21,9 +21,9 @@ output "azure_virtual_wan_hub_resource_names" {
 output "azure_virtual_wan_hub_resource_details" {
   value = {
     for k, v in data.azapi_resource.virtual_wan_hub_details : k => {
-      name     = v.name
-      id       = v.id
-      location = v.location
+      name                       = v.name
+      id                         = v.id
+      location                   = v.location
       address_prefix             = v.output.properties["addressPrefix"]
       network_virtual_appliances = v.output.properties["networkVirtualAppliances"]
       virtual_router_asn         = v.output.properties["virtualRouterAsn"]
@@ -37,13 +37,13 @@ output "azure_virtual_wan_hub_resource_details_by_location" {
   value = {
     for location in distinct([
       for v in data.azapi_resource.virtual_wan_hub_details : v.location
-    ]) : lower(location) => (
+      ]) : lower(location) => (
       [
         for k, v in data.azapi_resource.virtual_wan_hub_details :
         {
-          name     = v.name
-          id       = v.id
-          location = v.location
+          name                       = v.name
+          id                         = v.id
+          location                   = v.location
           address_prefix             = v.output.properties["addressPrefix"]
           network_virtual_appliances = v.output.properties["networkVirtualAppliances"]
           virtual_router_asn         = v.output.properties["virtualRouterAsn"]

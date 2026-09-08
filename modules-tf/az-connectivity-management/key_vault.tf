@@ -14,8 +14,8 @@ locals {
 resource "azapi_resource" "mgm_vault" {
   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
 
-  type      = "Microsoft.KeyVault/vaults@2026-02-01"
-  name      = join("-", compact([
+  type = "Microsoft.KeyVault/vaults@2026-02-01"
+  name = join("-", compact([
     data.azurecaf_name.kv.result,
     local.location_code[lower(local.hub_locations["main"].azure_location)]
   ]))
@@ -24,21 +24,21 @@ resource "azapi_resource" "mgm_vault" {
 
   body = {
     properties = {
-      sku                            = { family = "A", name = "standard" }
-      tenantId                       = data.azurerm_client_config.con.tenant_id
-      accessPolicies                 = []
-      enabledForDeployment           = false
-      enabledForDiskEncryption       = false
-      enabledForTemplateDeployment   = false
-      enableRbacAuthorization        = true
-      enableSoftDelete               = true
-      softDeleteRetentionInDays      = 7
-      enablePurgeProtection          = null   # omit = disabled
-      publicNetworkAccess            = "Enabled"
+      sku                          = { family = "A", name = "standard" }
+      tenantId                     = data.azurerm_client_config.con.tenant_id
+      accessPolicies               = []
+      enabledForDeployment         = false
+      enabledForDiskEncryption     = false
+      enabledForTemplateDeployment = false
+      enableRbacAuthorization      = true
+      enableSoftDelete             = true
+      softDeleteRetentionInDays    = 7
+      enablePurgeProtection        = null # omit = disabled
+      publicNetworkAccess          = "Enabled"
       networkAcls = {
-        bypass        = "AzureServices"
-        defaultAction = "Deny"
-        ipRules       = []
+        bypass              = "AzureServices"
+        defaultAction       = "Deny"
+        ipRules             = []
         virtualNetworkRules = []
       }
     }
@@ -56,10 +56,10 @@ resource "azurerm_private_endpoint" "mgm_vault" {
 
   for_each = toset(try(var.enabled_resources.key_vault, false) ? ["this"] : [])
 
-  location            = azapi_resource.mgm_vault[each.key].location
-  name                = "${azapi_resource.mgm_vault[each.key].name}-pep"
-  resource_group_name = azurerm_resource_group.mgm.name
-  subnet_id           = values(azurerm_subnet.mgm)[0].id
+  location                      = azapi_resource.mgm_vault[each.key].location
+  name                          = "${azapi_resource.mgm_vault[each.key].name}-pep"
+  resource_group_name           = azurerm_resource_group.mgm.name
+  subnet_id                     = values(azurerm_subnet.mgm)[0].id
   custom_network_interface_name = "${azapi_resource.mgm_vault[each.key].name}-pepnic"
 
   private_service_connection {

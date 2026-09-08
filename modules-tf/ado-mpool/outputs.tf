@@ -52,4 +52,3 @@ output "service_principals" {
     }
   }
 }
-

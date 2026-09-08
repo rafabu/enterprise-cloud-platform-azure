@@ -8,7 +8,7 @@ module "alz" {
   parent_resource_id = var.ecp_azure_root_parent_management_group_id
 
   subscription_placement = merge(
-    # "management" mg is the ONLY one that is ALWAYS required 
+    # "management" mg is the ONLY one that is ALWAYS required
     {
       management = {
         subscription_id       = var.ecp_management_subscription_id

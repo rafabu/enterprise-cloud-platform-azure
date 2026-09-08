@@ -10,7 +10,7 @@ resource "azuredevops_git_repository" "non_default" {
     if r != var.ecp_azure_devops_project_name
   ])
 
-  project_id = azuredevops_project.this.id
+  project_id     = azuredevops_project.this.id
   name           = each.key
   default_branch = "refs/heads/main"
 

@@ -38,6 +38,3 @@ resource "azapi_resource" "bastion_reader_role_assignment" {
     }
   }
 }
-
-
-

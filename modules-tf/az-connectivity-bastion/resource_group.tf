@@ -16,7 +16,7 @@ resource "azapi_resource" "resource_group" {
     "location",
   ]
 
-   lifecycle {
+  lifecycle {
     ignore_changes = [
       tags
     ]

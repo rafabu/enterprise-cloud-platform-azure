@@ -136,4 +136,3 @@ resource "random_integer" "virtual_hub_id" {
   max = 99
   min = 2
 }
-

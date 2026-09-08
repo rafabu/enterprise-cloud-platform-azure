@@ -38,7 +38,7 @@ resource "azapi_resource" "virtual_network_private_dns_zone_link" {
 
 # (Custom) RBAC assignment to the Private DNS Zone resource group(s):
 #   allow to contribute DNS records (owner)
-#   and read them (user) 
+#   and read them (user)
 locals {
   private_dns_zone_resource_group_ids = compact(distinct([
     for pdz in var.private_dns_zone_resource_ids : provider::azapi::parse_resource_id("Microsoft.Network/privateDnsZones", pdz).resource_group_id

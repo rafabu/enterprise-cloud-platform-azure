@@ -139,5 +139,3 @@ resource "azapi_resource" "dev_center_network_connection_attachment" {
 
   depends_on = [azurerm_role_assignment.dev_center_vnet]
 }
-
-

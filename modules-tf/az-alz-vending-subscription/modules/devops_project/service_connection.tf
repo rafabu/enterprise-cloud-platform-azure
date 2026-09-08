@@ -1,4 +1,4 @@
-##################################################    Service Connection    ################################################## 
+##################################################    Service Connection    ##################################################
 locals {
   uami_subscription_id   = provider::azapi::parse_resource_id("Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30", var.managed_identity_resource_id).subscription_id
   uami_subscription_name = data.azapi_resource.lz_subscription.output.displayName

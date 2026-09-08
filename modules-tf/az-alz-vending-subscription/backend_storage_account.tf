@@ -87,7 +87,7 @@ resource "time_sleep" "storage_account_destroy_wait" {
     module.storage_account
   ]
 
-  create_duration = null
+  create_duration  = null
   destroy_duration = "60s"
 }
 

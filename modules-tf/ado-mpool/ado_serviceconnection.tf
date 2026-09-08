@@ -20,7 +20,7 @@ resource "azuredevops_serviceendpoint_azurerm" "mpool" {
 
   lifecycle {
     ignore_changes = all #[
-      # description,
+    # description,
     #]
   }
 

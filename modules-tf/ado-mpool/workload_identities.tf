@@ -152,7 +152,7 @@ locals {
           roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
           condition        = null
         },
-         {
+        {
           scope = var.backend_storage_accounts["l3"].id, # backend storage account
           # security reader
           roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor

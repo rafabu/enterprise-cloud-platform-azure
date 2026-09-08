@@ -30,4 +30,3 @@ output "storage_accounts" {
     }
   }
 }
-

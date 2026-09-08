@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0 # Get the latest from: https://github.com/pre-commit/pre-commit-hooks/releases
+    hooks:
+      - id: check-added-large-files # Checks for large files added to the repository
+      - id: check-case-conflict # Checks for case conflicts in filenames
+      - id: check-illegal-windows-names # Checks for filenames that are illegal on Windows
+      # - id: check-json # does not allow comments, which are fine in some use-cases
+      # - id: check-xml
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer # Ensures files end with a newline
+      - id: forbid-new-submodules # Prevents adding new git submodules
+      # - id: pretty-format-json # does not allow comments, which are fine in some use-cases
+      #   args:
+      #     - --autofix
+      #     - --no-sort-keys
+      - id: trailing-whitespace
+
+  # - repo: https://github.com/gruntwork-io/pre-commit/
+  #   rev: v0.1.30 # Get the latest from: https://github.com/gruntwork-io/pre-commit/releases
+  #   hooks:
+  #     - id: terragrunt-hcl-fmt
+  #     - id: markdown-link-check    # requires installation:  npm install -g markdown-link-check
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.109.1
+    hooks:
+      - id: terraform_fmt
+      # - id: terraform_validate # requires that modules can actually be initialized
+      # - id: terraform_tflint # requires installation:
+
+minimum_pre_commit_version: '4.6.0'

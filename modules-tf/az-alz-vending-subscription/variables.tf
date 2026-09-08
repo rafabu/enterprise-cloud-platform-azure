@@ -138,7 +138,7 @@ variable "private_dns_zone_resource_group_id" {
 }
 
 variable "private_dns_zone_resource_ids" {
-  type = list(string)
+  type        = list(string)
   description = "List of resource IDs for Private DNS Zones to link to the virtual networks."
 }
 
@@ -336,5 +336,3 @@ variable "additional_entra_id_group_members" {
   default     = {}
   description = "Additional members to add to the Entra ID groups. The key is the group name and the value is a list of object IDs."
 }
-
-

@@ -34,7 +34,7 @@ variable "virtual_subnet_id" {
 }
 
 variable "storage_account_public_network_access_enabled" {
-  type = bool
+  type        = bool
   description = "Whether to allow public network access for the storage account. Default is false."
-  default = false
+  default     = false
 }

@@ -16,14 +16,14 @@ try {
     } catch {
         # Second fallback: Get first non-loopback network adapter IP (Windows-specific)
         try {
-            $privateIP = (Get-NetIPAddress -AddressFamily IPv4 -PrefixOrigin Dhcp,Manual -ErrorAction Stop | 
-                Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.IPAddress -notlike "169.254.*" } | 
+            $privateIP = (Get-NetIPAddress -AddressFamily IPv4 -PrefixOrigin Dhcp,Manual -ErrorAction Stop |
+                Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.IPAddress -notlike "169.254.*" } |
                 Select-Object -First 1).IPAddress
         } catch {
             # If Get-NetIPAddress fails (Linux/Mac), use alternative method
             $privateIP = $null
         }
-        
+
         if (-not $privateIP) {
             # Third fallback: Pure .NET DNS method (cross-platform)
             $privateIP = ([System.Net.Dns]::GetHostAddresses([System.Net.Dns]::GetHostName()) |

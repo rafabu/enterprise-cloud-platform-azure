@@ -7,7 +7,7 @@ provider "azurerm" {
   environment         = "public"
   storage_use_azuread = true
 
-  # core are: 
+  # core are:
   # - Microsoft.Authorization
   # - Microsoft.Compute
   # - Microsoft.CostManagement

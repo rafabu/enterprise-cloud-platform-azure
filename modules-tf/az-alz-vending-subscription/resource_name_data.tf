@@ -10,7 +10,7 @@ locals {
 
   devops_landing_zone_deployment_pipeline_name = "ECP Deploy Landing Zone ${var.azure_resource_name_elements.name}-${local.name_suffixes} - ${local.name_prefixes}"
   devops_landing_zone_deployment_pipeline_path = "\\ECP\\${local.name_prefixes}\\deploy_workloads"
-  devops_landing_zone_environment_name  = "${local.name_prefixes}_ECP_Platform_Level3"
+  devops_landing_zone_environment_name         = "${local.name_prefixes}_ECP_Platform_Level3"
 
 }
 data "azurecaf_name" "rg" {
