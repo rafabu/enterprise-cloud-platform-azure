@@ -20,79 +20,86 @@
 
 param(
     [int]$MaxRetries = 3,
-    [int]$TimeoutSeconds = 15,
     [int]$RetryDelaySeconds = 2
 )
 
 # Define multiple reliable public IP services
 $ipSources = @(
     @{
-        Name = "ipify.org"
-        Url = "https://api.ipify.org?format=json"
+        Name   = "ipify.org"
+        Url    = "https://api.ipify.org?format=json"
         Parser = { param($response)
             try {
                 ($response | ConvertFrom-Json).ip
-            } catch {
+            }
+            catch {
                 # Fallback: try to extract from plain text
                 if ($response -match '\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b') {
                     $matches[0]
-                } else {
+                }
+                else {
                     $null
                 }
             }
         }
     },
     @{
-        Name = "httpbin.org"
-        Url = "https://httpbin.org/ip"
+        Name   = "httpbin.org"
+        Url    = "https://httpbin.org/ip"
         Parser = { param($response)
             try {
                 ($response | ConvertFrom-Json).origin.Split(',')[0].Trim()
-            } catch {
+            }
+            catch {
                 # Try to extract IP from plain text response
                 if ($response -match '\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b') {
                     $matches[0]
-                } else {
+                }
+                else {
                     $null
                 }
             }
         }
     },
     @{
-        Name = "icanhazip.com"
-        Url = "https://icanhazip.com"
+        Name   = "icanhazip.com"
+        Url    = "https://icanhazip.com"
         Parser = { param($response)
             $ip = $response.Trim()
             if ($ip -match '\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b') {
                 $matches[0]
-            } else {
+            }
+            else {
                 $null
             }
         }
     },
     @{
-        Name = "ifconfig.me"
-        Url = "https://ifconfig.me/ip"
+        Name   = "ifconfig.me"
+        Url    = "https://ifconfig.me/ip"
         Parser = { param($response)
             $ip = $response.Trim()
             if ($ip -match '\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b') {
                 $matches[0]
-            } else {
+            }
+            else {
                 $null
             }
         }
     },
     @{
-        Name = "ipify64.org"
-        Url = "https://api64.ipify.org?format=json"
+        Name   = "ipify64.org"
+        Url    = "https://api64.ipify.org?format=json"
         Parser = { param($response)
             try {
                 ($response | ConvertFrom-Json).ip
-            } catch {
+            }
+            catch {
                 # Fallback: try to extract from plain text
                 if ($response -match '\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b') {
                     $matches[0]
-                } else {
+                }
+                else {
                     $null
                 }
             }
@@ -116,11 +123,11 @@ function Test-ValidIPAddress {
 
         # Exclude private IP ranges and other reserved ranges
         $isPrivate = ($firstOctet -eq 10) -or
-                    (($firstOctet -eq 172) -and ($secondOctet -ge 16) -and ($secondOctet -le 31)) -or
-                    (($firstOctet -eq 192) -and ($secondOctet -eq 168)) -or
-                    ($firstOctet -eq 127) -or  # Loopback
-                    ($firstOctet -eq 169 -and $secondOctet -eq 254) -or  # Link-local
-                    ($firstOctet -ge 224)  # Multicast and reserved
+        (($firstOctet -eq 172) -and ($secondOctet -ge 16) -and ($secondOctet -le 31)) -or
+        (($firstOctet -eq 192) -and ($secondOctet -eq 168)) -or
+        ($firstOctet -eq 127) -or # Loopback
+        ($firstOctet -eq 169 -and $secondOctet -eq 254) -or # Link-local
+        ($firstOctet -ge 224)  # Multicast and reserved
 
         return -not $isPrivate
     }
@@ -132,7 +139,6 @@ function Get-PublicIPFromSource {
     param(
         [hashtable]$Source,
         [int]$MaxRetries,
-        [int]$TimeoutSeconds,
         [int]$RetryDelaySeconds
     )
 
@@ -148,12 +154,15 @@ function Get-PublicIPFromSource {
 
                 if (Test-ValidIPAddress -IPAddress $ipAddress) {
                     return $ipAddress
-                } else {
                 }
-            } finally {
+                else {
+                }
+            }
+            finally {
                 $webClient.Dispose()
             }
-        } catch {
+        }
+        catch {
 
             if ($attempt -lt $MaxRetries) {
                 Start-Sleep -Seconds $RetryDelaySeconds
@@ -179,7 +188,10 @@ function Get-PublicIPFallback {
                 return $ip
             }
         }
-    } catch {
+    }
+    catch {
+        # DNS fallback is best-effort; HTTP sources already failed, so ignore and return safe fallback below.
+        $null = $_
     }
 
     # If DNS method fails, return a safe fallback
@@ -191,7 +203,7 @@ $detectedIP = $null
 $usedSource = $null
 
 foreach ($source in $ipSources) {
-    $detectedIP = Get-PublicIPFromSource -Source $source -MaxRetries $MaxRetries -TimeoutSeconds $TimeoutSeconds -RetryDelaySeconds $RetryDelaySeconds
+    $detectedIP = Get-PublicIPFromSource -Source $source -MaxRetries $MaxRetries -RetryDelaySeconds $RetryDelaySeconds
 
     if ($detectedIP) {
         $usedSource = $source.Name
@@ -208,20 +220,21 @@ if (-not $detectedIP) {
 if ($detectedIP -and $detectedIP -ne "0.0.0.0") {
     $output = @{
         "public_ip" = $detectedIP
-        "source" = $usedSource
+        "source"    = $usedSource
         "timestamp" = (Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
-        "status" = "success"
+        "status"    = "success"
     } | ConvertTo-Json -Compress
 
     Write-Output $output
-} else {
+}
+else {
     # Return a response that Terraform can handle gracefully
     $output = @{
         "public_ip" = "0.0.0.0"
-        "source" = "failed"
-        "error" = "All IP detection sources failed"
+        "source"    = "failed"
+        "error"     = "All IP detection sources failed"
         "timestamp" = (Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
-        "status" = "failed"
+        "status"    = "failed"
     } | ConvertTo-Json -Compress
 
     Write-Output $output

@@ -10,8 +10,8 @@ $renderedFiles = $renderedFilesJson | ConvertFrom-Json
 
 # Get unique destination folders
 $destinationFolders = $renderedFiles.PSObject.Properties.Value.destination_file_path |
-ForEach-Object { Split-Path -Parent $_ } |
-Select-Object -Unique
+    ForEach-Object { Split-Path -Parent $_ } |
+    Select-Object -Unique
 
 # Delete and recreate destination folders
 foreach ($folder in $destinationFolders) {

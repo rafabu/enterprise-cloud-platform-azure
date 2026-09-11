@@ -1,37 +1,51 @@
 #!/usr/bin/env pwsh
+# Read JSON from stdin (Terraform external data source protocol)
+$jsonInput = [Console]::In.ReadToEnd() | ConvertFrom-Json
 
-# Method 1: Use Azure Instance Metadata Service (works in Azure VMs)
-try {
-    $headers = @{ "Metadata" = "true" }
-    $uri = "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2021-02-01&format=text"
-    $privateIP = Invoke-RestMethod -Uri $uri -Headers $headers -TimeoutSec 5
-} catch {
-    # Fallback: Cross-platform .NET method
-    try {
-        # Get the local IP by connecting to a remote address (doesn't actually send data)
-        $udpClient = New-Object System.Net.Sockets.UdpClient
-        $udpClient.Connect("8.8.8.8", 53)  # Connect to Google DNS
-        $privateIP = $udpClient.Client.LocalEndPoint.Address.ToString()
-        $udpClient.Close()
-    } catch {
-        # Second fallback: Get first non-loopback network adapter IP (Windows-specific)
-        try {
-            $privateIP = (Get-NetIPAddress -AddressFamily IPv4 -PrefixOrigin Dhcp,Manual -ErrorAction Stop |
-                Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.IPAddress -notlike "169.254.*" } |
-                Select-Object -First 1).IPAddress
-        } catch {
-            # If Get-NetIPAddress fails (Linux/Mac), use alternative method
-            $privateIP = $null
-        }
+# Decode the base64-encoded UTF-16LE string
+$renderedFilesJson = [System.Text.Encoding]::Unicode.GetString(
+    [System.Convert]::FromBase64String($jsonInput.rendered_files_base64)
+)
+$renderedFiles = $renderedFilesJson | ConvertFrom-Json
 
-        if (-not $privateIP) {
-            # Third fallback: Pure .NET DNS method (cross-platform)
-            $privateIP = ([System.Net.Dns]::GetHostAddresses([System.Net.Dns]::GetHostName()) |
-                Where-Object { $_.AddressFamily -eq 'InterNetwork' -and $_.IPAddressToString -ne '127.0.0.1' } |
-                Select-Object -First 1).IPAddressToString
-        }
+# Get unique destination folders
+$destinationFolders = $renderedFiles.PSObject.Properties.Value.destination_file_path |
+    ForEach-Object { Split-Path -Parent $_ } |
+    Select-Object -Unique
+
+# Delete and recreate destination folders
+foreach ($folder in $destinationFolders) {
+    if (Test-Path $folder) {
+        Write-Verbose "Removing existing folder: $folder"
+        Remove-Item -Path $folder -Recurse -Force
     }
+
+    Write-Verbose "Creating folder: $folder"
+    New-Item -ItemType Directory -Path $folder -Force | Out-Null
 }
 
-$output = @{"local_ip" = $privateIP } | ConvertTo-Json
-Write-Output $output
+# Write rendered files
+$filesWritten = 0
+foreach ($fileEntry in $renderedFiles.PSObject.Properties) {
+    $fileInfo = $fileEntry.Value
+    $destinationPath = $fileInfo.destination_file_path
+    $content = $fileInfo.rendered_file_content
+
+    # Ensure parent directory exists
+    $parentDir = Split-Path -Parent $destinationPath
+    if (-not (Test-Path $parentDir)) {
+        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+    }
+
+    # Write file content
+    Write-Verbose "Writing file: $destinationPath"
+    $content | Out-File -FilePath $destinationPath -Encoding utf8 -NoNewline
+    $filesWritten++
+}
+
+# Return result to Terraform (external data source protocol requires JSON output)
+@{
+    destination_paths = $destinationFolders -join ";"
+    files_written     = $filesWritten.ToString()
+    status            = "success"
+} | ConvertTo-Json

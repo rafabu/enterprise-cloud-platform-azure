@@ -89,12 +89,12 @@ else {
         $mgBodyJson = $mgBody | ConvertTo-Json -Depth 10 -Compress
     }
 
-    # $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body $mgBodyJson
     $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" `
-     --headers "Content-Type=application/json" `
-     --body @"
+        --headers "Content-Type=application/json" `
+        --body @"
 $mgBodyJson
 "@
+    Write-Debug "Create result: $createResult"
     if ($LASTEXITCODE -ieq 0) {
         $parentMgName = $parent_management_group_id
         $parentMgDisplayName = $parent_management_group_display_name

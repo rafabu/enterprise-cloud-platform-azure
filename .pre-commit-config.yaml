@@ -5,23 +5,16 @@ repos:
       - id: check-added-large-files # Checks for large files added to the repository
       - id: check-case-conflict # Checks for case conflicts in filenames
       - id: check-illegal-windows-names # Checks for filenames that are illegal on Windows
-      # - id: check-json # does not allow comments, which are fine in some use-cases
-      # - id: check-xml
+      - id: check-json # does not allow comments, which are fine in some use-cases
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer # Ensures files end with a newline
       - id: forbid-new-submodules # Prevents adding new git submodules
-      # - id: pretty-format-json # does not allow comments, which are fine in some use-cases
-      #   args:
-      #     - --autofix
-      #     - --no-sort-keys
+      - id: pretty-format-json # does not allow comments, which are fine in some use-cases
+        args:
+          - --autofix
+          - --no-sort-keys
       - id: trailing-whitespace
-
-  # - repo: https://github.com/gruntwork-io/pre-commit/
-  #   rev: v0.1.30 # Get the latest from: https://github.com/gruntwork-io/pre-commit/releases
-  #   hooks:
-  #     - id: terragrunt-hcl-fmt
-  #     - id: markdown-link-check    # requires installation:  npm install -g markdown-link-check
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.109.1
@@ -29,5 +22,68 @@ repos:
       - id: terraform_fmt
       # - id: terraform_validate # requires that modules can actually be initialized
       # - id: terraform_tflint # requires installation:
+
+  # PowerShell Scripts
+  - repo: local
+    hooks:
+      - id: powershell-analyze
+        name: PSScriptAnalyzer
+        language: unsupported # system-level executables
+        entry: >-
+          pwsh -NoProfile -NonInteractive -Command '
+            & {
+            #Requires -Modules PSScriptAnalyzer -PSEdition Core
+            param(
+              [Parameter(ValueFromRemainingArguments)]
+              [string[]]$filePaths
+            )
+
+            $diagnostics = foreach ($path in $filePaths) {
+              $providerPath = (Resolve-Path -LiteralPath $path).ProviderPath
+              Invoke-ScriptAnalyzer -Path $providerPath
+            }
+
+            if ($diagnostics) {
+              $diagnostics | Format-Table -AutoSize | Out-String | Write-Output
+              exit 1
+            }
+          } @args
+          '
+        files: \.ps(?:1|m1|d1)$
+        verbose: false
+
+      - id: powershell-format
+        name: PSScriptAnalyzer Formatter
+        language: unsupported # system-level executables
+        entry: >-
+          pwsh -NoProfile -NonInteractive -Command '
+           & {
+            #Requires -Modules PSScriptAnalyzer -PSEdition Core
+            param(
+              [Parameter(ValueFromRemainingArguments)]
+              [string[]]$filePaths
+            )
+
+            $encoding = [System.Text.UTF8Encoding]::new($false)
+
+            foreach ($path in $filePaths) {
+              $resolvedpath = (Resolve-Path -LiteralPath $path).ProviderPath
+              $original = [System.IO.File]::ReadAllText($resolvedpath)
+              if ($original.Length -eq 0) {
+                continue
+              }
+              else {
+                Write-Output "INFO: Invoke-Formatter on file $resolvedpath"
+                $formatted = Invoke-Formatter -ScriptDefinition $original -Settings CodeFormatting
+                if ($original -cne $formatted) {
+                  Write-Output "INFO: Write formatted content to file $resolvedpath"
+                  [System.IO.File]::WriteAllText($resolvedpath, $formatted, $encoding)
+                }
+              }
+            }
+          } @args
+          '
+        files: \.ps1$
+        verbose: false
 
 minimum_pre_commit_version: '4.6.0'
