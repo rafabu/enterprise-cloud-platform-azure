@@ -358,7 +358,7 @@ resource "azurerm_federated_identity_credential" "mpool" {
 
   user_assigned_identity_id = azurerm_user_assigned_identity.mpool[each.key].id
 
-  name = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
+  name = replace("ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}", "/[^A-Za-z0-9-]/", "-")
 
   audience = ["api://AzureADTokenExchange"]
   issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer
