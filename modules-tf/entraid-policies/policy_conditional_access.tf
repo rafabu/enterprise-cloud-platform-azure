@@ -504,7 +504,7 @@ resource "azuread_conditional_access_policy" "this" {
     command     = <<-SCRIPT
       start-sleep -Seconds (Get-Random -Minimum 5 -Maximum 30)
     SCRIPT
-    quiet = true
+    quiet       = true
   }
 
   timeouts {

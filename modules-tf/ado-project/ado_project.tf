@@ -63,5 +63,5 @@ resource "terraform_data" "git_repository_default_delete" {
     interpreter = ["pwsh", "-Command"]
   }
 
-  depends_on = [ azuredevops_git_repository.non_default ]
+  depends_on = [azuredevops_git_repository.non_default]
 }

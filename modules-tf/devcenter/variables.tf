@@ -59,7 +59,7 @@ variable "virtual_network_subnet_definitions" {
   }))
   description = "Map of virtual network artefacts (virtualNetwork), where the key is the artefactName and the value is an object containing properties of the virtual network."
 
-validation {
+  validation {
     condition = alltrue([
       for subnet in var.virtual_network_subnet_definitions :
       subnet.privateEndpointNetworkPolicies == null

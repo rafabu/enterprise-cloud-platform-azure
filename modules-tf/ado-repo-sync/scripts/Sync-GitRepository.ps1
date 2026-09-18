@@ -13,55 +13,53 @@ param(
 # Set error handling
 $ErrorActionPreference = 'Stop'
 
-function Apply-TemplateReplacements {
+function Invoke-TemplateReplacement {
     param(
         [string]$SourceDirectory,
         [object]$ReplacementConfigs,
         [string]$Encoding = "utf8",
         [bool]$BackupOriginals = $false
     )
-    
-    Write-Host "INFO: Starting template replacement processing..."
-    
+
+    Write-Output "INFO: Starting template replacement processing..."
+
     if (-not $ReplacementConfigs -or $ReplacementConfigs.Count -eq 0) {
-        Write-Host "INFO: No template replacements configured, skipping"
+        Write-Output "INFO: No template replacements configured, skipping"
         return
     }
-    
+
     $totalContentReplacements = 0
     $totalNameReplacements = 0
     $filesProcessed = 0
     $directoriesRenamed = 0
-    
+
     foreach ($configKey in $ReplacementConfigs.Keys) {
         $config = $ReplacementConfigs[$configKey]
-        Write-Host "INFO: Processing replacement group: $configKey"
-        
+        Write-Output "INFO: Processing replacement group: $configKey"
+
         $filePatterns = if ($config.file_patterns) { $config.file_patterns } else { @() }
         $directoryPatterns = if ($config.directory_patterns) { $config.directory_patterns } else { @() }
         $contentReplacements = if ($config.content_replacements) { $config.content_replacements } else { @{} }
         $nameReplacements = if ($config.name_replacements) { $config.name_replacements } else { @{} }
         $useRegex = if ($config.use_regex) { $config.use_regex } else { $false }
-        
+
         # ========================================
         # STEP 1: RENAME DIRECTORIES
         # ========================================
         if ($directoryPatterns.Count -gt 0 -and $nameReplacements.Count -gt 0) {
-            Write-Host "INFO: Processing directory renames..."
-            
+            Write-Output "INFO: Processing directory renames..."
+
             # Find all matching directories
             $matchingDirs = @()
             foreach ($pattern in $directoryPatterns) {
-                $psPattern = $pattern -replace '\*\*/', '*' -replace '/', '\'
-                
                 try {
                     # Get all directories recursively
                     $dirs = Get-ChildItem -Path $SourceDirectory -Directory -Recurse -ErrorAction SilentlyContinue
-                    
+
                     # Filter by pattern
                     $dirs = $dirs | Where-Object {
                         $relativePath = $_.FullName.Replace($SourceDirectory, '').TrimStart('\', '/')
-                        
+
                         # Simple wildcard matching
                         if ($pattern -match '\*\*/') {
                             $dirNamePattern = ($pattern -split '/')[-1]
@@ -71,30 +69,30 @@ function Apply-TemplateReplacements {
                             $relativePath -like $pattern.Replace('/', '\')
                         }
                     }
-                    
+
                     $matchingDirs += $dirs
                 }
                 catch {
                     Write-Warning "Could not search for directory pattern '$pattern': $($_.Exception.Message)"
                 }
             }
-            
+
             $matchingDirs = $matchingDirs | Select-Object -Unique
-            Write-Host "INFO:   Found $($matchingDirs.Count) directories matching patterns"
-            
+            Write-Output "INFO:   Found $($matchingDirs.Count) directories matching patterns"
+
             # Sort directories by depth (deepest first) to avoid parent-child conflicts
             $matchingDirs = $matchingDirs | Sort-Object { ($_.FullName -split '\\').Count } -Descending
-            
+
             # Rename directories
             foreach ($dir in $matchingDirs) {
                 $originalName = $dir.Name
                 $newName = $originalName
                 $replaced = $false
-                
+
                 # Apply name replacements
                 foreach ($searchPattern in $nameReplacements.Keys) {
                     $replaceValue = $nameReplacements[$searchPattern]
-                    
+
                     if ($useRegex) {
                         if ($newName -match $searchPattern) {
                             $newName = $newName -replace $searchPattern, $replaceValue
@@ -108,20 +106,20 @@ function Apply-TemplateReplacements {
                         }
                     }
                 }
-                
+
                 # Perform rename if name changed
                 if ($replaced -and $newName -ne $originalName) {
                     try {
                         $newPath = Join-Path $dir.Parent.FullName $newName
-                        
+
                         # Check if target already exists
                         if (Test-Path $newPath) {
                             Write-Warning "Cannot rename directory '$originalName' to '$newName' - target already exists"
                             continue
                         }
-                        
+
                         Rename-Item -Path $dir.FullName -NewName $newName -Force
-                        Write-Host "INFO:   Renamed directory: $originalName → $newName"
+                        Write-Output "INFO:   Renamed directory: $originalName -> $newName"
                         $directoriesRenamed++
                         $totalNameReplacements++
                     }
@@ -131,21 +129,19 @@ function Apply-TemplateReplacements {
                 }
             }
         }
-        
+
         # ========================================
         # STEP 2: PROCESS FILE CONTENT & NAMES
         # ========================================
         if ($filePatterns.Count -gt 0) {
-            Write-Host "INFO: Processing files..."
-            
+            Write-Output "INFO: Processing files..."
+
             # Find all matching files
             $matchingFiles = @()
             foreach ($pattern in $filePatterns) {
-                $psPattern = $pattern -replace '\*\*/', '*' -replace '/', '\'
-                
                 try {
                     $files = Get-ChildItem -Path $SourceDirectory -File -Recurse -ErrorAction SilentlyContinue
-                    
+
                     # Apply pattern filtering
                     if ($pattern -match '\*\*/') {
                         $fileNamePattern = ($pattern -split '/')[-1]
@@ -157,26 +153,26 @@ function Apply-TemplateReplacements {
                             $relativePath -like $pattern.Replace('/', '\')
                         }
                     }
-                    
+
                     $matchingFiles += $files
                 }
                 catch {
                     Write-Warning "Could not search for pattern '$pattern': $($_.Exception.Message)"
                 }
             }
-            
+
             $matchingFiles = $matchingFiles | Select-Object -Unique
-            Write-Host "INFO:   Found $($matchingFiles.Count) files matching patterns"
-            
+            Write-Output "INFO:   Found $($matchingFiles.Count) files matching patterns"
+
             # Process each file
             foreach ($file in $matchingFiles) {
                 try {
                     $relativePath = $file.FullName.Replace($SourceDirectory, '').TrimStart('\', '/')
-                    Write-Host "INFO:   Processing file: $relativePath"
-                    
+                    Write-Output "INFO:   Processing file: $relativePath"
+
                     $contentChanged = $false
                     $nameChanged = $false
-                    
+
                     # CONTENT REPLACEMENT
                     if ($contentReplacements.Count -gt 0) {
                         # Backup original if requested
@@ -184,21 +180,21 @@ function Apply-TemplateReplacements {
                             $backupPath = "$($file.FullName).original"
                             Copy-Item -Path $file.FullName -Destination $backupPath -Force
                         }
-                        
+
                         # Read file content
                         $content = Get-Content -Path $file.FullName -Raw -Encoding $Encoding
                         $originalContent = $content
                         $fileContentReplacements = 0
-                        
+
                         # Apply content replacements
                         foreach ($searchPattern in $contentReplacements.Keys) {
                             $replaceValue = $contentReplacements[$searchPattern]
-                            
+
                             if ($useRegex) {
-                                $matches = [regex]::Matches($content, $searchPattern)
-                                if ($matches.Count -gt 0) {
+                                $matchCount = [regex]::Matches($content, $searchPattern)
+                                if ($matchCount.Count -gt 0) {
                                     $content = $content -replace $searchPattern, $replaceValue
-                                    $fileContentReplacements += $matches.Count
+                                    $fileContentReplacements += $matchCount.Count
                                 }
                             }
                             else {
@@ -209,25 +205,25 @@ function Apply-TemplateReplacements {
                                 }
                             }
                         }
-                        
+
                         # Write back if content changed
                         if ($content -ne $originalContent) {
                             Set-Content -Path $file.FullName -Value $content -Encoding $Encoding -NoNewline
-                            Write-Host "INFO:     Content: $fileContentReplacements replacements applied"
+                            Write-Output "INFO:     Content: $fileContentReplacements replacements applied"
                             $totalContentReplacements += $fileContentReplacements
                             $contentChanged = $true
                         }
                     }
-                    
+
                     # FILE NAME REPLACEMENT
                     if ($nameReplacements.Count -gt 0) {
                         $originalFileName = $file.Name
                         $newFileName = $originalFileName
-                        
+
                         # Apply name replacements
                         foreach ($searchPattern in $nameReplacements.Keys) {
                             $replaceValue = $nameReplacements[$searchPattern]
-                            
+
                             if ($useRegex) {
                                 if ($newFileName -match $searchPattern) {
                                     $newFileName = $newFileName -replace $searchPattern, $replaceValue
@@ -239,18 +235,18 @@ function Apply-TemplateReplacements {
                                 }
                             }
                         }
-                        
+
                         # Rename file if name changed
                         if ($newFileName -ne $originalFileName) {
                             try {
                                 $newPath = Join-Path $file.DirectoryName $newFileName
-                                
+
                                 if (Test-Path $newPath) {
                                     Write-Warning "Cannot rename file '$originalFileName' to '$newFileName' - target exists"
                                 }
                                 else {
                                     Rename-Item -Path $file.FullName -NewName $newFileName -Force
-                                    Write-Host "INFO:     Filename: $originalFileName → $newFileName"
+                                    Write-Output "INFO:     Filename: $originalFileName -> $newFileName"
                                     $totalNameReplacements++
                                     $nameChanged = $true
                                 }
@@ -260,11 +256,11 @@ function Apply-TemplateReplacements {
                             }
                         }
                     }
-                    
+
                     if ($contentChanged -or $nameChanged) {
                         $filesProcessed++
                     }
-                    
+
                 }
                 catch {
                     Write-Warning "Failed to process file '$($file.FullName)': $($_.Exception.Message)"
@@ -272,13 +268,13 @@ function Apply-TemplateReplacements {
             }
         }
     }
-    
-    Write-Host "INFO: Template replacement completed"
-    Write-Host "INFO:   Files processed: $filesProcessed"
-    Write-Host "INFO:   Directories renamed: $directoriesRenamed"
-    Write-Host "INFO:   Content replacements: $totalContentReplacements"
-    Write-Host "INFO:   Name replacements: $totalNameReplacements"
-    
+
+    Write-Output "INFO: Template replacement completed"
+    Write-Output "INFO:   Files processed: $filesProcessed"
+    Write-Output "INFO:   Directories renamed: $directoriesRenamed"
+    Write-Output "INFO:   Content replacements: $totalContentReplacements"
+    Write-Output "INFO:   Name replacements: $totalNameReplacements"
+
     return @{
         FilesProcessed      = $filesProcessed
         DirectoriesRenamed  = $directoriesRenamed
@@ -288,31 +284,31 @@ function Apply-TemplateReplacements {
 }
 
 try {
-    Write-Host "INFO: Starting repository synchronization..."
-    Write-Host "INFO:   Source: Local submodule at $LocalSubmodulePath"
-    Write-Host "INFO:   Target: $AdoOrg/$AdoProject/$AdoRepo"
+    Write-Output "INFO: Starting repository synchronization..."
+    Write-Output "INFO:   Source: Local submodule at $LocalSubmodulePath"
+    Write-Output "INFO:   Target: $AdoOrg/$AdoProject/$AdoRepo"
 
     # === AZURE DEVOPS CONFIGURATION ===
-    Write-Host "INFO: Configuring Azure DevOps CLI defaults..."
+    Write-Output "INFO: Configuring Azure DevOps CLI defaults..."
     az devops configure --defaults organization="https://dev.azure.com/$AdoOrg" project="$AdoProject"
-    
+
     if ($LASTEXITCODE -ne 0) {
         throw "Error: Failed to configure Azure DevOps CLI defaults"
     }
-    
+
     # === AUTHENTICATION SETUP ===
-    Write-Host "INFO: Setting up authentication for Azure DevOps..."
-    
+    Write-Output "INFO: Setting up authentication for Azure DevOps..."
+
     # Check if running in Azure DevOps pipeline with service principal
     $isAzureDevOpsPipeline = $env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI -and $env:SYSTEM_ACCESSTOKEN
     $hasServicePrincipal = $env:servicePrincipalId -and $env:servicePrincipalKey
     $hasAzureDevOpsPat = $env:AZDO_PERSONAL_ACCESS_TOKEN
-    
+
     if ($isAzureDevOpsPipeline) {
-        Write-Host "INFO: Detected Azure DevOps pipeline environment"
-        
+        Write-Output "INFO: Detected Azure DevOps pipeline environment"
+
         if ($env:SYSTEM_ACCESSTOKEN) {
-            Write-Host "INFO: Using System.AccessToken for authentication"
+            Write-Output "INFO: Using System.AccessToken for authentication"
             # Set up git credential helper for Azure DevOps using the pipeline token
             git config --global credential."https://dev.azure.com".helper ""
             git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:SYSTEM_ACCESSTOKEN; }; f"
@@ -322,28 +318,28 @@ try {
         }
     }
     elseif ($hasServicePrincipal) {
-        Write-Host "INFO: Using service principal authentication"
-        
+        Write-Output "INFO: Using service principal authentication"
+
         # For service principal, we need to get an access token and use it with git
         try {
             # Get access token using service principal
             $tokenResponse = az account get-access-token --resource "499b84ac-1321-427f-aa17-267ca6975798" --query "accessToken" -o tsv
-            
+
             if ($LASTEXITCODE -ne 0 -or -not $tokenResponse) {
                 throw "Failed to get access token with service principal"
             }
-            
-            Write-Host "INFO: Successfully obtained access token with service principal"
-            
+
+            Write-Output "INFO: Successfully obtained access token with service principal"
+
             # Configure git to use the access token
             git config --global credential."https://dev.azure.com".helper ""
             git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$tokenResponse; }; f"
         }
         catch {
             Write-Warning "INFO: Service principal token method failed, trying PAT fallback..."
-            
+
             if ($hasAzureDevOpsPat) {
-                Write-Host "INFO: Using AZDO_PERSONAL_ACCESS_TOKEN for authentication"
+                Write-Output "INFO: Using AZDO_PERSONAL_ACCESS_TOKEN for authentication"
                 git config --global credential."https://dev.azure.com".helper ""
                 git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZDO_PERSONAL_ACCESS_TOKEN; }; f"
             }
@@ -353,19 +349,19 @@ try {
         }
     }
     elseif ($hasAzureDevOpsPat) {
-        Write-Host "INFO: Using AZDO_PERSONAL_ACCESS_TOKEN for authentication"
+        Write-Output "INFO: Using AZDO_PERSONAL_ACCESS_TOKEN for authentication"
         git config --global credential."https://dev.azure.com".helper ""
         git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$env:AZDO_PERSONAL_ACCESS_TOKEN; }; f"
     }
     else {
-        Write-Host "INFO: Using existing Azure CLI authentication context"
-    
+        Write-Output "INFO: Using existing Azure CLI authentication context"
+
         # Try to get access token from Azure CLI session
         try {
             $cliToken = az account get-access-token --resource "499b84ac-1321-427f-aa17-267ca6975798" --query "accessToken" -o tsv 2>$null
-        
+
             if ($LASTEXITCODE -eq 0 -and $cliToken) {
-                Write-Host "INFO: Using Azure CLI session token for git authentication"
+                Write-Output "INFO: Using Azure CLI session token for git authentication"
                 git config --global credential."https://dev.azure.com".helper ""
                 git config --global credential."https://dev.azure.com".helper "!f() { echo username=PAT; echo password=$cliToken; }; f"
             }
@@ -378,11 +374,11 @@ try {
             Write-Warning "INFO: Proceeding without explicit git credential configuration - git may prompt for credentials"
         }
     }
-    
+
     # Validate authentication
-    Write-Host "INFO: Validating authentication..."
+    Write-Output "INFO: Validating authentication..."
     az devops project show --organization "https://dev.azure.com/$AdoOrg" --project $AdoProject --output none
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-Error "ERROR: Azure DevOps authentication failed. Please ensure:"
         Write-Error "ERROR:   1. You've run 'az login' or have valid service principal credentials"
@@ -391,90 +387,90 @@ try {
         Write-Error "ERROR:   4. You have access to organization '$AdoOrg' and project '$AdoProject'"
         exit 1
     }
-    
+
     # Create temporary directory
     $tempDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
-    Write-Host "INFO: Created temp directory: $tempDir"
-    
+    Write-Output "INFO: Created temp directory: $tempDir"
+
     try {
         # Validate and prepare local submodule
-        Write-Host "INFO: Validating local submodule..."
-        
+        Write-Output "INFO: Validating local submodule..."
+
         # Resolve absolute path to submodule
         $submoduleAbsPath = Resolve-Path -Path $LocalSubmodulePath -ErrorAction SilentlyContinue
         if (-not $submoduleAbsPath -or -not (Test-Path $submoduleAbsPath)) {
             throw "Error: Local submodule not found at path: $LocalSubmodulePath"
         }
-        
-        Write-Host "INFO: Found submodule at: $submoduleAbsPath"
-        
+
+        Write-Output "INFO: Found submodule at: $submoduleAbsPath"
+
         # Check if it's a git repository
         if (-not (Test-Path (Join-Path $submoduleAbsPath ".git"))) {
             throw "Error: Local path is not a git repository: $submoduleAbsPath"
         }
-        
+
         # Get current commit hash from submodule
         Set-Location $submoduleAbsPath
         $submoduleCommit = git rev-parse HEAD
         $submoduleMessage = git log -1 --pretty=format:"%s"
         $submoduleBranch = git branch --show-current
-        
+
         if ($LASTEXITCODE -ne 0) {
             throw "Error: Failed to get commit information from submodule"
         }
-        
-        Write-Host "INFO: Submodule current commit: $submoduleCommit"
-        Write-Host "INFO: Submodule current branch: $submoduleBranch"
-        Write-Host "INFO: Latest commit message: $submoduleMessage"
-        
+
+        Write-Output "INFO: Submodule current commit: $submoduleCommit"
+        Write-Output "INFO: Submodule current branch: $submoduleBranch"
+        Write-Output "INFO: Latest commit message: $submoduleMessage"
+
         # Copy submodule to temp directory for processing
         Set-Location $tempDir
-        Write-Host "INFO: Copying submodule contents to temp directory..."
-        
+        Write-Output "INFO: Copying submodule contents to temp directory..."
+
         # Create source directory first
         New-Item -ItemType Directory -Path "./source" -Force | Out-Null
-        
+
         # Determine what to copy based on IncludeSubfolders parameter
         if ($IncludeSubfolders -and $IncludeSubfolders.Count -gt 0) {
-            Write-Host "INFO: Selective sync enabled - including only specified subfolders:"
+            Write-Output "INFO: Selective sync enabled - including only specified subfolders:"
             foreach ($subfolder in $IncludeSubfolders) {
-                Write-Host "INFO:   - $subfolder"
+                Write-Output "INFO:   - $subfolder"
             }
-            
+
             # Copy only specified subfolders, respecting .gitignore
             Set-Location $submoduleAbsPath
-            
+
             foreach ($subfolder in $IncludeSubfolders) {
                 $sourcePath = Join-Path $submoduleAbsPath $subfolder
-                
+
                 if (Test-Path $sourcePath) {
                     $destinationPath = Join-Path "$tempDir/source" $subfolder
-                    
+
                     # Ensure parent directory exists
                     $parentDir = Split-Path $destinationPath -Parent
                     if ($parentDir -and -not (Test-Path $parentDir)) {
                         New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
                     }
-                    
+
                     if (Test-Path $sourcePath -PathType Container) {
-                        Write-Host "INFO:   Copying directory (respecting .gitignore): $subfolder"
-                        
+                        Write-Output "INFO:   Copying directory (respecting .gitignore): $subfolder"
+
                         # Use git archive to respect .gitignore
                         $archiveFile = Join-Path $tempDir "archive-$([guid]::NewGuid().ToString()).tar"
                         git archive --format=tar --output="$archiveFile" HEAD "$subfolder" 2>$null
-                        
+
                         if ($LASTEXITCODE -eq 0 -and (Test-Path $archiveFile)) {
                             # Extract archive to temp location
                             $extractDir = Join-Path $tempDir "extract-$([guid]::NewGuid().ToString())"
                             New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
                             tar -xf "$archiveFile" -C "$extractDir"
-                            
+
                             # Copy extracted contents to destination
                             $extractedSource = Join-Path $extractDir $subfolder
                             if (Test-Path $extractedSource) {
                                 Copy-Item -Path $extractedSource -Destination $destinationPath -Recurse -Force
                             }
-                            
+
                             # Cleanup
                             Remove-Item $archiveFile -Force -ErrorAction SilentlyContinue
                             Remove-Item $extractDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -486,7 +482,7 @@ try {
                         }
                     }
                     else {
-                        Write-Host "INFO:   Copying file: $subfolder"
+                        Write-Output "INFO:   Copying file: $subfolder"
                         Copy-Item -Path $sourcePath -Destination $destinationPath -Force
                     }
                 }
@@ -494,33 +490,33 @@ try {
                     Write-Warning "Specified subfolder/file not found in source: $subfolder"
                 }
             }
-            
+
             Set-Location $tempDir
         }
         else {
-            Write-Host "INFO: Full repository sync - copying all contents"
-            
+            Write-Output "INFO: Full repository sync - copying all contents"
+
             # Copy all contents including subdirectories, preserving structure
             Get-ChildItem -Path $submoduleAbsPath -Force | Where-Object { $_.Name -ne '.git' } | ForEach-Object {
                 $destinationPath = Join-Path "./source" $_.Name
                 if ($_.PSIsContainer) {
-                    Write-Host "INFO:   Copying directory: $($_.Name)"
+                    Write-Output "INFO:   Copying directory: $($_.Name)"
                     Copy-Item -Path $_.FullName -Destination $destinationPath -Recurse -Force
                 }
                 else {
-                    Write-Host "INFO:   Copying file: $($_.Name)"
+                    Write-Output "INFO:   Copying file: $($_.Name)"
                     Copy-Item -Path $_.FullName -Destination $destinationPath -Force
                 }
             }
         }
-        
+
         # Verify directory structure was preserved
-        Write-Host "INFO: Copied directory structure:"
+        Write-Output "INFO: Copied directory structure:"
         Get-ChildItem -Path "./source" -Recurse -Directory | ForEach-Object {
             $relativePath = $_.FullName.Replace((Resolve-Path "./source").Path, "").TrimStart('\', '/')
-            Write-Host "INFO:   Directory: $relativePath"
+            Write-Output "INFO:   Directory: $relativePath"
         }
-        
+
         # Create a minimal source info for commit tracking
         Set-Content -Path "./source/.sync-info" -Value @"
 # Sync Information
@@ -529,45 +525,45 @@ Branch: $submoduleBranch
 Message: $submoduleMessage
 SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
 "@
-        
+
         # Clone Azure DevOps repository with authentication
-        Write-Host "INFO: Cloning Azure DevOps repository..."
-        $adoRepoUrl = "https://dev.azure.com/$AdoOrg/$AdoProject/_git/$AdoRepo"
-        
+        Write-Output "INFO: Cloning Azure DevOps repository..."
+        $adoRepoUrl = "https://dev.azure.com/$AdoOrg/$([uri]::EscapeDataString($AdoProject))/_git/$([uri]::EscapeDataString($AdoRepo))"
+
         # Clone with explicit credential handling
         git -c core.askpass=true clone $adoRepoUrl target
-        
+
         if ($LASTEXITCODE -ne 0) {
             throw "Error: Failed to clone Azure DevOps repository. Check authentication and repository access."
         }
-        
+
         # Copy files from submodule to Azure DevOps repo (excluding .git)
-        Write-Host "INFO: Syncing files..."
+        Write-Output "INFO: Syncing files..."
         Set-Location target
-        
+
         # Selective sync mode: only remove and update specified folders
         if ($IncludeSubfolders -and $IncludeSubfolders.Count -gt 0) {
-            Write-Host "INFO: Selective sync mode - updating only specified paths"
-            
+            Write-Output "INFO: Selective sync mode - updating only specified paths"
+
             foreach ($subfolder in $IncludeSubfolders) {
                 $sourcePath = Join-Path "../source" $subfolder
                 $targetPath = $subfolder
-                
+
                 if (Test-Path $sourcePath) {
                     # Remove existing target path if it exists
                     if (Test-Path $targetPath) {
-                        Write-Host "INFO:   Removing existing: $targetPath"
+                        Write-Output "INFO:   Removing existing: $targetPath"
                         Remove-Item -Path $targetPath -Recurse -Force
                     }
-                    
+
                     # Ensure parent directory exists
                     $parentDir = Split-Path $targetPath -Parent
                     if ($parentDir -and -not (Test-Path $parentDir)) {
                         New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
                     }
-                    
+
                     # Copy new content
-                    Write-Host "INFO:   Copying new content: $targetPath"
+                    Write-Output "INFO:   Copying new content: $targetPath"
                     if (Test-Path $sourcePath -PathType Container) {
                         Copy-Item -Path $sourcePath -Destination $targetPath -Recurse -Force
                     }
@@ -576,74 +572,74 @@ SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
                     }
                 }
             }
-            
-            Write-Host "INFO: Selective sync complete - other files/folders in repo preserved"
+
+            Write-Output "INFO: Selective sync complete - other files/folders in repo preserved"
         }
         else {
-            Write-Host "INFO: Full repository sync - replacing all contents"
-            
+            Write-Output "INFO: Full repository sync - replacing all contents"
+
             # Remove existing files (except .git)
             Get-ChildItem -Force | Where-Object { $_.Name -ne '.git' } | Remove-Item -Recurse -Force
-            
+
             # Copy new files
             Copy-Item -Path "../source/*" -Destination "." -Recurse -Force -Exclude ".git"
         }
-        
+
         # ========================================
         # APPLY TEMPLATE REPLACEMENTS (after copying to temp folder)
         # ========================================
         if ($TemplateReplacements -and $TemplateReplacements.Count -gt 0) {
-            Write-Host "INFO: Applying template replacements..."
-            $replacementResult = Apply-TemplateReplacements -SourceDirectory "." -ReplacementConfigs $TemplateReplacements
-            Write-Host "INFO: Template processing complete - $($replacementResult.FilesProcessed) files and $($replacementResult.DirectoriesRenamed) directories modified"
+            Write-Output "INFO: Applying template replacements..."
+            $replacementResult = Invoke-TemplateReplacement -SourceDirectory "." -ReplacementConfigs $TemplateReplacements
+            Write-Output "INFO: Template processing complete - $($replacementResult.FilesProcessed) files and $($replacementResult.DirectoriesRenamed) directories modified"
         }
 
         # Configure git user (use Azure DevOps service user)
         git config user.email "azure-devops@noreply.microsoft.com"
         git config user.name "Azure DevOps Sync"
-        
+
         # Check if there are changes
         git add -A
         $changes = git status --porcelain
-        
+
         if ($changes -or $ForceSync) {
-            Write-Host "INFO: Changes detected or force sync enabled. Committing and pushing..."
-            
+            Write-Output "INFO: Changes detected or force sync enabled. Committing and pushing..."
+
             # Get sync info from the copied source
             $syncInfo = Get-Content "../source/.sync-info" -Raw -ErrorAction SilentlyContinue
-            
+
             # Commit changes with submodule information
             $commitMessage = "ECP config: git repo sync: $(Get-Date -Format 'yy-MM-dd HH:mm UTC')`n`nSubmodule commit: $submoduleCommit`nMessage: $submoduleMessage`nBranch: $submoduleBranch`n`nSync Details:`n$syncInfo"
             git commit -m "$commitMessage"
-            
+
             if ($LASTEXITCODE -ne 0) {
                 throw "Error: Failed to commit changes"
             }
-            
+
             # Push to Azure DevOps
             git push origin $TargetBranch
-            
+
             if ($LASTEXITCODE -ne 0) {
                 throw "Error: Failed to push to Azure DevOps repository"
             }
-            
-            Write-Host "INFO: Successfully synchronized repository"
+
+            Write-Output "INFO: Successfully synchronized repository"
         }
         else {
-            Write-Host "INFO: No changes detected, skipping commit"
+            Write-Output "INFO: No changes detected, skipping commit"
         }
-        
+
     }
     finally {
         # Cleanup git configuration
         git config --global --unset credential."https://dev.azure.com".helper 2>$null
-        
+
         # Cleanup temporary directory
         Set-Location $env:TEMP
         Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Host "INFO: Cleaned up temporary directory"
+        Write-Output "INFO: Cleaned up temporary directory"
     }
-    
+
 }
 catch {
     Write-Error "Synchronization failed: $($_.Exception.Message)"

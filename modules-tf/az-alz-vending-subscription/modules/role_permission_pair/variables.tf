@@ -31,7 +31,7 @@ variable "use_pim" {
 }
 
 variable "permanent_permission_member_object_ids" {
- type        = list(string)
+  type        = list(string)
   default     = []
   description = "List of object IDs for members to be added to the Entra ID group \"permission\" - when PIM is used permanently to the \"privileged\" permission group (use for workload identities)."
 }

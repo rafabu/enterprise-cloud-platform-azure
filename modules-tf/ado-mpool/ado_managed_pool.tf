@@ -101,7 +101,7 @@ resource "azapi_resource" "managed_devops_pool" {
   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
   parent_id = azurerm_resource_group.mpool.id
-  type      = "Microsoft.DevOpsInfrastructure/pools@2025-09-20"
+  type      = "Microsoft.DevOpsInfrastructure/pools@2026-06-02"
   location  = azurerm_resource_group.mpool.location
   body = {
     properties = {

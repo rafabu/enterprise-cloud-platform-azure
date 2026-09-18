@@ -89,55 +89,55 @@ resource "azapi_resource" "dev_center_project" {
   }
 }
 
-resource "azapi_resource" "dev_center_network_connection" {
-  type      = "Microsoft.DevCenter/networkConnections@2025-02-01"
-  name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devcnc-")
-  parent_id = var.resource_group_id
-  location  = local.resource_group.location
+# DevCenter network connections do no longer exist
+# resource "azapi_resource" "dev_center_network_connection" {
+#   type      = "Microsoft.DevCenter/networkConnections@2025-02-01"
+#   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-devcnc-")
+#   parent_id = var.resource_group_id
+#   location  = local.resource_group.location
 
-  body = {
-    properties = {
-      domainJoinType              = "AzureADJoin"
-      domainName                  = ""
-      domainPassword              = null
-      domainUsername              = ""
-      organizationUnit            = ""
-      networkingResourceGroupName = "${local.resource_group.name}-managed-nc"
-      subnetId                    = azurerm_subnet.devbox[var.subnet_artefact_names[0]].id
-    }
-  }
+#   body = {
+#     properties = {
+#       domainJoinType              = "AzureADJoin"
+#       domainName                  = ""
+#       domainPassword              = null
+#       domainUsername              = ""
+#       organizationUnit            = ""
+#       networkingResourceGroupName = "${local.resource_group.name}-managed-nc"
+#       subnetId                    = azurerm_subnet.devbox[var.subnet_artefact_names[0]].id
+#     }
+#   }
 
-  schema_validation_enabled = false
-
-
-  tags = var.azure_tags
-}
-
-resource "azurerm_role_assignment" "dev_center_vnet" {
-  provider = azurerm.launchpad
-
-  for_each = toset([
-    "acdd72a7-3385-48ef-bd42-f606fba81ae7",
-    "4d97b98b-1d4f-4787-a291-c67834d212e7"
-  ])
-
-  scope              = var.virtual_network_id
-  role_definition_id = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
-  principal_id       = azapi_resource.dev_center.identity[0].principal_id
-}
-
-resource "azapi_resource" "dev_center_network_connection_attachment" {
-  type      = "Microsoft.DevCenter/devcenters/attachednetworks@2025-02-01"
-  name      = "${local.virtual_network.name}-${azurerm_subnet.devbox[var.subnet_artefact_names[0]].name}"
-  parent_id = azapi_resource.dev_center.id
-
-  body = {
-    properties = {
-      networkConnectionId = azapi_resource.dev_center_network_connection.id
-    }
-  }
-
-  depends_on = [azurerm_role_assignment.dev_center_vnet]
-}
+#   schema_validation_enabled = false
 
 
+#   tags = var.azure_tags
+# }
+
+# resource "azurerm_role_assignment" "dev_center_vnet" {
+#   provider = azurerm.launchpad
+
+#   for_each = toset([
+#     "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+#     "4d97b98b-1d4f-4787-a291-c67834d212e7"
+#   ])
+
+#   scope              = var.virtual_network_id
+#   role_definition_id = "${data.azapi_client_config.this.subscription_resource_id}/providers/Microsoft.Authorization/roleDefinitions/${each.key}"
+#   principal_id       = azapi_resource.dev_center.identity[0].principal_id
+# }
+
+
+# resource "azapi_resource" "dev_center_network_connection_attachment" {
+#   type      = "Microsoft.DevCenter/devcenters/attachednetworks@2025-02-01"
+#   name      = "${local.virtual_network.name}-${azurerm_subnet.devbox[var.subnet_artefact_names[0]].name}"
+#   parent_id = azapi_resource.dev_center.id
+
+#   body = {
+#     properties = {
+#       networkConnectionId = azapi_resource.dev_center_network_connection.id
+#     }
+#   }
+
+#   depends_on = [azurerm_role_assignment.dev_center_vnet]
+# }

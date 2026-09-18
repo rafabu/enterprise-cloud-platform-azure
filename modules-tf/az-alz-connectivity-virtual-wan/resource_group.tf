@@ -21,4 +21,3 @@ resource "azapi_resource" "resource_group_vwan_hub" {
 
   tags = var.azure_tags
 }
-

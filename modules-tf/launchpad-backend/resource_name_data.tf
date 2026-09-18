@@ -17,4 +17,3 @@ data "azurecaf_name" "st" {
   clean_input   = true
   use_slug      = true
 }
-

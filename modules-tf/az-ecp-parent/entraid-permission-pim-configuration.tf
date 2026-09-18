@@ -21,7 +21,7 @@ resource "time_sleep" "contributor_replication_wait" {
 resource "terraform_data" "ServicePrincipal" {
   for_each = toset(var.ecp_deployment_entraid_contributor_group_pim_enabled ? ["this"] : [])
 
-  input    = data.azuread_directory_object.this.type
+  input = data.azuread_directory_object.this.type
 
   lifecycle {
     precondition {

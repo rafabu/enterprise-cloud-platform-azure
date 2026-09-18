@@ -102,7 +102,15 @@ locals {
   )
 }
 
-# # Environment Resource Authorization
+# azuredevops_pipeline_authorization occasionally fails when multiple are created at the same time
+resource "time_sleep" "pipeline_create_delay" {
+
+  create_duration = "30s" # Wait 30s ONLY on create
+
+  depends_on = [azuredevops_build_definition.pipelines]
+}
+
+# Environment Resource Authorization
 resource "azuredevops_pipeline_authorization" "ecp_environment" {
   for_each = local.pip_env_object
 
@@ -111,4 +119,6 @@ resource "azuredevops_pipeline_authorization" "ecp_environment" {
   type                = "environment"
   pipeline_id         = azuredevops_build_definition.pipelines[each.value.pip_item].id
   pipeline_project_id = null
+
+  depends_on = [time_sleep.pipeline_create_delay]
 }

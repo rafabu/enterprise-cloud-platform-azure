@@ -24,7 +24,7 @@ locals {
   (
    !(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})
   )
-  OR 
+  OR
   (
     @Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
   )
@@ -34,7 +34,7 @@ AND
   (
     !(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})
   )
-  OR 
+  OR
   (
     @Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${join(", ", local.subscription_owner_excluded_assignment_role_ids)}}
   )

@@ -46,7 +46,7 @@ resource "time_sleep" "ecp_deployment_parent" {
 }
 
 # move ECP platform subscriptions into the ECP deployment parent management group
-#     note: this is only happening upon first deployment of the management group 
+#     note: this is only happening upon first deployment of the management group
 #           alz deployment will then create the structure and place the subscriptions correctly
 locals {
   ecp_platform_subscription_ids = [

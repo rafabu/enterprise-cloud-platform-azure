@@ -37,8 +37,8 @@ resource "azapi_resource" "bast_vnet" {
 resource "azapi_resource" "bast_subnet" {
   for_each = local.virtual_network_subnet_address_prefixes_location_object
 
-  type = "Microsoft.Network/virtualNetworks/subnets@2025-05-01"
-  name = local.parsed_network_subnet_artefacts[each.value.artefact_key].name
+  type      = "Microsoft.Network/virtualNetworks/subnets@2025-05-01"
+  name      = local.parsed_network_subnet_artefacts[each.value.artefact_key].name
   parent_id = azapi_resource.bast_vnet[each.key].id
 
   body = {

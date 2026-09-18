@@ -31,7 +31,7 @@ locals {
 
   # missing from
   #     ALZ 2026.04.2 (policy initiative Deploy-Private-DNS-Zones v2.5.0)
-  # but present in 
+  # but present in
   #     AVM avm-ptn-network-private-link-private-dns-zones 0.23.2 (11.06.2026):
   # - privatelink.openai.azure.com:             azure_ai_oai
   # - privatelink.mysql.database.azure.com:     azure_mysql_db_server

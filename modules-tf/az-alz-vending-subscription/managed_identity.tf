@@ -10,7 +10,7 @@ moved {
 
 
 resource "azapi_resource" "uami" {
-  type      = "Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30"
+  type = "Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30"
   # UAMI does not (yet) exist in provider DS - just rename the RG one...
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-id-")
   parent_id = module.vending.resource_group_resource_ids["mgmt"]

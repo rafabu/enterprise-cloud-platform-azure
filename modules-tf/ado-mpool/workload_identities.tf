@@ -152,7 +152,7 @@ locals {
           roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
           condition        = null
         },
-         {
+        {
           scope = var.backend_storage_accounts["l3"].id, # backend storage account
           # security reader
           roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
@@ -358,7 +358,7 @@ resource "azurerm_federated_identity_credential" "mpool" {
 
   user_assigned_identity_id = azurerm_user_assigned_identity.mpool[each.key].id
 
-  name = "ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}"
+  name = replace("ADO-${var.ecp_azure_devops_organization_name}-${var.ecp_azure_devops_project_name}-${azuredevops_serviceendpoint_azurerm.mpool[each.key].service_endpoint_name}", "/[^A-Za-z0-9-]/", "-")
 
   audience = ["api://AzureADTokenExchange"]
   issuer   = azuredevops_serviceendpoint_azurerm.mpool[each.key].workload_identity_federation_issuer

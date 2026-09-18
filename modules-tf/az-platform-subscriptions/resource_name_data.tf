@@ -1,5 +1,5 @@
 data "azurecaf_name" "rg" {
-  name          = try(var.azure_resource_name_elements.name, null)
+  name = try(var.azure_resource_name_elements.name, null)
   # azurerm_subscription is not implemented - use azurerm_resource_group for resource_type
   resource_type = "azurerm_resource_group"
   prefixes      = try(var.azure_resource_name_elements.prefixes, [])

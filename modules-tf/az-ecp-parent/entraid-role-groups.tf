@@ -7,7 +7,7 @@ resource "azuread_group_without_members" "contributor_role" {
   security_enabled        = true
   assignable_to_role      = var.ecp_deployment_entraid_contributor_groups_protected
 
- owners = [
+  owners = [
     var.ecp_deployment_contributor_workload_identity_object_id
   ]
 
@@ -32,7 +32,7 @@ resource "azuread_group_without_members" "reader_role" {
   security_enabled        = true
   assignable_to_role      = var.ecp_deployment_entraid_reader_groups_protected
 
-owners = var.ecp_deployment_entraid_reader_group_pim_enabled ? [] : [
+  owners = var.ecp_deployment_entraid_reader_group_pim_enabled ? [] : [
     var.ecp_deployment_contributor_workload_identity_object_id
   ]
 
@@ -47,4 +47,3 @@ resource "azuread_group_member" "reader_role" {
   group_object_id  = azuread_group_without_members.reader_role.object_id
   member_object_id = each.key
 }
-

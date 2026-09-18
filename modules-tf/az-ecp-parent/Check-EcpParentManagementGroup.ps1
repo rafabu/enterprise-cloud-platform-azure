@@ -14,15 +14,15 @@ function Wait-TenantBackfill {
         [int]$MaxWaitMinutes = 10,
         [int]$PollIntervalSeconds = 10
     )
-    
+
     $startTime = Get-Date
-    
+
     while (((Get-Date) - $startTime).TotalMinutes -lt $MaxWaitMinutes) {
         Start-Sleep -Seconds $PollIntervalSeconds
-        
+
         $bfStatus = az rest --method POST --url "https://management.azure.com/providers/Microsoft.Management/tenantBackfillStatus?api-version=2020-05-01"
         $status = ($bfStatus | ConvertFrom-Json).status
-        
+
         if ($status -ieq "Completed") {
             return @{ Success = $true; Status = $bfStatus }
         }
@@ -89,12 +89,12 @@ else {
         $mgBodyJson = $mgBody | ConvertTo-Json -Depth 10 -Compress
     }
 
-    # $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" --body $mgBodyJson
     $createResult = az rest --method PUT --url "https://management.azure.com/providers/Microsoft.Management/managementGroups/$($parent_management_group_id)?api-version=2020-05-01" `
-     --headers "Content-Type=application/json" `
-     --body @"
+        --headers "Content-Type=application/json" `
+        --body @"
 $mgBodyJson
 "@
+    Write-Debug "Create result: $createResult"
     if ($LASTEXITCODE -ieq 0) {
         $parentMgName = $parent_management_group_id
         $parentMgDisplayName = $parent_management_group_display_name

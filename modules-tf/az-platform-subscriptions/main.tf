@@ -27,7 +27,7 @@ module "management_subscription" {
 
   subscription_id   = var.ecp_management_subscription_id
   subscription_name = "${replace(data.azurecaf_name.rg.result, "-rg-", "-sub-")}-management"
-  tags              = merge(
+  tags = merge(
     var.azure_tags,
     var.management_azure_tags
   )
@@ -49,7 +49,7 @@ module "connectivity_subscription" {
 
   subscription_id   = var.ecp_connectivity_subscription_id
   subscription_name = "${replace(data.azurecaf_name.rg.result, "-rg-", "-sub-")}-connectivity"
-  tags              = merge(
+  tags = merge(
     var.azure_tags,
     var.connectivity_azure_tags
   )
@@ -71,7 +71,7 @@ module "identity_subscription" {
 
   subscription_id   = var.ecp_identity_subscription_id
   subscription_name = "${replace(data.azurecaf_name.rg.result, "-rg-", "-sub-")}-identity"
-  tags              = merge(
+  tags = merge(
     var.azure_tags,
     var.identity_azure_tags
   )
@@ -93,7 +93,7 @@ module "security_subscription" {
 
   subscription_id   = var.ecp_security_subscription_id
   subscription_name = "${replace(data.azurecaf_name.rg.result, "-rg-", "-sub-")}-security"
-  tags              = merge(
+  tags = merge(
     var.azure_tags,
     var.security_azure_tags
   )

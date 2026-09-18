@@ -233,7 +233,7 @@ locals {
             },
             vnc_value
           )
-          # connect to all matching artefacts || only to the main location  
+          # connect to all matching artefacts || only to the main location
           if vnc_value.connect_to_main_location == false || (vnc_value.connect_to_main_location == true && l_k == "main")
         }
 
