@@ -528,7 +528,7 @@ SyncTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
 
         # Clone Azure DevOps repository with authentication
         Write-Output "INFO: Cloning Azure DevOps repository..."
-        $adoRepoUrl = "https://dev.azure.com/$AdoOrg/$AdoProject/_git/$AdoRepo"
+        $adoRepoUrl = "https://dev.azure.com/$AdoOrg/$([uri]::EscapeDataString($AdoProject))/_git/$([uri]::EscapeDataString($AdoRepo))"
 
         # Clone with explicit credential handling
         git -c core.askpass=true clone $adoRepoUrl target
