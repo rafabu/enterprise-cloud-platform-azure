@@ -119,46 +119,53 @@ locals {
     }
     l0-contribute = {
       ecp_level = "l0"
-      azure-roleAssignments = [
-        {
-          scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
-          # contributor
-          # roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
-          roleDefinitionId = "5d58bcaf-24a5-4b20-bdb6-eed9f69fbe4c" # Management Group Contributor Role
-          condition        = null
-        },
-        {
-          scope = data.azurerm_subscription.launchpad.id, # launchpad subscription
-          # contributor
-          roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c" # Contributor
-          condition        = null
-        },
+      azure-roleAssignments = distinct(concat(
+        [
+          {
+            scope = data.azurerm_management_group.ecp_root_parent.id, # ECP root parent management group
+            # contributor
+            # roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c", # Contributor
+            roleDefinitionId = "5d58bcaf-24a5-4b20-bdb6-eed9f69fbe4c" # Management Group Contributor Role
+            condition        = null
+          },
+          {
+            scope = data.azurerm_subscription.launchpad.id, # launchpad subscription
+            # contributor
+            roleDefinitionId = "b24988ac-6180-42a0-ab88-20f7382dd24c" # Contributor
+            condition        = null
+          },
 
-        {
-          scope = var.backend_storage_accounts["l0"].id, # backend storage account
-          # security reader
-          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
-          condition        = null
-        },
-        {
-          scope = var.backend_storage_accounts["l1"].id, # backend storage account
-          # security reader
-          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
-          condition        = null
-        },
-        {
-          scope = var.backend_storage_accounts["l2"].id, # backend storage account
-          # security reader
-          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
-          condition        = null
-        },
-        {
-          scope = var.backend_storage_accounts["l3"].id, # backend storage account
-          # security reader
-          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
-          condition        = null
-        }
-      ],
+          {
+            scope            = var.backend_storage_accounts["l0"].id, # backend storage account
+            roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+            condition        = null
+          },
+          {
+            scope            = var.backend_storage_accounts["l1"].id, # backend storage account
+            roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+            condition        = null
+          },
+          {
+            scope            = var.backend_storage_accounts["l2"].id, # backend storage account
+            roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+            condition        = null
+          },
+          {
+            scope            = var.backend_storage_accounts["l3"].id, # backend storage account
+            roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+            condition        = null
+          }
+
+        ],
+        # allow moving platform subscription(s) to management groups in level 1
+        [
+          for sub_id in local.ecp_platform_subscription_ids : {
+            scope            = "/subscriptions/${sub_id}"
+            roleDefinitionId = "18d7d88d-d35e-4fb5-a5c3-7773c20a72d9" # User Access Administrator
+            condition        = null
+          }
+        ]
+      )),
       ado-memberships = [
         # Organization-wide permission might no longer be required once Azure DevOps Managed Pools support
         #     project-level only permissions
@@ -178,7 +185,7 @@ locals {
           resourceAppId = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
           resourceAccess = [
             {
-              id   = "5b567255-7703-4780-807c-7be8301ae99b" # Group.Read.All
+              id   = "62a82d76-70ea-41e2-9197-370581804d09" # Group.ReadWrite.All
               type = "Role"
             },
             {
@@ -317,6 +324,18 @@ locals {
     flatten([for key, attr in local.ado_wid_entra_approle_assignment_list : keys(attr)]),
     flatten([for key, attr in local.ado_wid_entra_approle_assignment_list : values(attr)])
   )
+
+  # need to assign roleAssignment RBAC to all ECP platform subscriptions
+  #    otherwise they cannot be moved to the correct Management Group in level 1
+  ecp_platform_subscription_ids = [
+    for sub_id in [
+      var.ecp_launchpad_subscription_id,
+      var.ecp_management_subscription_id,
+      var.ecp_connectivity_subscription_id,
+      var.ecp_identity_subscription_id,
+      var.ecp_security_subscription_id
+    ] : sub_id if sub_id != "00000000-0000-0000-0000-000000000000"
+  ]
 }
 
 ####################### Azure User Assigned Managed Identity #######################
