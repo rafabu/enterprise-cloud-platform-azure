@@ -35,6 +35,28 @@ locals {
           scope            = var.backend_storage_accounts["l3"].id  # backend storage account
           roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1" # Storage Blob Data Reader
           condition        = null
+        },
+        # without contributor access, a first-time 'terraform plan' will not be able to initialize the empty remote backend's state blob :-(
+        #    so grant it but only on the blob container
+        {
+          scope            = "${var.backend_storage_accounts["l0"].id}/blobServices/default/containers/${var.backend_storage_accounts["l0"].tf_backend_container}"  # backend storage account
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+          condition        = null
+        },
+        {
+          scope            = "${var.backend_storage_accounts["l1"].id}/blobServices/default/containers/${var.backend_storage_accounts["l1"].tf_backend_container}"  # backend storage account
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+          condition        = null
+        },
+        {
+          scope            = "${var.backend_storage_accounts["l2"].id}/blobServices/default/containers/${var.backend_storage_accounts["l2"].tf_backend_container}"  # backend storage account
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+          condition        = null
+        },
+        {
+          scope            = "${var.backend_storage_accounts["l3"].id}/blobServices/default/containers/${var.backend_storage_accounts["l3"].tf_backend_container}"  # backend storage account
+          roleDefinitionId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe" # Storage Blob Data Contributor
+          condition        = null
         }
       ],
       ado-memberships = [
