@@ -26,7 +26,7 @@ resource "azuread_group_without_members" "contributor_permission" {
   assignable_to_role      = var.ecp_deployment_entraid_contributor_groups_protected
 
   # with PIM, azuread_privileged_access_group_assignment_schedule resource handles ownership
-  owners = var.ecp_deployment_entraid_contributor_group_pim_enabled ? [] : [
+  owners = [
     var.ecp_deployment_contributor_workload_identity_object_id
   ]
 
@@ -79,7 +79,7 @@ resource "azuread_group_without_members" "reader_permission" {
   assignable_to_role      = var.ecp_deployment_entraid_reader_groups_protected
 
   # with PIM, azuread_privileged_access_group_assignment_schedule resource handles ownership
-  owners = var.ecp_deployment_entraid_reader_group_pim_enabled ? [] : [
+  owners = [
     var.ecp_deployment_contributor_workload_identity_object_id
   ]
 

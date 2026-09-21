@@ -152,26 +152,8 @@ resource "azuread_privileged_access_group_assignment_schedule" "contributor_memb
 }
 
 # workload identity ---> permanent owner of privileged group
-resource "azuread_privileged_access_group_assignment_schedule" "contributor_owner_workload_identity_assignment" {
-  for_each = toset(var.ecp_deployment_entraid_contributor_group_pim_enabled ? ["this"] : [])
-
-  group_id        = azuread_group_without_members.contributor_permission.object_id
-  principal_id    = var.ecp_deployment_contributor_workload_identity_object_id
-  assignment_type = "owner"
-
-  justification        = "Grant permanent ownership of privileged group '${azuread_group_without_members.contributor_permission.display_name}'"
-  permanent_assignment = true
-
-  lifecycle {
-    ignore_changes = [
-      justification # MacOS seems to add weird characters that cannot be updated later
-    ]
-  }
-
-  depends_on = [
-    time_sleep.contributor_policy_wait
-  ]
-}
+#     --> MS-Graph creates this automatically based on the 'owner' attribute of the group
+# resource "azuread_privileged_access_group_assignment_schedule" "contributor_owner_workload_identity_assignment" {
 
 # role group ---> permanently schedule eligible
 resource "azuread_privileged_access_group_eligibility_schedule" "contributor_member_eligible" {
@@ -336,26 +318,8 @@ resource "azuread_privileged_access_group_assignment_schedule" "reader_member_wo
 }
 
 # workload identity ---> permanent owner of privileged group
-resource "azuread_privileged_access_group_assignment_schedule" "reader_owner_workload_identity_assignment" {
-  for_each = toset(var.ecp_deployment_entraid_reader_group_pim_enabled ? ["this"] : [])
-
-  group_id        = azuread_group_without_members.reader_permission.object_id
-  principal_id    = var.ecp_deployment_contributor_workload_identity_object_id # owner must be the CONTRIBUTOR
-  assignment_type = "owner"
-
-  justification        = "Grant permanent ownership of privileged group '${azuread_group_without_members.reader_permission.display_name}'"
-  permanent_assignment = true
-
-  lifecycle {
-    ignore_changes = [
-      justification # MacOS seems to add weird characters that cannot be updated later
-    ]
-  }
-
-  depends_on = [
-    time_sleep.reader_policy_wait
-  ]
-}
+#     --> MS-Graph creates this automatically based on the 'owner' attribute of the group
+# resource "azuread_privileged_access_group_assignment_schedule" "reader_owner_workload_identity_assignment" {
 
 # role group ---> permanently schedule eligible
 resource "azuread_privileged_access_group_eligibility_schedule" "reader_member_eligible" {
