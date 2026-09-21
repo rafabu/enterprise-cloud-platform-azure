@@ -15,25 +15,25 @@ module "alz" {
         management_group_name = "${var.ecp_environment_name}-mg-ecpa-platform-management"
       }
     },
-    var.ecp_launchpad_subscription_id != "00000000-0000-0000-0000-000000000000" ? {
+    var.ecp_launchpad_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_launchpad_subscription_id != var.ecp_management_subscription_id ? {
       launchpad = {
         subscription_id       = var.ecp_launchpad_subscription_id
         management_group_name = "${var.ecp_environment_name}-mg-ecpa-platform-launchpad"
       }
     } : {},
-    var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? {
+    var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_connectivity_subscription_id != var.ecp_management_subscription_id ? {
       connectivity = {
         subscription_id       = var.ecp_connectivity_subscription_id
         management_group_name = "${var.ecp_environment_name}-mg-ecpa-platform-connectivity"
       }
     } : {},
-    var.ecp_identity_subscription_id != "00000000-0000-0000-0000-000000000000" ? {
+    var.ecp_identity_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_identity_subscription_id != var.ecp_management_subscription_id ? {
       identity = {
         subscription_id       = var.ecp_identity_subscription_id
         management_group_name = "${var.ecp_environment_name}-mg-ecpa-platform-identity"
       }
     } : {},
-    var.ecp_security_subscription_id != "00000000-0000-0000-0000-000000000000" ? {
+    var.ecp_security_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_security_subscription_id != var.ecp_management_subscription_id ? {
       security = {
         subscription_id       = var.ecp_security_subscription_id
         management_group_name = "${var.ecp_environment_name}-mg-ecpa-platform-security"
