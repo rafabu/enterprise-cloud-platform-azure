@@ -1,5 +1,5 @@
 module "launchpad_subscription" {
-  for_each = toset(var.ecp_launchpad_subscription_id != "00000000-0000-0000-0000-000000000000" ? ["this"] : [])
+  for_each = toset(var.ecp_launchpad_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_launchpad_subscription_id != var.ecp_management_subscription_id ? ["this"] : [])
 
   source = "../shared/az-subscription-basics"
 
@@ -43,7 +43,7 @@ module "management_subscription" {
 }
 
 module "connectivity_subscription" {
-  for_each = toset(var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" ? ["this"] : [])
+  for_each = toset(var.ecp_connectivity_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_connectivity_subscription_id != var.ecp_management_subscription_id ? ["this"] : [])
 
   source = "../shared/az-subscription-basics"
 
@@ -65,7 +65,7 @@ module "connectivity_subscription" {
 }
 
 module "identity_subscription" {
-  for_each = toset(var.ecp_identity_subscription_id != "00000000-0000-0000-0000-000000000000" ? ["this"] : [])
+  for_each = toset(var.ecp_identity_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_identity_subscription_id != var.ecp_management_subscription_id ? ["this"] : [])
 
   source = "../shared/az-subscription-basics"
 
@@ -87,7 +87,7 @@ module "identity_subscription" {
 }
 
 module "security_subscription" {
-  for_each = toset(var.ecp_security_subscription_id != "00000000-0000-0000-0000-000000000000" ? ["this"] : [])
+  for_each = toset(var.ecp_security_subscription_id != "00000000-0000-0000-0000-000000000000" && var.ecp_security_subscription_id != var.ecp_management_subscription_id ? ["this"] : [])
 
   source = "../shared/az-subscription-basics"
 
