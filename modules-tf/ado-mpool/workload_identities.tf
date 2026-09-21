@@ -189,6 +189,10 @@ locals {
               type = "Role"
             },
             {
+              id   = "9e3f62cf-ca93-4989-b6ce-bf83c28f9fe8" # RoleManagement.ReadWrite.Directory => allow assignable_to_role
+              type = "Role"
+            },
+            {
               id   = "df021288-bdef-4463-88db-98f22de89214" # User.Read.All
               type = "Role"
             },
