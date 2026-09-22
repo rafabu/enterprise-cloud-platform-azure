@@ -60,7 +60,7 @@ resource "terraform_data" "git_repository_non_default_destroy_helper" {
 
   provisioner "local-exec" {
     when        = destroy
-    command     = "az config set extension.use_dynamic_install=yes_without_prompt; az repos create --name ${self.output.default_repository_name} --organization ${self.output.organization_url} --project ${self.output.project_id}"
+    command     = "az config set extension.use_dynamic_install=yes_without_prompt; az repos create --name '${self.output.default_repository_name}' --organization '${self.output.organization_url}' --project '${self.output.project_id}'"
     interpreter = ["pwsh", "-Command"]
   }
 
