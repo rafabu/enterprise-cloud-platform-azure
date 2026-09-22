@@ -41,8 +41,8 @@ data "azapi_resource_action" "provider_registration" {
   resource_id = "/subscriptions/${var.subscription_id}/providers/${each.key}"
 
   # only register if it is currently unregistered (empty action does nothing but a get)
-  action = contains(["NotRegistered", "Unregistered"], data.azapi_resource.provider_registration[each.key].output.registrationState) ? "Register" : ""
-  method = contains(["NotRegistered", "Unregistered"], data.azapi_resource.provider_registration[each.key].output.registrationState) ? "POST" : "GET"
+  action = var.terraform_command == "apply" && contains(["NotRegistered", "Unregistered"], data.azapi_resource.provider_registration[each.key].output.registrationState) ? "Register" : ""
+  method = var.terraform_command == "apply" && contains(["NotRegistered", "Unregistered"], data.azapi_resource.provider_registration[each.key].output.registrationState) ? "POST" : "GET"
 
   response_export_values = [
     "namespace",

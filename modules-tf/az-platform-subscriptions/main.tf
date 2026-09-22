@@ -18,6 +18,8 @@ module "launchpad_subscription" {
     "workloadOwner"
   ]
   region = var.azure_location
+
+  terraform_command = var.terraform_command
 }
 
 module "management_subscription" {
@@ -40,6 +42,8 @@ module "management_subscription" {
     "workloadOwner"
   ]
   region = var.azure_location
+
+  terraform_command = var.terraform_command
 }
 
 module "connectivity_subscription" {
@@ -62,6 +66,8 @@ module "connectivity_subscription" {
     "workloadOwner"
   ]
   region = var.azure_location
+
+  terraform_command = var.terraform_command
 }
 
 module "identity_subscription" {
@@ -84,6 +90,8 @@ module "identity_subscription" {
     "workloadOwner"
   ]
   region = var.azure_location
+
+  terraform_command = var.terraform_command
 }
 
 module "security_subscription" {
@@ -106,4 +114,6 @@ module "security_subscription" {
     "workloadOwner"
   ]
   region = var.azure_location
+
+  terraform_command = var.terraform_command
 }
