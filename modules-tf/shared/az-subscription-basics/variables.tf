@@ -30,3 +30,9 @@ variable "region" {
   default     = "eastus"
   description = "Default region for resources deployed into this subscription."
 }
+
+variable "terraform_command" {
+  type        = string
+  default     = "plan"
+  description = "The command used to invoke Terraform (e.g., 'apply')."
+}

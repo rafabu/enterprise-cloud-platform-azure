@@ -93,3 +93,9 @@ variable "azure_location" {
   type        = string
   description = "Default region for resources deployed into this subscription."
 }
+
+variable "terraform_command" {
+  type        = string
+  description = "The command used to invoke Terraform (e.g., 'apply')."
+  default = "plan"
+}
