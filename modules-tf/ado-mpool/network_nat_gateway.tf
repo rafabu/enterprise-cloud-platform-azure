@@ -26,6 +26,8 @@ resource "azurerm_public_ip" "mpool" {
   sku                 = "StandardV2"
   sku_tier            = "Regional"
   zones               = null
+
+  tags = var.azure_tags
 }
 
 resource "azurerm_nat_gateway" "mpool" {
@@ -38,6 +40,8 @@ resource "azurerm_nat_gateway" "mpool" {
   resource_group_name = azurerm_resource_group.mpool.name
   sku_name            = "StandardV2"
   zones               = null
+
+  tags = var.azure_tags
 }
 
 resource "azurerm_nat_gateway_public_ip_association" "mpool" {

@@ -41,6 +41,9 @@ module "alz" {
     } : {}
   )
 
+  subscription_placement_destroy_behavior = "custom"
+  subscription_placement_destroy_custom_target_management_group_id = var.ecp_azure_root_parent_management_group_id
+
   #   management_group_hierarchy_settings = {
   #     default_management_group_name            = "sandbox"
   #     require_authorisation_for_group_creation = true

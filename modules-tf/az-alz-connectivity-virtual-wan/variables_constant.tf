@@ -1,7 +1,7 @@
 variable "avm-ptn-alz-connectivity-virtual-wan_version" {
   type    = string
   const   = true
-  default = "0.16.1"
+  default = "0.17.2"
 }
 
 variable "avm-utl-regions_version" {
