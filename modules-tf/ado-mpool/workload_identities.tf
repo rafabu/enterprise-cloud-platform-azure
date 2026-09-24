@@ -377,6 +377,8 @@ resource "azurerm_user_assigned_identity" "mpool" {
   # UAMI does not (yet) exist in provider DS - just rename the RG one...
   name                = format("%s-%s", replace(data.azurecaf_name.rg.result, "-rg-", "-id-"), each.key)
   resource_group_name = azurerm_resource_group.mpool.name
+
+  tags = var.azure_tags
 }
 
 # service principals require a while to replicate properly
