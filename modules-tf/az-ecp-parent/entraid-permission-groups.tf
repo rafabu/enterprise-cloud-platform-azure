@@ -67,6 +67,10 @@ resource "azurerm_role_assignment" "contributor_permission" {
   depends_on = [
     time_sleep.ecp_deployment_parent
   ]
+
+  lifecycle {
+    destroy = false
+  }
 }
 
 ###################### READER PERMISSION GROUP ######################
@@ -120,4 +124,8 @@ resource "azurerm_role_assignment" "reader_permission" {
   depends_on = [
     time_sleep.ecp_deployment_parent
   ]
+
+  lifecycle {
+    destroy = false
+  }
 }
