@@ -68,10 +68,6 @@ resource "azurerm_role_assignment" "contributor_permission" {
     time_sleep.ecp_deployment_parent,
     azapi_resource_action.ecp_deployment_parent_subscriptions_move
   ]
-
-  lifecycle {
-    destroy = false
-  }
 }
 
 ###################### READER PERMISSION GROUP ######################
@@ -126,8 +122,4 @@ resource "azurerm_role_assignment" "reader_permission" {
     time_sleep.ecp_deployment_parent,
     azapi_resource_action.ecp_deployment_parent_subscriptions_move
   ]
-
-  lifecycle {
-    destroy = false
-  }
 }
