@@ -65,7 +65,8 @@ resource "azurerm_role_assignment" "contributor_permission" {
   condition            = null
 
   depends_on = [
-    time_sleep.ecp_deployment_parent
+    time_sleep.ecp_deployment_parent,
+    azapi_resource_action.ecp_deployment_parent_subscriptions_move
   ]
 
   lifecycle {
@@ -122,7 +123,8 @@ resource "azurerm_role_assignment" "reader_permission" {
   condition            = null
 
   depends_on = [
-    time_sleep.ecp_deployment_parent
+    time_sleep.ecp_deployment_parent,
+    azapi_resource_action.ecp_deployment_parent_subscriptions_move
   ]
 
   lifecycle {
