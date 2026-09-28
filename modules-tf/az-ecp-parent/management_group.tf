@@ -72,6 +72,29 @@ resource "azapi_resource_action" "ecp_deployment_parent_subscriptions_move" {
     time_sleep.ecp_deployment_parent
   ]
 
+  when = "apply" # won't do anything on destroy (see below for what is done then)
+
+  lifecycle {
+    replace_triggered_by = [
+      azurerm_management_group.ecp_deployment_parent.id
+    ]
+  }
+}
+
+resource "azapi_resource_action" "ecp_deployment_parent_subscriptions_move_back_on_destroy" {
+  for_each = toset(local.ecp_platform_subscription_ids)
+
+  type        = "Microsoft.Management/managementGroups@2021-04-01"
+  resource_id = "/providers/Microsoft.Management/managementGroups/${var.ecp_azure_root_parent_management_group_id}"
+  action      = "subscriptions/${each.key}"
+  method      = "PUT"
+
+  depends_on = [
+    azapi_resource_action.ecp_deployment_parent_subscriptions_move
+  ]
+
+  when = "destroy"
+
   lifecycle {
     replace_triggered_by = [
       azurerm_management_group.ecp_deployment_parent.id
