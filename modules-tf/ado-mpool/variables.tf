@@ -229,34 +229,7 @@ variable "managed_devops_pool_stateless_agent_profile" {
   })
   description = "(Optional) The stateless agent profile for the managed DevOps pool."
   default     = {}
-  # default = {
-  #   manual_resource_predictions_profile = {
-  #     time_zone = "W. Europe Standard Time"
-  #     # all_week_schedule = 2
-  #     monday_schedule = {
-  #       "07:30:00" = 2,
-  #       "21:00:00" = 0
-  #     }
-  #     tuesday_schedule = {
-  #       "07:30:00" = 2,
-  #       "21:00:00" = 0
-  #     }
-  #     wednesday_schedule = {
-  #       "07:30:00" = 2,
-  #       "21:00:00" = 0
-  #     }
-  #     thursday_schedule = {
-  #       "07:30:00" = 2,
-  #       "21:00:00" = 0
-  #     }
-  #     friday_schedule = {
-  #       "07:30:00" = 2,
-  #       "21:00:00" = 0
-  #     }
-  #     saturday_schedule = {}
-  #     sunday_schedule   = {}
-  #   }
-  # }
+  nullable   = true
 }
 
 variable "managed_devops_pool_vmss_fabric_profile" {
