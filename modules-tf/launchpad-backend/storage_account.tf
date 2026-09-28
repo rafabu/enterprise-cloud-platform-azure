@@ -4,8 +4,8 @@ resource "azurerm_storage_account" "backend" {
   for_each = toset(local.backend_levels)
 
   name                = format("%s%s", data.azurecaf_name.st.result, each.key)
-  resource_group_name = azurerm_resource_group.backend.name
-  location            = azurerm_resource_group.backend.location
+  resource_group_name = azapi_resource.backend_rg.name
+  location            = azapi_resource.backend_rg.location
 
   account_tier             = "Standard"
   account_kind             = "StorageV2"
@@ -73,11 +73,11 @@ resource "azurerm_private_endpoint" "backend_blob" {
 
   for_each = toset(local.backend_levels)
 
-  location            = azurerm_resource_group.backend.location
+  location            = azapi_resource.backend_rg.location
   name                = "${azurerm_storage_account.backend[each.key].name}-pep-blob"
-  resource_group_name = azurerm_storage_account.backend[each.key].resource_group_name
+  resource_group_name = azapi_resource.backend_rg.name
 
-  subnet_id                     = var.virtual_subnet_id
+  subnet_id                     = azurerm_subnet.lp[var.subnet_artefact_names[0]].id
   custom_network_interface_name = "${azurerm_storage_account.backend[each.key].name}-pepnic-blob"
 
   private_service_connection {

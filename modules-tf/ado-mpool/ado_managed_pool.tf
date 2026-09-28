@@ -202,3 +202,7 @@ resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
     ignore_changes = all
   }
 }
+
+output "zzz_managed_devops_pool_properties" {
+  value = local.managed_devops_pool_properties
+}
