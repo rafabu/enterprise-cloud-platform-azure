@@ -90,8 +90,21 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
 }
 
+resource "time_sleep" "post_variable_group_delay" {
+  create_duration = "30s"
+
+  depends_on = [
+    azuredevops_variable_group.mpool_variablegroup
+  ]
+}
+
 resource "azuredevops_pipeline_authorization" "mpool_variablegroup" {
   project_id  = local.azure_devops_project.project_id
   resource_id = azuredevops_variable_group.mpool_variablegroup.id
   type        = "variablegroup"
+
+  depends_on = [
+    resource.time_sleep.post_variable_group_delay
+  ]
 }
+   

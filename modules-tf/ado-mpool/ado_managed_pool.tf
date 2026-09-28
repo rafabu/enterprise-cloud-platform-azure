@@ -184,12 +184,20 @@ data "azuredevops_agent_pool" "mpool" {
   ]
 }
 
+resource "time_sleep" "post_agent_queue_delay" {
+  create_duration = "30s"
+
+  depends_on = [
+    azapi_resource.managed_devops_pool
+  ]
+}
+
 data "azuredevops_agent_queue" "mpool" {
   project_id = local.azure_devops_project.project_id
   name       = local.ado_agent_pool_alias
 
   depends_on = [
-    azapi_resource.managed_devops_pool
+    resource.time_sleep.post_agent_queue_delay
   ]
 }
 
@@ -201,8 +209,4 @@ resource "azuredevops_pipeline_authorization" "agent_queue_shared" {
   lifecycle {
     ignore_changes = all
   }
-}
-
-output "zzz_managed_devops_pool_properties" {
-  value = local.managed_devops_pool_properties
 }
