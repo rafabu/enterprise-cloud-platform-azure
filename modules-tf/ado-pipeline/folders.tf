@@ -34,6 +34,12 @@ locals {
         description = "Enterprise Cloud Platform (ECP) insights folder"
         permissions = []
       }
+       examples = {
+        name        = "examples"
+        parent_key  = "ecp_environment"
+        description = "Enterprise Cloud Platform (ECP) example folder"
+        permissions = []
+      }
     }
   }
 }
