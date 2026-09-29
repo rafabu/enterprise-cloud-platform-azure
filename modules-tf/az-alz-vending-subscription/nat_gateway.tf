@@ -85,6 +85,16 @@ module "nat_gateway" {
   enable_telemetry = false
 }
 
+resource "time_sleep" "nat_gateway_pre_destroy_delay" {
+  # destroy only: after destroying *_subnet_nat_gateway_link resources
+  #     we have to wait for Entra Id replication or subnet_nat_gateway_link
+  #     destroy operation will fail.
+
+  destroy_duration = "10s" # Wait 10 seconds ONLY on destroy
+
+  depends_on = [module.nat_gateway]
+}
+
 # after initial creation of NAT Gateway, update it directly on the subnets
 resource "azapi_update_resource" "subnet_nat_gateway_link" {
   for_each = var.nat_gateway_creation_enabled ? local.virtual_networks : {}
@@ -109,6 +119,7 @@ resource "azapi_update_resource" "subnet_nat_gateway_link" {
     }
   }
 
+  depends_on = [time_sleep.nat_gateway_pre_destroy_delay]
   lifecycle {
     ignore_changes = [
       body,

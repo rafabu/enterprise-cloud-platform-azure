@@ -37,6 +37,16 @@ resource "azuredevops_pipeline_authorization" "this" {
   # authorized  = true
 }
 
+resource "time_sleep" "serviceendpoint_azurerm_pre_destroy_delay" {
+  # destroy only: after destroying *_federated_identity_credential resources
+  #     we have to wait for Entra Id replication or azuredevops_serviceendpoint_azurerm
+  #     destroy operation will fail.
+
+  destroy_duration = "60s" # Wait 1 minute ONLY on destroy
+
+  depends_on = [azuredevops_serviceendpoint_azurerm.this]
+}
+
 resource "azapi_resource" "federated_identity_credential" {
   type      = "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2024-11-30"
   name      = replace("Azure-DevOps_${data.azuredevops_client_config.current.name}_${azuredevops_project.this.name}", " ", "_")
@@ -49,4 +59,6 @@ resource "azapi_resource" "federated_identity_credential" {
       subject   = azuredevops_serviceendpoint_azurerm.this.workload_identity_federation_subject
     }
   }
+
+  depends_on = [time_sleep.serviceendpoint_azurerm_pre_destroy_delay]
 }
