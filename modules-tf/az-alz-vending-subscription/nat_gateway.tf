@@ -36,7 +36,13 @@ data "azapi_resource_action" "nat_gateway_discovery" {
 locals {
   nat_gateway_observed_resource_id = try(data.azapi_resource_action.nat_gateway_discovery["this"].output.data[0].id, "")
   # NAT Gateway resource ID to be fed into subnet object of vending AVM module
-  nat_gateway_resource_id = var.nat_gateway_creation_enabled && length(local.nat_gateway_observed_resource_id) > 0 ? local.nat_gateway_observed_resource_id : var.nat_gateway_resource_id != null ? var.nat_gateway_resource_id : null
+  #     must be known before apply so build it manually using the resource group and NAT Gateway name
+  nat_gateway_resource_id = var.nat_gateway_creation_enabled ? provider::azapi::resource_group_resource_id(
+    module.vending.subscription_id,
+    local.resource_groups.vnet.name,
+    "Microsoft.Network/natGateways",
+    [replace(data.azurecaf_name.rg.result, "-rg-", "-ng-")]
+  ) : length(local.nat_gateway_observed_resource_id) > 0 ? local.nat_gateway_observed_resource_id : null
 }
 
 module "nat_gateway" {

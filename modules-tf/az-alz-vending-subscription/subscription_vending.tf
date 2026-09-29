@@ -1,8 +1,6 @@
 data "azapi_client_config" "current" {
 }
 
-
-
 module "vending" {
   source  = "Azure/avm-ptn-alz-sub-vending/azure"
   version = var.avm-ptn-alz-sub-vending_version
@@ -44,4 +42,14 @@ module "vending" {
   enable_telemetry = false
 
   # tags = var.azure_tags
+}
+
+resource "azapi_resource_action" "subscription_move_back_on_destroy" {
+
+  type        = "Microsoft.Management/managementGroups@2021-04-01"
+  resource_id = "/providers/Microsoft.Management/managementGroups/${var.ecp_parent_management_group_id}"
+  action      = "subscriptions/${module.vending.subscription_id}"
+  method      = "PUT"
+
+  when = "destroy"
 }
