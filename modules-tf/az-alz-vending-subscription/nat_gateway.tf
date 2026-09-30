@@ -83,6 +83,8 @@ module "nat_gateway" {
   )
 
   enable_telemetry = false
+
+  depends_on = []
 }
 
 resource "time_sleep" "nat_gateway_pre_destroy_delay" {
@@ -90,7 +92,7 @@ resource "time_sleep" "nat_gateway_pre_destroy_delay" {
   #     we have to wait for Entra Id replication or subnet_nat_gateway_link
   #     destroy operation will fail.
 
-  destroy_duration = "10s" # Wait 10 seconds ONLY on destroy
+  destroy_duration = "15s" # wait until ALL subnets are destroyed
 
   depends_on = [module.nat_gateway]
 }
@@ -119,10 +121,85 @@ resource "azapi_update_resource" "subnet_nat_gateway_link" {
     }
   }
 
-  depends_on = [time_sleep.nat_gateway_pre_destroy_delay]
+  retry = {
+    error_message_regex  = ["AnotherOperationInProgress"]
+    interval             = 5
+    max_interval_seconds = 30
+  }
+
+  depends_on = []
+
   lifecycle {
     ignore_changes = [
-      body,
+      body
     ]
   }
+}
+
+#########  DESTROY Logic here #########
+# in order to disassociate the NAT Gateway from subnets,
+#    a full "PUT" operation is required on each subnet. This
+#    must include ALL other properties. Hence, datasource, then
+#    feeding it into a DESTROY-ONLY azapi_resource_action.
+#    If this isn't done, deleting NAT gateway will most oftenfail due
+#    to timing issues.
+data "azapi_resource" "subnet" {
+  for_each = var.nat_gateway_creation_enabled ? local.subnet_resource_ids_by_vnet_object : {}
+
+  resource_id = each.value.subnet_id
+  type        = "Microsoft.Network/virtualNetworks/subnets@2026-05-01"
+
+  response_export_values = ["*"]
+}
+
+locals {
+  subnet_resource_ids_by_vnet_list = [
+    for vnet_key, vnet_val in local.virtual_networks : {
+      for subnet_key, subnet_val in vnet_val.subnets : "${vnet_key}_${subnet_key}" => {
+        resource_group_key        = vnet_val.resource_group_key
+        vnet_key                  = vnet_key
+        subnet_key                = subnet_key
+        subnet_id                 = "${module.vending.virtual_network_resource_ids[vnet_key]}/subnets/${subnet_val.name}"
+        private_endpoint_allocate = subnet_val.private_endpoint_allocate
+      }
+    }
+  ]
+  subnet_resource_ids_by_vnet_object = zipmap(
+    flatten([for entry, attr in local.subnet_resource_ids_by_vnet_list : keys(attr)]),
+    flatten([for entry, attr in local.subnet_resource_ids_by_vnet_list : values(attr)])
+  )
+}
+
+resource "azapi_resource_action" "subnet_nat_gateway_unlink_on_destroy" {
+  # unassign the NAT Gateway from subnets on destroy (PATCH), never delete the subnets themselves
+  for_each = var.nat_gateway_creation_enabled ? local.subnet_resource_ids_by_vnet_object : {}
+
+  type        = "Microsoft.Network/virtualNetworks/subnets@2026-05-01"
+  resource_id = each.value.subnet_id
+  method      = "PUT"
+
+  body = {
+    # location = "WestEurope"
+    properties = {
+      natGateway = null,
+      # # need to have NSG here, otherwise policy will complain
+      addressPrefixes                   = data.azapi_resource.subnet[each.key].output.properties.addressPrefixes
+      defaultOutboundAccess             = data.azapi_resource.subnet[each.key].output.properties.defaultOutboundAccess
+      delegations                       = data.azapi_resource.subnet[each.key].output.properties.delegations
+      networkSecurityGroup              = data.azapi_resource.subnet[each.key].output.properties.networkSecurityGroup
+      privateEndpointNetworkPolicies    = data.azapi_resource.subnet[each.key].output.properties.privateEndpointNetworkPolicies
+      privateLinkServiceNetworkPolicies = data.azapi_resource.subnet[each.key].output.properties.privateLinkServiceNetworkPolicies
+      serviceEndpoints                  = data.azapi_resource.subnet[each.key].output.properties.serviceEndpoints
+    }
+  }
+
+  when = "destroy"
+
+  retry = {
+    error_message_regex  = ["AnotherOperationInProgress"]
+    interval             = 5
+    max_interval_seconds = 30
+  }
+
+  depends_on = [time_sleep.nat_gateway_pre_destroy_delay]
 }

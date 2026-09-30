@@ -42,7 +42,7 @@ resource "time_sleep" "serviceendpoint_azurerm_pre_destroy_delay" {
   #     we have to wait for Entra Id replication or azuredevops_serviceendpoint_azurerm
   #     destroy operation will fail.
 
-  destroy_duration = "60s" # Wait 1 minute ONLY on destroy
+  destroy_duration = "30s" # Wait 30 seconds ONLY on destroy
 
   depends_on = [azuredevops_serviceendpoint_azurerm.this]
 }

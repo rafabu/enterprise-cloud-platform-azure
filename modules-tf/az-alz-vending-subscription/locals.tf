@@ -201,7 +201,7 @@ EOT
       } : null
 
       subnets = {
-        for key, val in var.subnet_configuration : key => merge(
+        for key, val in var.subnet_configuration : val.name => merge(
           {
             name                            = val.name
             address_prefixes                = val.address_prefixes

@@ -47,7 +47,7 @@ module "vending" {
 resource "azapi_resource_action" "subscription_move_back_on_destroy" {
 
   type        = "Microsoft.Management/managementGroups@2021-04-01"
-  resource_id = "/providers/Microsoft.Management/managementGroups/${var.ecp_parent_management_group_id}"
+  resource_id = "${var.ecp_parent_management_group_id}"
   action      = "subscriptions/${module.vending.subscription_id}"
   method      = "PUT"
 

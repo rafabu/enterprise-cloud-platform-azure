@@ -53,6 +53,7 @@ resource "azapi_resource" "uami_lock" {
   }
 
   depends_on = [
-    time_sleep.uami_wait
+    time_sleep.uami_wait,
+    module.devops_project # setting federated identity
   ]
 }
