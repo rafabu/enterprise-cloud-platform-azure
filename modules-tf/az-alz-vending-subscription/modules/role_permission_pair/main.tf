@@ -175,10 +175,10 @@ resource "time_sleep" "policy_replication_wait" {
 resource "azuread_privileged_access_group_assignment_schedule" "role_member_assignment" {
   # Manages an active assignment to a privileged access group.
   #      service principal of DevOps service connection
-  for_each = toset(length(var.permanent_permission_member_object_ids) > 0 && var.use_pim ? var.permanent_permission_member_object_ids : [])
+  for_each = toset(var.use_pim ? ["member"] : [])
 
   group_id        = azuread_group.role.object_id
-  principal_id    = each.key
+  principal_id    = var.permanent_permission_member_object_ids[0]
   assignment_type = "member"
 
   justification = "Grant permanent assignment to privileged group '${azuread_group.role.display_name}'"
@@ -194,26 +194,9 @@ resource "azuread_privileged_access_group_assignment_schedule" "role_member_assi
   ]
 }
 
-resource "azuread_privileged_access_group_assignment_schedule" "role_owner_assignment" {
-  for_each = toset(var.use_pim ? ["this"] : [])
-
-  # ECP deployment principal has to become owner
-  group_id        = azuread_group.role.object_id
-  principal_id    = var.vending_managed_identity_object_id
-  assignment_type = "owner"
-
-  justification = "Grant permanent assignment to privileged group '${azuread_group.role.display_name}'"
-
-  permanent_assignment = true
-
-  lifecycle {
-    ignore_changes = [justification]
-  }
-
-  depends_on = [
-    time_sleep.policy_replication_wait
-  ]
-}
+# workload identity ---> permanent owner of privileged group
+#     --> MS-Graph creates this automatically based on the 'owner' attribute of the group
+#resource "azuread_privileged_access_group_assignment_schedule" "role_owner_assignment" {
 
 # role group ---> permanently schedule eligible
 resource "azuread_privileged_access_group_eligibility_schedule" "role_member_eligible" {

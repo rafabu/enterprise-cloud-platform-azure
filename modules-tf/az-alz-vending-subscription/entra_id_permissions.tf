@@ -13,6 +13,8 @@ module "entra_id_permissions" {
   permanent_permission_member_object_ids = each.value.permanent_permission_member_object_ids
 
   vending_managed_identity_object_id = var.ecp_azure_deployment_service_principal_object_id
+
+  depends_on = [time_sleep.uami_wait]
 }
 
 # additional member to the Entra ID role groups (e.g. for Bastion)

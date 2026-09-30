@@ -15,3 +15,9 @@ variable "avm-res-network-natgateway_version" {
   const   = true
   default = "0.3.2"
 }
+
+variable "avm-utl-roledefinitions_version" {
+  type    = string
+  const   = true
+  default = "0.3.0"
+}

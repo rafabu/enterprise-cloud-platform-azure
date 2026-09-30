@@ -1,3 +1,15 @@
+# Scope aware RBAC role id lookup
+#     avm-ptn-alz-sub-vending's own lookup does not reliably detect custom roles :-(
+module "rbac_role_definitions" {
+  source  = "Azure/avm-utl-roledefinitions/azure"
+  version = var.avm-utl-roledefinitions_version
+
+  enable_telemetry = false
+  # must use role definitions as available at the subscription's management group scope
+  role_definition_scope = "/providers/Microsoft.Management/managementGroups/${var.subscription_management_group_id}"
+  use_cached_data       = false
+}
+
 locals {
 
   # Entra ID Roles and Permissions
@@ -15,9 +27,8 @@ locals {
       ]
       permission_rbac_role_definitions = {
         subscription-owner = {
-          definition                = "Subscription-Owner-Role-Restricted (${var.ecp_parent_management_group_name})" # alz provider adds MG id to custom role names
-          definition_lookup_enabled = true
-          relative_scope            = ""
+          definition     = "Subscription-Owner-Role-Restricted (${var.ecp_parent_management_group_name})" # alz provider adds MG id to custom role names
+          relative_scope = ""
           # prevent owners to add highly privileged role assignments to the subscription and lower levels (e.g. Owner, User Access Administrator, etc.)
           condition         = <<-EOT
 (
@@ -101,7 +112,11 @@ EOT
           condition_version         = null
 
         },
-        definition_value
+        definition_value,
+        {
+          definition                = can(regex("(?i)/providers/Microsoft.Authorization/roleDefinitions", definition_value.definition)) ? definition_value.definition : module.rbac_role_definitions.role_definition_rolename_to_resource_id[definition_value.definition]
+          definition_lookup_enabled = false
+        }
       )
     }
   ]
@@ -186,24 +201,40 @@ EOT
       } : null
 
       subnets = {
-        for key, val in var.subnet_configuration : key => merge({
-          network_security_group = {
-            key_reference = "lz-nsg"
-          }
-          name                                          = val.name
-          address_prefixes                              = val.address_prefixes
-          private_endpoint_network_policies             = try(val.private_endpoint_network_policies, "Disabled")
-          private_link_service_network_policies_enabled = try(val.private_link_service_network_policies_enabled, true)
-          default_outbound_access_enabled               = try(val.default_outbound_access_enabled, false)
-          service_endpoints                             = try(val.service_endpoints, [])
-          delegations = try([for del_key, del_val in val.delegations : {
-            name = del_val
-            service_delegation = {
-              name = del_val
-          } }], [])
-          # extra attribute to steer creation of private endpoints in this subnet (not consumed by AVM)
-          private_endpoint_allocate = try(val.private_endpoint_allocate, false)
+        for key, val in var.subnet_configuration : val.name => merge(
+          {
+            name                            = val.name
+            address_prefixes                = val.address_prefixes
+            default_outbound_access_enabled = try(val.default_outbound_access_enabled, false)
+            network_security_group = {
+              key_reference = "lz-nsg"
+            }
+
+            delegations = try(
+              [
+                for del_key, del_val in val.delegations : {
+                  name = del_val
+                  service_delegation = {
+                    name = del_val
+                  }
+                }
+              ], []
+            )
+
+            private_endpoint_network_policies             = try(val.private_endpoint_network_policies, "Disabled")
+            private_link_service_network_policies_enabled = try(val.private_link_service_network_policies_enabled, true)
+            service_endpoints                             = try(val.service_endpoints, [])
+            service_endpoint_policies                     = null
+
+            route_table = null
+            # IPAM pools are not currently used
+            ipam_pools = null
+
+
+            # extra attribute to steer creation of private endpoints in this subnet (not consumed by AVM)
+            private_endpoint_allocate = try(val.private_endpoint_allocate, false)
           },
+
           # do not add NAT Gateway link on private endpoint subnet (not required)
           local.nat_gateway_resource_id != null && try(val.private_endpoint_allocate, false) == false ? {
             nat_gateway = {
