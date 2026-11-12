@@ -6,5 +6,6 @@ module "azure-region-info" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = var.avm-utl-regions_version
 
+  location = var.azure_location
   enable_telemetry = false
 }

@@ -9,7 +9,6 @@ data "azuredevops_group" "reference" {
   name       = each.value["displayName"]
 }
 
-# COMMENTED OUT DUE TO PROVIDER INSTABILITY ON LINUX - REPLACED WITH terraform_data IN ado_instable_resources_fix.tf
 resource "azuredevops_service_principal_entitlement" "mpool" {
   for_each = local.ado_wid_permission_objects
 
