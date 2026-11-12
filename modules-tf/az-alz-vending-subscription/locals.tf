@@ -176,7 +176,7 @@ EOT
         allow_forwarded_traffic       = false
         allow_gateway_transit         = false
         allow_virtual_network_access  = true
-        do_not_verify_remote_gateways = true
+        do_not_verify_remote_gateways = false
         #     enable_only_ipv6_peering      = optional(bool, false)
         #     local_peered_address_spaces   = optional(list(string), [])
         #     local_peered_subnets          = optional(list(string), [])
@@ -190,7 +190,7 @@ EOT
         allow_forwarded_traffic       = false
         allow_gateway_transit         = false
         allow_virtual_network_access  = true
-        do_not_verify_remote_gateways = true
+        do_not_verify_remote_gateways = false
         # enable_only_ipv6_peering      = optional(bool, false)
         # local_peered_address_spaces   = optional(list(string), [])
         # local_peered_subnets          = optional(list(string), [])
