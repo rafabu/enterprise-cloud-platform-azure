@@ -201,5 +201,9 @@ resource "azapi_resource_action" "subnet_nat_gateway_unlink_on_destroy" {
     max_interval_seconds = 30
   }
 
+  lifecycle {
+    ignore_changes = [body]
+  }
+
   depends_on = [time_sleep.nat_gateway_pre_destroy_delay]
 }
