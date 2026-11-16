@@ -48,7 +48,7 @@ locals {
   managed_devops_pool_sku                 = local.managed_devops_pool_properties.fabricProfile.sku.name
   managed_devops_pool_sku_family          = "${join("", regexall("^([^_]+)_([A-Za-z]+)\\d+([A-Za-z]*)_(.+)$", local.managed_devops_pool_sku)[0])}Family"
   managed_devops_pool_sku_cpu_count       = tonumber(try(regexall("^[^_]+_[A-Za-z]+(\\d+)[A-Za-z]*_.+$", local.managed_devops_pool_sku)[0][0], 0))
-  managed_devops_pool_sku_cpu_count_total = local.managed_devops_pool_properties.maximumConcurrency * local.managed_devops_pool_sku_cpu_count
+  managed_devops_pool_sku_cpu_count_total = try(local.managed_devops_pool_properties.maximumConcurrency * local.managed_devops_pool_sku_cpu_count, 0)
 
   managed_devops_pool_usage = try([
     for usage in data.azapi_resource_action.provider_usage.output.value :
@@ -68,6 +68,8 @@ locals {
 }
 
 resource "terraform_data" "managed_devops_quota_request" {
+  for_each = toset(var.devops_pool_type == "ManagedDevOpsPool" ? ["request"] : [])
+
   triggers_replace = {
     # force re-evaluation when relevant inputs change
     managed_devops_pool_sku                 = local.managed_devops_pool_sku

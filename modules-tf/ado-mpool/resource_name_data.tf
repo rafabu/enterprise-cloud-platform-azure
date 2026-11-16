@@ -19,5 +19,6 @@ locals {
     "ecp_bootstrap_%s",
     join("-", try(var.azure_resource_name_elements.prefixes, []))
   )
-  ado_agent_pool_alias = "ECP-Platform-Pool-${var.ecp_azure_devops_organization_name}"
+  # if no ManagedDevopPool can be provisioned, fall back to Microsoft Hosted Pool
+  ado_agent_pool_alias = var.devops_pool_type == "ManagedDevOpsPool" ? "ECP-Platform-Pool-${var.ecp_azure_devops_organization_name}" : "Azure Pipelines"
 }
