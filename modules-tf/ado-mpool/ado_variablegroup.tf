@@ -25,6 +25,11 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
 
   variable {
+    name  = "ecp_network_address_space"
+    value = var.ecp_network_main_ipv4_address_space
+  }
+
+  variable {
     name  = "ecp_environment_name"
     value = var.azure_resource_name_elements.prefixes[0]
   }
