@@ -68,7 +68,7 @@ locals {
 }
 
 resource "terraform_data" "managed_devops_quota_request" {
-  for_each = toset(var.devops_pool_type == "ManagedDevOpsPool" ? ["request"] : [])
+  for_each = toset(var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? ["request"] : [])
 
   triggers_replace = {
     # force re-evaluation when relevant inputs change

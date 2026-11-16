@@ -43,7 +43,7 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
   variable {
     name = "ecp_ado_agent_pool_azure_images"
-    value = var.devops_pool_type == "ManagedDevOpsPool" ? join(", ", [
+    value = var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? join(", ", [
       for img in try(azapi_resource.managed_devops_pool["this"].body.properties.fabricProfile.images, []) : img.wellKnownImageName
     ]) : "macOS-26, ubuntu-24.04, ubuntu-26.04, windows-2025"
   }

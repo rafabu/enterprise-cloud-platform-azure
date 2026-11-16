@@ -8,7 +8,7 @@ output "resource_group" {
 }
 
 output "managed_devops_pool" {
-  value = var.devops_pool_type == "ManagedDevOpsPool" ? {
+  value = var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? {
     id                  = azapi_resource.managed_devops_pool["this"].id
     id_azuredevops      = data.azuredevops_agent_pool.mpool.id
     alias               = local.ado_agent_pool_alias
