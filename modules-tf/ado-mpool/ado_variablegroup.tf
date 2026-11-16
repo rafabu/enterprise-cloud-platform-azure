@@ -20,6 +20,11 @@ resource "azuredevops_variable_group" "mpool_variablegroup" {
   }
 
   variable {
+    name  = "ecp_configuration_repo_deployment_environment_path"
+    value = "${var.ecp_configuration_repo_deployment_root_path}/${var.ecp_environment_stage}"
+  }
+
+  variable {
     name  = "ecp_environment_name"
     value = var.azure_resource_name_elements.prefixes[0]
   }
@@ -107,4 +112,4 @@ resource "azuredevops_pipeline_authorization" "mpool_variablegroup" {
     resource.time_sleep.post_variable_group_delay
   ]
 }
-   
+

@@ -84,6 +84,11 @@ variable "ecp_configuration_repo_deployment_root_path" {
   description = "subfolder path within the ecp_configuration_repo where the environment deployment files are located."
 }
 
+variable "ecp_environment_stage" {
+  type        = string
+  description = "The stage of the environment (e.g., dev, tst, prd)."
+}
+
 variable "azure_location" {
   type = string
 }
@@ -206,8 +211,7 @@ variable "backend_storage_accounts" {
 
 variable "devops_pool_type" {
   type = string
-  # default = "ManagedDevOpsPool"
-  default = "MicrosoftHosted"
+  default = "ManagedDevOpsPool"
   description = "Type of DevOps pool to be configured. Defaults to 'ManagedDevOpsPool' but may be set to 'MicrosoftHosted' if no DevOpsPool can be created (e.g. due to quota limitations)."
 }
 
