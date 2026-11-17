@@ -97,6 +97,11 @@ resource "azurerm_role_assignment" "devops_infrastructure_vnet" {
   principal_id       = data.azuread_service_principal.devops_infrastructure.object_id
 }
 
+moved {
+  from = azapi_resource.managed_devops_pool
+  to   = azapi_resource.managed_devops_pool["this"]
+}
+
 resource "azapi_resource" "managed_devops_pool" {
   for_each = toset(var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? ["this"] : [])
 

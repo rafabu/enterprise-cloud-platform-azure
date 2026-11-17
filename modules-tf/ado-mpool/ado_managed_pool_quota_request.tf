@@ -67,6 +67,11 @@ locals {
   ][0], {})
 }
 
+moved {
+	from = terraform_data.managed_devops_quota_request
+	to = terraform_data.managed_devops_quota_request["request"]
+}
+
 resource "terraform_data" "managed_devops_quota_request" {
   for_each = toset(var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? ["request"] : [])
 
