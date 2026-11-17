@@ -169,3 +169,9 @@ variable "storage_account_public_network_access_enabled" {
   description = "Whether to allow public network access for the storage account. Default is false."
   default     = false
 }
+
+variable "ecp_azure_devops_pool_type" {
+  type = string
+  default = "ManagedDevOpsPool"
+  description = "Type of DevOps pool to be configured. Defaults to 'ManagedDevOpsPool' but may be set to 'MicrosoftHosted' if no DevOpsPool can be created (e.g. due to quota limitations)."
+}
