@@ -8,14 +8,22 @@ output "resource_group" {
 }
 
 output "managed_devops_pool" {
-  value = {
-    id                  = azapi_resource.managed_devops_pool.id
+  value = var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? {
+    id                  = azapi_resource.managed_devops_pool["this"].id
     id_azuredevops      = data.azuredevops_agent_pool.mpool.id
     alias               = local.ado_agent_pool_alias
     name                = local.ado_agent_pool_alias
-    resource_name       = azapi_resource.managed_devops_pool.name
+    resource_name       = azapi_resource.managed_devops_pool["this"].name
     resource_group_name = azurerm_resource_group.mpool.name
     location            = azurerm_resource_group.mpool.location
+  } : {
+    id                  = ""
+    id_azuredevops      = data.azuredevops_agent_pool.mpool.id
+    alias               = local.ado_agent_pool_alias
+    name                = local.ado_agent_pool_alias
+    resource_name       = ""
+    resource_group_name = ""
+    location            = ""
   }
 }
 

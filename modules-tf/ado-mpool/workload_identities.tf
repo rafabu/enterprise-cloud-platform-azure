@@ -521,7 +521,9 @@ resource "azurerm_role_assignment" "mpool" {
 
   scope = each.value["scope"]
   # if scope is management group, subscription must not be added at the beginning
-  role_definition_id = format("%s/providers/Microsoft.Authorization/roleDefinitions/%s", startswith(each.value["scope"], "/subscriptions/") ? data.azapi_client_config.this.subscription_resource_id : "", each.value["roleDefinitionId"])
+  # if scope is different subscription that launchpad, scope (actual target subscription) must be used
+  role_definition_id = format("%s/providers/Microsoft.Authorization/roleDefinitions/%s", startswith(each.value["scope"], data.azapi_client_config.this.subscription_resource_id) ? data.azapi_client_config.this.subscription_resource_id : startswith(each.value["scope"], "/subscriptions/") ? each.value["scope"] : "",  each.value["roleDefinitionId"])
+  # role_definition_id = format("%s/providers/Microsoft.Authorization/roleDefinitions/%s", startswith(each.value["scope"], "/subscriptions/") ? each.value["scope"] : "", each.value["roleDefinitionId"])
   principal_id       = var.workload_identity_type == "userAssignedIdentity" ? azurerm_user_assigned_identity.mpool[each.value["wid_key"]].principal_id : var.workload_identity_type == "serviceprincipal" ? azuread_service_principal.mpool[each.value["wid_key"]].object_id : "error"
 
   depends_on = [

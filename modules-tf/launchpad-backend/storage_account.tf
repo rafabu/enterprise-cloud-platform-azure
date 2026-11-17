@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "backend" {
   allow_nested_items_to_be_public = false
   default_to_oauth_authentication = true
   local_user_enabled              = false
-  public_network_access           = var.storage_account_public_network_access_enabled ? "Enabled" : "Disabled"
+  public_network_access           = var.storage_account_public_network_access_enabled || var.ecp_azure_devops_pool_type == "MicrosoftHosted" ? "Enabled" : "Disabled"
   # you will need to enable the storage_use_azuread flag in the Provider block to use Azure AD for authentication
   shared_access_key_enabled = false
 
@@ -55,7 +55,7 @@ resource "azurerm_storage_account_network_rules" "backend" {
   for_each = toset(local.backend_levels)
 
   storage_account_id         = azurerm_storage_account.backend[each.key].id
-  default_action             = "Deny"
+  default_action             = var.storage_account_public_network_access_enabled || var.ecp_azure_devops_pool_type == "MicrosoftHosted" ? "Allow" : "Deny"
   ip_rules                   = []
   virtual_network_subnet_ids = []
   bypass                     = ["AzureServices"]

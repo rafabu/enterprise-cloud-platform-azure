@@ -98,6 +98,8 @@ resource "azurerm_role_assignment" "devops_infrastructure_vnet" {
 }
 
 resource "azapi_resource" "managed_devops_pool" {
+  for_each = toset(var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? ["this"] : [])
+
   # managed devops pool does not (yet) exist in provider DS - just rename the RG one...
   name      = replace(data.azurecaf_name.rg.result, "-rg-", "-mpool-")
   parent_id = azurerm_resource_group.mpool.id
@@ -185,6 +187,8 @@ data "azuredevops_agent_pool" "mpool" {
 }
 
 resource "time_sleep" "post_agent_queue_delay" {
+  for_each = toset(var.ecp_azure_devops_pool_type == "ManagedDevOpsPool" ? ["this"] : [])
+
   create_duration = "30s"
 
   depends_on = [
