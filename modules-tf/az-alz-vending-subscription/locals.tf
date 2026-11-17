@@ -156,7 +156,7 @@ EOT
       name               = data.azurecaf_name.vnet.result
       resource_group_key = "vnet"
       address_space      = var.vnet_address_space
-      ipam_pools         = []
+      ipam_pools         = null
       location           = var.azure_location
       # vWAN connect
       vwan_connection_enabled = var.vwan_connect_enabled
@@ -206,7 +206,7 @@ EOT
           {
             name                            = val.name
             address_prefixes                = val.address_prefixes
-            ipam_pools                      = []
+            ipam_pools                      = null
             default_outbound_access_enabled = try(val.default_outbound_access_enabled, false)
             network_security_group = {
               key_reference = "lz-nsg"
