@@ -83,5 +83,5 @@ resource "time_sleep" "policy_exemptions_mgmt_create_wait" {
   ]
 
   # seems oddly long but unfortunately required to allow the exemptions to actually allow public network access
-  create_duration = "300s"
+  create_duration = "60s"
 }
