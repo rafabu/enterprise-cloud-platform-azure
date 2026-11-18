@@ -78,8 +78,10 @@ resource "time_sleep" "policy_exemptions_mgmt_create_wait" {
   for_each = toset(var.resource_network_communication_mode == "PrivateLink" && var.ecp_azure_devops_managed_devops_pool_name != "Azure Pipelines" ? [] : ["sleep"])
 
   depends_on = [
+    module.vending,
     azapi_resource.policy_exemptions_mgmt
   ]
 
-  create_duration = "60s"
+  # seems oddly long but unfortunately required to allow the exemptions to actually allow public network access
+  create_duration = "300s"
 }
