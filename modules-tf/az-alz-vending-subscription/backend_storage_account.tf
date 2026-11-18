@@ -26,8 +26,8 @@ module "storage_account" {
   table_encryption_key_type         = "Account"
 
   allow_nested_items_to_be_public = false
-  # public network access: is disabled by policy in corp
-  public_network_access_enabled = var.resource_network_communication_mode == "PrivateLink" ? false : true
+  # public network access: is disabled by policy in corp but when no self-hosted agent pool is provisioned, it is required :-(
+  public_network_access_enabled = var.resource_network_communication_mode == "PrivateLink" && var.ecp_azure_devops_managed_devops_pool_name != "Azure Pipelines" ? false : true
 
   blob_properties = {
     change_feed_enabled      = false
@@ -46,7 +46,7 @@ module "storage_account" {
   network_rules = merge(
     {
       bypass                     = ["AzureServices"]
-      default_action             = "Deny"
+      default_action             = var.resource_network_communication_mode == "PrivateLink" && var.ecp_azure_devops_managed_devops_pool_name != "Azure Pipelines" ? "Deny" : "Allow"
       ip_rules                   = []
       virtual_network_subnet_ids = var.resource_network_communication_mode == "ServiceEndpoint" ? local.subnet_resource_ids : null
     },
@@ -78,6 +78,11 @@ module "storage_account" {
   tags = var.azure_tags
 
   enable_telemetry = false
+
+  depends_on = [
+    time_sleep.policy_exemptions_mgmt_create_wait,
+    azapi_resource.policy_exemptions_mgmt
+  ]
 }
 
 resource "time_sleep" "storage_account_destroy_wait" {
