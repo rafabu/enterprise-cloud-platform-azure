@@ -96,7 +96,7 @@ module "alz" {
 
     ##### DEV SPECIFIC POLICY OVERRIDES #####
     #      disarm key vault purge protection policy
-    try(var.ecp_environment_stage, "") == "dev" ? {
+    try(var.ecp_environment_stage, "") == "dev" || try(var.ecp_environment_stage, "") == "tst" ? {
       key_vault_guardrails_purge_protection_missing_effect = jsonencode(
         {
           value = "Audit"
