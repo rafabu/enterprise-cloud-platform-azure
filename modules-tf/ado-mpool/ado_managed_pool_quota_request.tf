@@ -38,7 +38,7 @@ locals {
       sku_regex  = "(?i)^Standard_B\\d+ms$"
       sku_family = "standardBSFamily"
     }
-    bs = { # DaS_v6 does not have the "s" in the family name
+    bs = {
       sku_regex  = "(?i)^Standard_B\\d+s$"
       sku_family = "standardBSFamily"
     }
