@@ -34,6 +34,14 @@ locals {
   # IMPORTANT: Most of the SKU family names for quotas are derivable from the managed devops pool's SKU name, but some are exceptions (reminds me of French classes I took in the last millennium ...)
   #      if such are encountered, add them to the following local: managed_devops_pool_sku_family_exceptions
   managed_devops_pool_sku_family_exceptions = {
+    bms = { # all B series without a V
+      sku_regex  = "(?i)^Standard_B\\d+ms$"
+      sku_family = "standardBSFamily"
+    }
+    bs = {
+      sku_regex  = "(?i)^Standard_B\\d+s$"
+      sku_family = "standardBSFamily"
+    }
     dasv6 = { # DaS_v6 does not have the "s" in the family name
       sku_regex  = "(?i)^Standard_D\\d+as_v6$"
       sku_family = "standardDav6Family"
@@ -46,8 +54,8 @@ locals {
 
   # current usage of SKU family and details on the allotment required by this mpool instance
   managed_devops_pool_sku                 = local.managed_devops_pool_properties.fabricProfile.sku.name
-  managed_devops_pool_sku_family          = "${join("", regexall("^([^_]+)_([A-Za-z]+)\\d+([A-Za-z]*)_(.+)$", local.managed_devops_pool_sku)[0])}Family"
-  managed_devops_pool_sku_cpu_count       = tonumber(try(regexall("^[^_]+_[A-Za-z]+(\\d+)[A-Za-z]*_.+$", local.managed_devops_pool_sku)[0][0], 0))
+  managed_devops_pool_sku_family          = "${join("", regexall("^([^_]+)_([A-Za-z]+)\\d+([A-Za-z]*)_?(.+)$", local.managed_devops_pool_sku)[0])}Family"
+  managed_devops_pool_sku_cpu_count       = tonumber(try(regexall("^[^_]+_[A-Za-z]+(\\d+)[A-Za-z]*_?.+$", local.managed_devops_pool_sku)[0][0], 0))
   managed_devops_pool_sku_cpu_count_total = try(local.managed_devops_pool_properties.maximumConcurrency * local.managed_devops_pool_sku_cpu_count, 0)
 
   managed_devops_pool_usage = try([
