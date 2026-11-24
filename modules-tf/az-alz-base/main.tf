@@ -2,7 +2,7 @@ module "alz" {
   source  = "Azure/avm-ptn-alz/azurerm"
   version = var.avm-ptn-alz_version
 
-  architecture_name = var.ecp_alz_architecture_name
+  architecture_name =  "ecp-${var.ecp_deployment_alz_library}-v1"
   location          = var.azure_location
 
   parent_resource_id = var.ecp_azure_root_parent_management_group_id

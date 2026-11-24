@@ -69,10 +69,10 @@ variable "ecp_security_subscription_id" {
   }
 }
 
-variable "ecp_alz_architecture_name" {
-  type        = string
-  default     = "ecp-alz-v1"
-  description = "The architecture name for the ALZ deployment."
+variable "ecp_deployment_alz_library" {
+  type = string
+  default = "alz"
+  description = "The architecture name for the ALZ deployment ('alz' or 'slz')"
 }
 
 variable "alz_library_path_shared_rendered" {
