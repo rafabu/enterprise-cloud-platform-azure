@@ -3,10 +3,21 @@ variable "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
 }
 
-variable "alz_library_path_shared" {
+variable "ecp_deployment_alz_library" {
   type        = string
-  description = "Path to the shared ALZ library artefacts."
+  default     = "alz"
+  description = "ALZ library used ('alz' or 'slz')"
 }
+
+variable "alz_library_path_base" {
+  type        = string
+  description = "Path to the base ALZ library artefacts."
+}
+
+# variable "alz_library_path_shared" {
+#   type        = string
+#   description = "Path to the shared ALZ library artefacts."
+# }
 
 variable "alz_library_path_shared_rendered" {
   type        = string
