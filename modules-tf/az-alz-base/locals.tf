@@ -73,7 +73,28 @@ locals {
     )
     if contains(local.policy_private_dns_zones_not_in_alz, key) == true
   }
-  slz_allowed_locations_lower = [for loc in var.slz_allowed_locations : lower(loc)]
+  slz_allowed_locations_lower = try([for loc in var.slz_allowed_locations : lower(loc)], [
+    "austriaeast",
+    "belgiumcentral",
+    "denmarkeast",
+    "francecentral",
+    "francesouth",
+    "germanywestcentral",
+    "germanynorth",
+    "global",
+    "italynorth",
+    "northeurope",
+    "norwayeast",
+    "norwaywest",
+    "polandcentral",
+    "spaincentral",
+    "swedencentral",
+    "switzerlandnorth",
+    "switzerlandwest",
+    "westeurope",
+    # "uksouth",
+    # "ukwest"
+  ])
 }
 
 output "policy_default_values_private_dns_zones_not_in_alz" {
