@@ -3,6 +3,12 @@ variable "ecp_environment_name" {
   description = "Name of the ECP environment (used for naming resources)"
 }
 
+variable "ecp_deployment_alz_library" {
+  type = string
+  default = "alz"
+  description = "The architecture name for the ALZ deployment ('alz' or 'slz')"
+}
+
 variable "ecp_azure_root_parent_management_group_id" {
   type        = string
   description = "The management group ID of the root parent management group for the ECP environment"
