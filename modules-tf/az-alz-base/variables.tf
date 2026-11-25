@@ -70,9 +70,36 @@ variable "ecp_security_subscription_id" {
 }
 
 variable "ecp_deployment_alz_library" {
-  type = string
-  default = "alz"
+  type        = string
+  default     = "alz"
   description = "The architecture name for the ALZ deployment ('alz' or 'slz')"
+}
+
+variable "slz_allowed_locations" {
+  type        = list(string)
+  description = "List of allowed Azure locations for the deployment."
+  default = [
+    "austriaeast",
+    "belgiumcentral",
+    "denmarkeast",
+    "francecentral",
+    "francesouth",
+    "germanywestcentral",
+    "germanynorth",
+    "global",
+    "italynorth",
+    "northeurope",
+    "norwayeast",
+    "norwaywest",
+    "polandcentral",
+    "spaincentral",
+    "swedencentral",
+    "switzerlandnorth",
+    "switzerlandwest",
+    "westeurope",
+    # "uksouth",
+    # "ukwest",
+  ]
 }
 
 variable "alz_library_path_shared_rendered" {

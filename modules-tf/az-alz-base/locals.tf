@@ -73,6 +73,7 @@ locals {
     )
     if contains(local.policy_private_dns_zones_not_in_alz, key) == true
   }
+  slz_allowed_locations_lower = [for loc in var.slz_allowed_locations : lower(loc)]
 }
 
 output "policy_default_values_private_dns_zones_not_in_alz" {

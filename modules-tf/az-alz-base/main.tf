@@ -2,7 +2,7 @@ module "alz" {
   source  = "Azure/avm-ptn-alz/azurerm"
   version = var.avm-ptn-alz_version
 
-  architecture_name =  "ecp-${var.ecp_deployment_alz_library}-v1"
+  architecture_name = "ecp-${var.ecp_deployment_alz_library}-v1"
   location          = var.azure_location
 
   parent_resource_id = var.ecp_azure_root_parent_management_group_id
@@ -51,6 +51,13 @@ module "alz" {
   #   }
 
   policy_default_values = merge(
+    var.ecp_deployment_alz_library == "slz" ? {
+      allowed_locations = jsonencode(
+        {
+          value = local.slz_allowed_locations_lower
+        }
+      )
+    } : {},
     try(length(var.alz_management_resource_ids.ama_user_assigned_managed_identity_id), 0) > 0 ? {
       ama_user_assigned_managed_identity_id = jsonencode(
         {
