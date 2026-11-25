@@ -78,28 +78,7 @@ variable "ecp_deployment_alz_library" {
 variable "slz_allowed_locations" {
   type        = list(string)
   description = "List of allowed Azure locations for the deployment."
-  default = [
-    "austriaeast",
-    "belgiumcentral",
-    "denmarkeast",
-    "francecentral",
-    "francesouth",
-    "germanywestcentral",
-    "germanynorth",
-    "global",
-    "italynorth",
-    "northeurope",
-    "norwayeast",
-    "norwaywest",
-    "polandcentral",
-    "spaincentral",
-    "swedencentral",
-    "switzerlandnorth",
-    "switzerlandwest",
-    "westeurope",
-    # "uksouth",
-    # "ukwest",
-  ]
+  nullable    = true
 }
 
 variable "alz_library_path_shared_rendered" {
