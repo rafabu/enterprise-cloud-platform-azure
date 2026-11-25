@@ -19,7 +19,7 @@ resource "azurerm_management_group" "ecp_deployment_parent" {
   provider = azurerm.launchpad
 
   name         = "${var.ecp_environment_name}-mg-ecpa-deployment"
-  display_name = "Deployment ${var.ecp_environment_name}"
+  display_name = "${var.ecp_deployment_alz_library == "slz" ? "Sovereign " : ""}Deployment ${var.ecp_environment_name}"
 
   parent_management_group_id = "/providers/Microsoft.Management/managementGroups/${var.ecp_azure_root_parent_management_group_id}"
 
