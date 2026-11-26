@@ -27,6 +27,15 @@ module "devops_project" {
   storage_account_name        = try(module.storage_account["this"].name, "")
   storage_account_resource_id = try(module.storage_account["this"].resource_id, "")
 
+  natgateway_name =  try(provider::azapi::parse_resource_id("Microsoft.Network/natGateways", local.nat_gateway_resource_id).name, null)
+  natgateway_resource_id = local.nat_gateway_resource_id
+
+  vnet_name        = provider::azapi::parse_resource_id("Microsoft.Network/virtualNetworks", module.vending.virtual_network_resource_ids["lz-vnet"]).name
+  vnet_resource_id = module.vending.virtual_network_resource_ids["lz-vnet"]
+  # vnet_address_spaces = module.vending.virtual_network_address_spaces["lz-vnet"]
+  vnet_subnet_names        = keys(module.vending.virtual_network_subnet_resource_ids["lz-vnet"])
+  vnet_subnet_resource_ids = values(module.vending.virtual_network_subnet_resource_ids["lz-vnet"])
+
   vending_managed_identity_client_id = var.ecp_azure_deployment_service_principal_client_id
 
   ecp_management_subscription_id   = var.ecp_management_subscription_id

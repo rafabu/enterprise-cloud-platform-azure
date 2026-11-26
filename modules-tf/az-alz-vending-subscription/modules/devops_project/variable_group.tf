@@ -109,32 +109,51 @@ resource "azuredevops_variable_group" "this_vending_output" {
   #     name  = "workloadNetworkResourceGrouId"
   #     value = module.resource_group_vnet.resource_id
   #   }
-  #   variable {
-  #     name  = "workloadNetworkVnetName"
-  #     value = module.vnet.name
+  variable {
+    name  = "workloadNetworkVnetName"
+    value = var.vnet_name
+  }
+  variable {
+    name  = "workloadNetworkVnetId"
+    value = var.vnet_resource_id
+  }
+  variable {
+    name  = "workloadNetworkVnetAddressSpaces"
+    value = jsonencode(var.vnet_address_spaces)
+  }
+
+  variable {
+    name  = "workloadNetworkVnetSubnetNames"
+    value = jsonencode(var.vnet_subnet_names)
+  }
+  # dynamic "variable" {
+  #   for_each = module.vnet.subnets
+  #   content {
+  #     name  = "workloadNetworkSubnetAddressPrefixes-${variable.value.name}"
+  #     value = jsonencode(variable.value.resource.body.properties.addressPrefixes)
   #   }
-  #   variable {
-  #     name  = "workloadNetworkVnetId"
-  #     value = module.vnet.resource_id
-  #   }
-  #   variable {
-  #     name  = "workloadNetworkSubnetNames"
-  #     value = jsonencode([for key, attr in module.vnet.subnets : attr.name])
-  #   }
-  #   dynamic "variable" {
-  #     for_each = module.vnet.subnets
-  #     content {
-  #       name  = "workloadNetworkSubnetAddressPrefixes-${variable.value.name}"
-  #       value = jsonencode(variable.value.resource.body.properties.addressPrefixes)
-  #     }
-  #   }
-  #   dynamic "variable" {
-  #     for_each = module.vnet.subnets
-  #     content {
-  #       name  = "workloadNetworkSubnetId-${variable.value.name}"
-  #       value = variable.value.resource_id
-  #     }
-  #   }
+  # }
+  dynamic "variable" {
+    for_each = var.vnet_subnet_resource_ids
+    content {
+      name  = "workloadNetworkVnetSubnetId-${provider::azapi::parse_resource_id("Microsoft.Network/virtualNetworks/subnets", variable.value).name}"
+      value = variable.value
+    }
+  }
+  dynamic "variable" {
+    for_each = length(var.natgateway_name) > 0 ? [var.natgateway_name] : []
+    content {
+      name  = "workloadNetworkNatGatewayName"
+      value = variable.value
+    }
+  }
+  dynamic "variable" {
+    for_each = length(var.natgateway_resource_id) > 0 ? [var.natgateway_resource_id] : []
+    content {
+      name  = "workloadNetworkNatGatewayId"
+      value = variable.value
+    }
+  }
 }
 
 resource "azuredevops_pipeline_authorization" "this_vending_output" {

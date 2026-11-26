@@ -77,12 +77,50 @@ variable "variable_group_name" {
 
 variable "storage_account_name" {
   type        = string
-  description = "Name of the storage account to create for the Azure DevOps project."
+  description = "Name of the storage account created during vending for the Azure DevOps project."
 }
 
 variable "storage_account_resource_id" {
   type        = string
-  description = "Resource ID of the storage account to create for the Azure DevOps project."
+  description = "Resource ID of the storage account created during vending for the Azure DevOps project."
+}
+
+variable "natgateway_name" {
+  type        = string
+  description = "Name of the NAT gateway created during vending."
+}
+
+variable "natgateway_resource_id" {
+  type        = string
+  description = "Resource ID of the NAT gateway created during vending."
+}
+
+variable "vnet_name" {
+  type        = string
+  description = "Name of the virtual network created during vending."
+}
+
+variable "vnet_resource_id" {
+  type        = string
+  description = "Resource ID of the virtual network created during vending."
+}
+
+variable "vnet_subnet_names" {
+  type        = list(string)
+  default = []
+  description = "Names of the subnets in the virtual network created during vending for the Azure DevOps project."
+}
+
+variable "vnet_subnet_resource_ids" {
+  type        = list(string)
+  default = []
+  description = "Resource IDs of the subnets in the virtual network created during vending for the Azure DevOps project."
+}
+
+variable "vnet_address_spaces" {
+  type        = list(string)
+  default     = []
+  description = "Address spaces of the virtual network created during vending for the Azure DevOps project."
 }
 
 variable "ecp_management_subscription_id" {

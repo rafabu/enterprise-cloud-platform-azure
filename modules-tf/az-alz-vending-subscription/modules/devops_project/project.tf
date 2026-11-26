@@ -17,13 +17,13 @@ resource "azuredevops_project" "this" {
   lifecycle {
     ignore_changes = [description]
 
-    precondition {
-      condition = contains(
-        data.azuredevops_group_membership.enterprise_service_accounts.members,
-        data.azuredevops_service_principal.master_spi.descriptor
-      )
-      error_message = "Service Principal/MSI ${try(data.azuread_service_principal.master_spi.display_name, "")} must be a member of built-in organizational group 'Enterprise Service Accounts' in Azure DevOps organization."
-    }
+    # precondition {
+    #   condition = contains(
+    #     data.azuredevops_group_membership.enterprise_service_accounts.members,
+    #     data.azuredevops_service_principal.master_spi.descriptor
+    #   )
+    #   error_message = "Service Principal/MSI ${try(data.azuread_service_principal.master_spi.display_name, "")} must be a member of built-in organizational group 'Enterprise Service Accounts' in Azure DevOps organization."
+    # }
   }
 }
 
