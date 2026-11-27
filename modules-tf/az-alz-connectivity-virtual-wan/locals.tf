@@ -119,8 +119,6 @@ locals {
   ])[0], {})
 
   ### Virtual Hub Artefact Processing ###
-
-
   virtual_hub_address_info = {
     for hub_key, parsed_hub in local.parsed_hub_artefacts : hub_key => {
       raw_address_prefix = parsed_hub.addressPrefix
@@ -410,7 +408,6 @@ locals {
             location_key      = l_k
 
             site_location = local.vpn_site_location_map["${l_k}_${s_k}"].location
-
 
             name = coalesce(try(s_v.name, null), s_k)
             links = [
