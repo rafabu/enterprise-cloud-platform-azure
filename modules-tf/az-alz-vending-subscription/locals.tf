@@ -159,7 +159,9 @@ EOT
       ipam_pools         = null
       location           = var.azure_location
       # vWAN connect
+      vwan_associated_routetable_resource_id = null
       vwan_connection_enabled = var.vwan_connect_enabled
+      vwan_connection_name = null
       vwan_hub_resource_id = var.vwan_connect_enabled ? try(
         var.vwan_hub_resources_by_location[lower(var.vwan_hub_location)].id,
         try(
@@ -167,6 +169,13 @@ EOT
           "NO-vWAN-HUB-RESOURCE-ID"
         )
       ) : null
+      vwan_propagated_routetables_labels = null
+      vwan_propagated_routetables_resource_ids = null
+      vwan_security_configuration = {
+        routing_intent_enabled = true # enables propagating learnt default routes from hub (a.k.a. enableInternetSecurity)
+        secure_internet        = null
+        secure_private_traffic = null
+      }
 
       # Bastion peering (re-use the "hub network feature)")
       hub_network_resource_id = var.bastion_connect_enabled ? var.bastion_vnet_id : null
@@ -277,3 +286,5 @@ EOT
     }
   }
 }
+
+
