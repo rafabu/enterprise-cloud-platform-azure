@@ -451,7 +451,6 @@ locals {
   )
 
   ### VPN Connections Artefact Processing ###
-
   vpn_connection_dependency_info = {
     for k, v in local.parsed_vpn_connection_artefacts : k => {
       gw_id_raw            = try(v.vpnGateway.id, "")
