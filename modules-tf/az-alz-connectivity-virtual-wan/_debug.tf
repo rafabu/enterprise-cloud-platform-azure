@@ -33,13 +33,13 @@ locals {
   firewall_hub_resolved_objects_list = [
     for k, v in var.virtual_hub_artefacts : {
       for l_k, l_v in local.hub_locations : "${l_k}_${k}" => {
-        firewall = {
-          for s_k, s_v in local.parsed_firewall_artefacts : s_k => {
-            hub_artefact_key      = k
-            firewall_artefact_key = s_k
-            location_key          = l_k
+        firewall = try([
+          for s_k, s_v in local.parsed_firewall_artefacts : {
+            # hub_artefact_key      = k
+            # firewall_artefact_key = s_k
+            # location_key          = l_k
 
-            firewall_location = local.firewall_location_map["${l_k}_${s_k}"].location
+            # firewall_location = local.firewall_location_map["${l_k}_${s_k}"].location
 
             name                 = try(s_v.name, null)
             sku_tier             = try(s_v.sku.tier, "Standard")
@@ -47,7 +47,7 @@ locals {
           }
           # add only when location matches hub
           if try(local.firewall_location_map["${l_k}_${s_k}"].location, "") == local.virtual_wan_hub_location_map["${l_k}_${k}"].location
-        }
+        ][0], null)
       }
     }
   ]
@@ -59,8 +59,8 @@ locals {
 
 }
 
-output "zzz_firewall_location_map" {
-  value = local.firewall_location_map
+output "zzz_virtual_hub_map" {
+  value = local.virtual_hub_map
 }
 
 output "zzz_firewall_objects_hub_resolved_map" {
