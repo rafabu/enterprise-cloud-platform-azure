@@ -203,7 +203,7 @@ locals {
         is_primary_region_hub = l_k == "main"
 
         enabled_resources = {
-          firewall                              = false
+          firewall                              = length(try(local.firewall_objects_hub_resolved_map["${l_k}_${k}"].firewall, {})) > 0 ? true : false
           firewall_policy                       = false
           bastion                               = false
           virtual_network_gateway_express_route = false
@@ -267,8 +267,8 @@ locals {
           }
         )
 
-        firewall = try(local.firewall_objects_hub_resolved_map["${l_k}_${k}"].firewall, null),
-         
+        firewall = try(local.firewall_objects_hub_resolved_map["${l_k}_${k}"].firewall, null)
+
         tags = var.azure_tags
       }
     }
