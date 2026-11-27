@@ -11,8 +11,8 @@ module "alz-connectivity-virtual-wan" {
     virtual_wan_name                           = "${data.azurecaf_name.vwan.result}-$${location}-$${sequence}"
     virtual_hub_name                           = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vhub-")}-$${location}-$${sequence}"
     sidecar_virtual_network_name               = "${data.azurecaf_name.vnet.result}-$${location}-$${sequence}"
-    firewall_name                              = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-afw-")}-$${location}-$${sequence}"
-    firewall_policy_name                       = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-afwp-")}-$${location}-$${sequence}"
+    firewall_name                              = "${data.azurecaf_name.afw.result}-$${location}-$${sequence}"
+    firewall_policy_name                       = "${data.azurecaf_name.afwp.result}-$${location}-$${sequence}"
     virtual_network_gateway_express_route_name = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-erc-")}-$${location}-$${sequence}"
     virtual_network_gateway_vpn_name           = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-vpng-")}-$${location}-$${sequence}"
     private_dns_resolver_name                  = "${replace(data.azurecaf_name.vwan.result, "-vwan-", "-dnspr-")}-$${location}-$${sequence}"
@@ -62,7 +62,6 @@ module "alz-connectivity-virtual-wan" {
 
       # p2s_gateways = []
 
-      # routing_intents = {}
 
       vpn_site_connections = try(vhub_value.vpn_site_connections, null)
 

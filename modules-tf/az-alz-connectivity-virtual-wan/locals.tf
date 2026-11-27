@@ -68,6 +68,16 @@ locals {
     if contains(var.ecp_archetype_definitions.vpn_connection, k)
   }
 
+  parsed_firewall_artefacts = {
+    for k, v in var.firewall_artefacts : k => jsondecode(file(v.filePath))
+    if contains(var.ecp_archetype_definitions.firewall, k)
+  }
+
+  parsed_firewall_policy_artefacts = {
+    for k, v in var.firewall_policy_artefacts : k => jsondecode(file(v.filePath))
+    if contains(var.ecp_archetype_definitions.firewall_policy, k)
+  }
+
   ### Virtual WAN Artefact Processing ###
   virtual_wan_location_list = [
     for k, v in local.parsed_wan_artefacts : {

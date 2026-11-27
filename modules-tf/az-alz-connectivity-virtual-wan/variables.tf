@@ -345,6 +345,26 @@ variable "vpn_connection_artefacts" {
   description = "merged vpnConnection artefacts sourced from library"
 }
 
+variable "firewall_artefacts" {
+  type = map(object({
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+    }))
+  }))
+  description = "merged azureFirewall artefacts sourced from library"
+}
+
+variable "firewall_policy_artefacts" {
+  type = map(object({
+    filePath = string
+    artefact = optional(object({
+      artefactName = string
+    }))
+  }))
+  description = "merged azureFirewallPolicy artefacts sourced from library"
+}
+
 variable "virtual_wan_artefacts" {
   type = map(object({
     filePath = string
@@ -365,13 +385,15 @@ variable "virtual_wan_artefacts" {
 variable "ecp_archetype_definitions" {
   type = object({
     # name           = string
-    virtual_wan    = optional(list(string), [])
-    virtual_hub    = optional(list(string), [])
-    vpn_gateway    = optional(list(string), [])
-    vpn_site       = optional(list(string), [])
-    vpn_connection = optional(list(string), [])
-    er_gateway     = optional(list(string), [])
-    er_connection  = optional(list(string), [])
+    virtual_wan     = optional(list(string), [])
+    virtual_hub     = optional(list(string), [])
+    vpn_gateway     = optional(list(string), [])
+    vpn_site        = optional(list(string), [])
+    vpn_connection  = optional(list(string), [])
+    er_gateway      = optional(list(string), [])
+    er_connection   = optional(list(string), [])
+    firewall        = optional(list(string), [])
+    firewall_policy = optional(list(string), [])
   })
   default = {
     # name = "ecp-vwan"
@@ -384,8 +406,10 @@ variable "ecp_archetype_definitions" {
     vpn_gateway    = []
     vpn_site       = []
     vpn_connection = []
-    er_gateway     = []
-    er_connection  = []
+    er_gateway      = []
+    er_connection   = []
+    firewall        = []
+    firewall_policy = []
   }
   description = "The ECP archetype definitions by 'archetypeName' which are valid for this deployment."
 }
