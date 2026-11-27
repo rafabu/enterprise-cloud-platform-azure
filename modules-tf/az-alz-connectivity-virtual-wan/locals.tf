@@ -204,7 +204,7 @@ locals {
 
         enabled_resources = {
           firewall                              = length(try(local.firewall_objects_hub_resolved_map["${l_k}_${k}"].firewall, {})) > 0 ? true : false
-          firewall_policy                       = false
+          firewall_policy                       = length(try(local.firewall_objects_hub_resolved_map["${l_k}_${k}"].firewall, {})) > 0 ? true : false
           bastion                               = false
           virtual_network_gateway_express_route = false
           # vpn gateway only when active artefacts are loaded
