@@ -266,6 +266,9 @@ locals {
             for vnc_key, vnc_value in try(var.virtual_wan_hubs[k].vpn_site_connections, {}) : vnc_key => vnc_value
           }
         )
+
+        firewall = try(local.firewall_objects_hub_resolved_map["${l_k}_${k}"].firewall, null),
+         
         tags = var.azure_tags
       }
     }
